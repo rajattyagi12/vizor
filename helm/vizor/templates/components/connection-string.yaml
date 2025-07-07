@@ -3,7 +3,7 @@ kind: Component
 metadata:
   name: sqlserver-db
 spec:
-  type: bindings.sqlserver
+  type: configuration.redis
   version: v1
   metadata:
   - name: connectionString
