@@ -1,0 +1,43 @@
+{{- if .Values.sqlServer.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.sqlServer.releaseName }}
+  labels:
+    app: sqlserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sqlserver
+  template:
+    metadata:
+      labels:
+        app: sqlserver
+    spec:
+      containers:
+        - name: mssql-server
+          image: "{{ .Values.sqlServer.image }}:{{ .Values.sqlServer.version }}"
+          ports:
+            - name: mssql
+              containerPort: 1433
+          env:
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: SA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.daprComponents.secretStore.secretName }}
+                  key: dbPassword
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.sqlServer.service.name }}
+spec:
+  ports:
+    - port: 1433
+      targetPort: 1433
+  selector:
+    app: sqlserver
+{{end}}

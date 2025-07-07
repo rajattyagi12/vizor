@@ -1,0 +1,17 @@
+
+╭──────────────────────────╮
+│     🎩 Dapr Store 👔     │
+╰──────────────────────────╯
+
+▶▶▶ 🚀 Dapr Store has been installed into: {{ .Release.Namespace }}
+▶▶▶ 🧩 Release name: {{ .Release.Name }}
+▶▶▶ 📦 Registry: {{ .Values.image.registry }}/{{ .Values.image.repo }}
+▶▶▶ 🎯 Tag: {{ .Values.image.tag }}
+
+{{- if .Values.ingress.host }}
+▶▶▶ 🌍 To access the store, go to http://{{ .Values.ingress.host }}/
+{{ else }}
+▶▶▶ 🌍 To access the store, copy & run the two commands below:
+ingressIp=$(kubectl get svc -l "purpose=vizor-api-gateway" -o jsonpath="{.items[0].status.loadBalancer.ingress[0].ip}")
+echo -e "\nStore URL is http://$ingressIp/ \n"
+{{ end }}

@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}-interaction-service
+  labels:
+    {{- include "vizor.labels" . | nindent 4 }}
+    vizor: interaction-service
+    
+spec:
+  replicas: {{ .Values.interactionService.replicas }}
+  selector:
+    matchLabels:
+      vizor: interaction-service
+  template:
+    metadata:
+      labels:
+        vizor: interaction-service
+        {{- include "vizor.selectorLabels" . | nindent 8 }}
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "interaction-service"
+        dapr.io/app-port: "9002"
+      {{- with .Values.interactionService.annotations }}
+          {{- toYaml . | nindent 8 }}
+      {{- end }}            
+    spec:
+    {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}    
+
+      containers:
+      - name: server
+        image: {{ .Values.image.registry }}/{{ .Values.image.repo }}/interaction-service:{{ .Values.image.tag }}
+        imagePullPolicy: Always
+
+        {{- if .Values.auth.clientId }}
+        env:
+          - name: AUTH_CLIENT_ID
+            value: {{ .Values.auth.clientId }}
+        {{- end }} 
+
+        resources:
+        {{- with .Values.resources }}
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 9002
+            httpHeaders:
+              - name: "No-Log"
+                value: "true"
+       

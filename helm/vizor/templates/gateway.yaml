@@ -1,0 +1,24 @@
+{{- $tlsEnabled := (or .Values.ingress.certIssuer .Values.ingress.certName) -}}
+
+{{- if $tlsEnabled }}
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: Gateway
+metadata:
+  name: dapr-gateway
+  namespace: {{ .Release.Namespace }}
+spec:
+  gatewayClassName: dapr
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "{{ .Values.ingress.host }}"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: {{ if .Values.ingress.certName }}{{ .Values.ingress.certName }}{{ else }}{{ include "vizor.fullname" . }}{{ end }}
+    - name: http
+      protocol: HTTP
+      port: 80
+{{- end }}

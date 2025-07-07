@@ -1,0 +1,11 @@
+apiVersion: v2
+name: vizor
+description: Vizor Application
+
+type: application
+
+# This is the chart version.
+version: 0.8.1
+
+# This is the version number of the application being deployed.
+appVersion: 0.8.1

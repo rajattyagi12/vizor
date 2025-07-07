@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}-engagement-service
+  labels:
+    {{- include "vizor.labels" . | nindent 4 }}
+    vizor: engagement-service
+    
+spec:
+  replicas: {{ .Values.engagementService.replicas }}
+  selector:
+    matchLabels:
+      vizor: engagement-service
+  template:
+    metadata:
+      labels:
+        vizor: engagement-service
+        {{- include "vizor.selectorLabels" . | nindent 8 }}
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "engagement-service"
+        dapr.io/app-port: "9004"
+      {{- with .Values.engagementService.annotations }}
+          {{- toYaml . | nindent 8 }}
+      {{- end }}            
+    spec:
+    {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}    
+
+      containers:
+      - name: engagement-service
+        image: {{ .Values.image.registry }}/{{ .Values.image.repo }}/engagement-service:{{ .Values.image.tag }}
+        imagePullPolicy: Always
+
+        {{- if .Values.auth.clientId }}
+        env:
+          - name: AUTH_CLIENT_ID
+            value: {{ .Values.auth.clientId }}
+        {{- end }} 
+
+        resources:
+        {{- with .Values.resources }}
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 9004
+            httpHeaders:
+              - name: "No-Log"
+                value: "true"

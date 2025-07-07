@@ -1,0 +1,22 @@
+#
+# Default values for redis Helm install as a backend for the statestore Dapr component
+# Use chart from charts.bitnami.com/bitnami repo
+#
+
+# Override the name simplifies the integration with Dapr components
+fullnameOverride: vizor-redis
+enabled: true
+
+# This is assumed by the Dapr components, and keeps it simple
+auth:
+  enabled: false
+
+replica:
+  replicaCount: 1
+  persistence:
+    enabled: false
+
+# This is a personal choice, it's not a production system
+master:
+  persistence:
+    enabled: false
