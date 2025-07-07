@@ -1,0 +1,27 @@
+#
+# Default values for nginx-ingress Helm install for use as an API gateway to Dapr Store
+# Runs nginx-ingress in Daprized mode :)
+# Use chart from https://kubernetes.github.io/ingress-nginx repo
+#
+
+controller:
+  service:
+    labels:
+      purpose: "vizor-api-gateway"
+
+  # Use a special class to not clash with any other controllers installed
+  ingressClass: "dapr"
+  ingressClassResource:
+    name: "dapr"
+
+  # This Dapr-izes the workload
+  podAnnotations:
+    dapr.io/enabled: "true"
+    dapr.io/app-id: "api-gateway"
+    dapr.io/app-port: "80"
+    # REALLY important! This is required since a change in Dapr 1.4
+    dapr.io/sidecar-listen-addresses: "0.0.0.0"
+
+  # This means this ingress controller only works inside this namespace
+  scope:
+    enabled: true

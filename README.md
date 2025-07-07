@@ -113,3 +113,11 @@ To get the URL of the deployed store run the following command:
 ```bash
 echo -e "Access Dapr Store here: http://$(kubectl get svc -l "purpose=vizor-api-gateway" -o jsonpath="{.items[0].status.loadBalancer.ingress[0].ip}")/"
 ```
+
+
+
+Ingress NGINX
+
+```bash
+helm install api-gateway ingress-nginx/ingress-nginx --values ./config/ingress-values.yaml --namespace $namespace
+```
