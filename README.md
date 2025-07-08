@@ -121,3 +121,7 @@ Ingress NGINX
 ```bash
 helm install api-gateway ingress-nginx/ingress-nginx --values ./config/ingress-values.yaml --namespace $namespace
 ```
+
+
+# Port forwarding sqlserver service locally
+nohup  kubectl port-forward svc/sql-server-service 1433:1433 -n vizor &

@@ -18,7 +18,7 @@ spec:
       annotations:
         dapr.io/enabled: "true"
         dapr.io/app-id: "core-service"
-        dapr.io/app-port: "9001"
+        dapr.io/app-port: "8080"
       {{- with .Values.coreService.annotations }}
           {{- toYaml . | nindent 8 }}
       {{- end }}            
@@ -44,10 +44,11 @@ spec:
           {{- toYaml . | nindent 12 }}
         {{- end }}
 
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 9001
-            httpHeaders:
-              - name: "No-Log"
-                value: "true"
+        # TODO: Add Health Path
+        # readinessProbe:
+        #   httpGet:
+        #     path: /health
+        #     port: 8080
+        #     httpHeaders:
+        #       - name: "No-Log"
+        #         value: "true"

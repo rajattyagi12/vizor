@@ -79,9 +79,9 @@ daprComponents:
       
   
   secretStore:
-    name: user-secrets
+    name: vizor-secretstore
     componentType: secretstores.kubernetes
-    secretName: user-secrets
+    secretName: vizor-secrets
 
 
 sqlServer:
