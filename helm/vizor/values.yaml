@@ -76,11 +76,7 @@ daprComponents:
     redisHost: vizor-redis-master:6379
 
   secrets:
-    sql-server: "sql-server-service" # Deprecated
-    sql-port: "1433" # Deprecated
-    sa-password: "P@55w0rd"  # Deprecated
-    dbPassword: "P@55w0rd"
-  
+      
   
   secretStore:
     name: user-secrets
@@ -95,6 +91,7 @@ sqlServer:
   releaseName: sqlserver
   username: "sa"
   database: "vizor"
+  dbPassword: "P@55w0rd"
   service:
     name: sql-server-service
     port: 1433

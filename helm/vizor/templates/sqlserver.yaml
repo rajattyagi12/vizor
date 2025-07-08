@@ -20,15 +20,12 @@ spec:
           image: "{{ .Values.sqlServer.image }}:{{ .Values.sqlServer.version }}"
           ports:
             - name: mssql
-              containerPort: 1433
+              containerPort: {{ .Values.sqlServer.service.port }}
           env:
             - name: ACCEPT_EULA
               value: "Y"
             - name: SA_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.daprComponents.secretStore.secretName }}
-                  key: dbPassword
+              value: {{ .Values.sqlServer.dbPassword }}
 ---
 apiVersion: v1
 kind: Service
@@ -36,8 +33,8 @@ metadata:
   name: {{ .Values.sqlServer.service.name }}
 spec:
   ports:
-    - port: 1433
-      targetPort: 1433
+    - port: {{ .Values.sqlServer.service.port }}
+      targetPort: {{ .Values.sqlServer.service.port }}
   selector:
     app: sqlserver
 {{end}}

@@ -45,7 +45,7 @@ kubectl create namespace $namespace
 
 ```bash
 helm repo add bitnami https://charts.bitnami.com/bitnami
-# helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo update
 ```
 
@@ -68,29 +68,29 @@ kubectl get pod vizor-redis-master-0 --namespace $namespace
 Install Gateway API CRDs
 
 ```bash
-kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
+#kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
 ```
 Validate Gateway API CRDs
 
 ```bash
-kubectl get crd | grep gateway
+#kubectl get crd | grep gateway
 ```
 
 Install MetalLB CRDs
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.15.2/config/manifests/metallb-native.yaml
+#kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.15.2/config/manifests/metallb-native.yaml
 ```
 
 Validate MetalLB is running
 
 ```bash
-kubectl get pods -n metallb-system
+#kubectl get pods -n metallb-system
 ```
 
 Then setup localLB
 ```bash
-./metal-lb.sh
+#./metal-lb.sh
 ```
 
 ## 🚀 Deploy Dapr Store
