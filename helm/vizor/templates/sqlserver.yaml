@@ -35,6 +35,7 @@ spec:
   ports:
     - port: {{ .Values.sqlServer.service.port }}
       targetPort: {{ .Values.sqlServer.service.port }}
+  type: NodePort
   selector:
     app: sqlserver
 {{end}}
