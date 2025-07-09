@@ -16,10 +16,19 @@ For more details see the [documentation for the Dapr Store Helm chart](./helm/vi
 
 ### Deploy Dapr to Kubernetes
 
+### Add Helm repos
+
+```bash
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo add dapr https://dapr.github.io/helm-charts/
+helm repo update
+```
+
 Skip this if the Dapr control plane is already deployed
 
 ```bash
-dapr init --kubernetes
+helm upgrade --install dapr dapr/dapr --namespace dapr-system --create-namespace --wait
 kubectl get pod --namespace dapr-system
 ```
 
@@ -41,13 +50,6 @@ namespace=vizor
 kubectl create namespace $namespace
 ```
 
-### Add Helm repos
-
-```bash
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-helm repo update
-```
 
 ## 💾 Deploy Redis
 
@@ -62,35 +64,10 @@ helm list --namespace $namespace
 kubectl get pod vizor-redis-master-0 --namespace $namespace
 ```
 
-## 🌐 Deploy k8s Gateway API
-
-
-Install Gateway API CRDs
+Ingress NGINX
 
 ```bash
-#kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
-```
-Validate Gateway API CRDs
-
-```bash
-#kubectl get crd | grep gateway
-```
-
-Install MetalLB CRDs
-
-```bash
-#kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.15.2/config/manifests/metallb-native.yaml
-```
-
-Validate MetalLB is running
-
-```bash
-#kubectl get pods -n metallb-system
-```
-
-Then setup localLB
-```bash
-#./metal-lb.sh
+helm install api-gateway ingress-nginx/ingress-nginx --values ./config/ingress-values.yaml --namespace $namespace
 ```
 
 ## 🚀 Deploy Dapr Store
@@ -116,11 +93,6 @@ echo -e "Access Dapr Store here: http://$(kubectl get svc -l "purpose=vizor-api-
 
 
 
-Ingress NGINX
-
-```bash
-helm install api-gateway ingress-nginx/ingress-nginx --values ./config/ingress-values.yaml --namespace $namespace
-```
 
 
 # Port forwarding sqlserver service locally
