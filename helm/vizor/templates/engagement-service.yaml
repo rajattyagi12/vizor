@@ -19,7 +19,7 @@ spec:
       annotations:
         dapr.io/enabled: "true"
         dapr.io/app-id: "engagement-service"
-        dapr.io/app-port: "9004"
+        dapr.io/app-port: "8080"
       {{- with .Values.engagementService.annotations }}
           {{- toYaml . | nindent 8 }}
       {{- end }}            
