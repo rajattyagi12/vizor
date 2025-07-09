@@ -3,7 +3,7 @@ OS_TYPE=$(uname -s)
 
 # For macOS, use netstat to find the active interface
 if [[ "$OS_TYPE" == "Darwin" ]]; then
-    IP=$( netstat -rn | grep default | awk '{print $2}' | head -n 1)
+    IP=$(ipconfig getifaddr en0)
 else
     # For Linux, use ip route to find the active interface
     # TODO Test on Linux
@@ -12,6 +12,7 @@ else
 fi
 
 # Get the IP address of the default network interface
+echo "Setting LB IP to $IP"
 
 # Apply MetalLB configuration with the dynamic IP
 cat <<EOF | kubectl apply -f -

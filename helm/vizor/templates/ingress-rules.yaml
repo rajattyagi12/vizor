@@ -22,7 +22,7 @@ spec:
     {{ if .Values.ingress.certName }}
     secretName: {{ .Values.ingress.certName }}
     {{ else }}
-    secretName: {{ include "vizor.fullname" . }}
+    secretName: {{ include "daprstore.fullname" . }}
     {{ end }}
   {{ end }}
   rules:
@@ -35,22 +35,23 @@ spec:
         paths:
           # This blocks calls to the private API from outside the cluster
           # It's kinda hacky (you get a 503 rather than 403), but it works
-          # - path: /v1.0/invoke/users/method/private
-          #   pathType: Prefix
-          #   backend:
-          #     service:
-          #       name: sink-hole # Non-existent service, for request to die
-          #       port: 
-          #         number: 80             
-          # Only expose the Dapr invoke API, lets us call our services and nothing more
-          - path: /v1.0/invoke
-            pathType: Prefix
+          - path: /v1.0/invoke/users/method/private
+            pathType: ImplementationSpecific
             backend:
               service:
+                name: sink-hole # Non-existent service, for request to die
+                port: 
+                  number: 80             
+          # Only expose the Dapr invoke API, lets us call our services and nothing more
+          - path: /v1.0/invoke
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                # Send to the Dapr sidecar, which exposes the Dapr invoke API
                 name: api-gateway-dapr
                 port: 
                   number: 80                
-          # Everything else falls through to the frontend for serving the SPA         
+          # Everything else falls through to the frontend-host for serving the SPA         
           - path: /
             pathType: Prefix
             backend:
