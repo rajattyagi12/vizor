@@ -97,3 +97,6 @@ echo -e "Access Dapr Store here: http://$(kubectl get svc -l "purpose=vizor-api-
 
 # Port forwarding sqlserver service locally
 nohup  kubectl port-forward svc/sql-server-service 1433:1433 -n vizor &
+
+# Port forwarding for ingress controller service
+kubectl port-forward svc/api-gateway-ingress-nginx-controller -n vizor 8080:80

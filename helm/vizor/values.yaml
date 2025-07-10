@@ -27,9 +27,9 @@ ingress:
 resources:
   limits:
     # -- CPU limit for the containers, leave alone mostly
-    cpu: 100m
+    cpu: 200m
     # -- Memory limit for the containers, leave alone mostly
-    memory: 200M
+    memory: 512M
 
 coreService:
   # -- Dapr store core annotations
