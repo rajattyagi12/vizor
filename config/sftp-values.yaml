@@ -1,0 +1,16 @@
+# sftp-values.yaml
+persistence:
+  enabled: true
+  existingClaim: sftp-pvc
+users:
+  - name: user1
+    passwordSecret: sftp-secret
+    passwordKey: password
+    homeDir: /home/user1
+service:
+  type: NodePort
+  nodePort: 30022
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"

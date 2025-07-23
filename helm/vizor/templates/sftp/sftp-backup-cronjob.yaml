@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: sftp-backup
+spec:
+  schedule: "0 2 * * *" # Daily at 2 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: backup
+            image: alpine
+            command: ["/bin/sh", "-c", "rsync -av /sftp-data /backup/sftp"]
+            volumeMounts:
+            - name: sftp-data
+              mountPath: /sftp-data
+            - name: backup-dest
+              mountPath: /backup
+          volumes:
+          - name: sftp-data
+            persistentVolumeClaim:
+              claimName: sftp-pvc
+          - name: backup-dest
+            persistentVolumeClaim:
+              claimName: backup-pvc
+          restartPolicy: OnFailure
