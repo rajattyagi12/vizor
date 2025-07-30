@@ -9,3 +9,11 @@ version: 0.8.1
 
 # This is the version number of the application being deployed.
 appVersion: 0.8.1
+
+
+dependencies:
+  - name: local-path-provisioner
+    version: "0.0.32" # Recommended stable version. Check Artifact Hub for latest: https://artifacthub.io/packages/helm/choerodon/local-path-provisioner
+    repository: "https://charts.containeroo.ch" # Or "https://charts.containeroo.ch"
+    # Optional: uncomment if you want to be able to disable the provisioner via values.yaml
+    # condition: local-path-provisioner.enabled

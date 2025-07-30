@@ -2,6 +2,10 @@
 # Default values for vizor Helm chart
 #
 
+# -- Global settings for the Helm chart
+global:
+  namespace: vizor # Your target namespace. All resources will be deployed here.
+
 image:
   # -- Image registry, only change if you're using your own images
   registry: harbor.nbt.local
@@ -76,12 +80,74 @@ daprComponents:
     redisHost: vizor-redis-master:6379
 
   secrets:
-      
+    # SFTP private key for Dapr binding to use.
+    # It will be stored in a Kubernetes Secret and referenced by the Dapr binding.
+    # === IMPORTANT: Replace with the RAW content of your ~/.ssh/dapr_sftp_key ===
+    # Example: -----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----\n
+    # Ensure it's the raw key, Helm will base64 encode it for the Secret.
+    sftpPrivateKey: |-
+      -----BEGIN OPENSSH PRIVATE KEY-----
+      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
+      -----END OPENSSH PRIVATE KEY-----
+    # === END IMPORTANT ===
   
   secretStore:
     name: vizor-secretstore
     componentType: secretstores.kubernetes
     secretName: vizor-secrets
+
+  sftpBinding:
+    name: sftp-binding # Name of the Dapr SFTP binding component
+    rootPath: "/srv/dapruser" # Root path for the Dapr user on SFTPGo
+    username: "dapruser" # SFTPGo user created for Dapr
+    # hostPublicKey: "" # Optional: For production, get SFTPGo's host public key fingerprint for host validation
+    insecureIgnoreHostKey: "true" # ONLY for dev/testing, NOT recommended for production
 
 
 sqlServer:
@@ -96,24 +162,91 @@ sqlServer:
     name: sql-server-service
     port: 1433
 
-sftp:
+# sftp:
+#   enabled: true
+#   image:
+#     registry: ""
+#     repo: atmoz/sftp
+#     tag: latest
+#   persistence:
+#     enabled: true
+#     existingClaim: sftp-pvc
+#   Users:
+#     - homeDir: /home/sftpuser
+#       username: sftpuser
+#       password: sftpuserpassword
+#   usersConfigMap: sftp-users-configmap
+#   service:
+#     type: NodePort
+#     nodePort: 30022
+#   resources:
+#     requests:
+#       memory: "128Mi"
+#       cpu: "100m"
+
+# -- Persistent Volume and Claim configuration for SFTPGo and backups
+persistence:
+  # Removed: sftpPvName, sftpStoragePath, sftpgoDbPvName, sftpgoDbStoragePath, backupPvName, backupStoragePath
+  sftpPvcName: sftp-pvc        # This PVC will be for /srv (SFTP user homes)
+  sftpgoDbPvcName: sftpgo-db-pvc # This PVC will be for /data (SFTPGo database)
+  backupPvcName: backup-pvc    # This PVC will be for backups
+  storageClass: local-path     # Use the StorageClass provided by the subchart
+
+# -- SFTPGo Server Configuration
+sftpGo:
   enabled: true
-  image:
-    registry: ""
-    repo: atmoz/sftp
-    tag: latest
-  persistence:
-    enabled: true
-    existingClaim: sftp-pvc
-  # users:
-  #   - name: user1
-  #     passwordSecret: sftp-secret
-  #     passwordKey: password
-  #     homeDir: /home/user1
-  service:
-    type: NodePort
-    nodePort: 30022
-  resources:
-    requests:
-      memory: "128Mi"
-      cpu: "100m"
+  createDefaultUser: true
+  image: ghcr.io/drakkan/sftpgo:v2.6.6 # Using the official SFTPGo image
+  port: 2022 # SFTP port
+  httpPort: 8080 # HTTP/API port for SFTPGo
+  daprUsername: dapruser # Username for Dapr binding to use
+  daprUserHomeDir: "/srv/dapruser" # SFTPGo internal path for the daprUser's home directory
+  # === IMPORTANT: Replace with the RAW content of your ~/.ssh/dapr_sftp_key.pub ===
+  daprUserPublicKey: |
+    ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC3Uuus8DG2gxyI5RfN4cccPD+WHvtOoP9RAockpJ/iibUukJQhVc+eoaZZNpd9IaCaKP08ttk3awdMYCExCv0qfqKkCSph8qDazLMSZroqiAsX1V5z8ofhAo3OxBxrXSpIBGYpc5uGfzgaGd0CuD2ekK6zVPOOb6F5eZGgKCi+RpGlYkfUrnh1pPTyf0EdCKMF0mxoUV0AhySUb8S+aPjugx/Sk17lMU1xw4WpIsWPhtOpy1YnWZf3MEJ1q/3/IU8gwqM0YJeygfRFDE5675CWfSTpv6XjGn5/LAhhdXZrfyJTvE0mhLlcl/8JMmMk7wn+5YxULAfVame6UGq5KaoBK3oGfQXd5E6CnbLzleiO7wn384SIZQz4mmt97hL/L6o9Do6tuTAYlAiyElJw+/h+tDQY4BHbxTE5GOAKUVZsj/B4Vy7+p+2vgInCPcjbdRFpYXKJB2ZZz0w0nzUxViVVRuW768G7HErn5pgGEa7OyqX6W+0eN+ayB6QoRvMUWk2Cl1vmO+k20q4DIJd2LWqyKeJP43t1cik4x0ZKbuGvytIZhRxZZbno2k2+XAhLDbN8V86qEt71CqvUaPPQcny6QgPAcBHbDLdWjdNq4v+Oji4ESRLA2aKPuUzv0iCvFbGA7EErMorgTTnpR1lToWtjU4BpGxYM/wIEQLuocSbeYw== veersingh@NBT-Veer-Mini.local
+  # === END IMPORTANT ===
+  enablePasswordAuth: false # Disable password authentication for SFTPGo
+  enableKeyAuth: true # Enable SSH key authentication for SFTPGo
+  fsGroup: 1001 # Recommended UID/GID for SFTPGo data directory permissions
+  adminAuthToken: "8862417938fe9ec10410b190c726877eace287f40999572ac15709b5acdc8538"
+  userJson: >
+    {
+      "username": "dapruser",
+      "home_dir": "/srv/dapruser",
+      "public_keys": [
+        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC3Uuus8DG2gxyI5RfN4cccPD+WHvtOoP9RAockpJ/iibUukJQhVc+eoaZZNpd9IaCaKP08ttk3awdMYCExCv0qfqKkCSph8qDazLMSZroqiAsX1V5z8ofhAo3OxBxrXSpIBGYpc5uGfzgaGd0CuD2ekK6zVPOOb6F5eZGgKCi+RpGlYkfUrnh1pPTyf0EdCKMF0mxoUV0AhySUb8S+aPjugx/Sk17lMU1xw4WpIsWPhtOpy1YnWZf3MEJ1q/3/IU8gwqM0YJeygfRFDE5675CWfSTpv6XjGn5/LAhhdXZrfyJTvE0mhLlcl/8JMmMk7wn+5YxULAfVame6UGq5KaoBK3oGfQXd5E6CnbLzleiO7wn384SIZQz4mmt97hL/L6o9Do6tuTAYlAiyElJw+/h+tDQY4BHbxTE5GOAKUVZsj/B4Vy7+p+2vgInCPcjbdRFpYXKJB2ZZz0w0nzUxViVVRuW768G7HErn5pgGEa7OyqX6W+0eN+ayB6QoRvMUWk2Cl1vmO+k20q4DIJd2LWqyKeJP43t1cik4x0ZKbuGvytIZhRxZZbno2k2+XAhLDbN8V86qEt71CqvUaPPQcny6QgPAcBHbDLdWjdNq4v+Oji4ESRLA2aKPuUzv0iCvFbGA7EErMorgTTnpR1lToWtjU4BpGxYM/wIEQLuocSbeYw== veersingh@NBT-Veer-Mini.local"
+      ],
+      "permissions": {
+        "/": ["*"]
+      },
+      "uid": "1001",
+      "gid": "1001",
+      "status": 1,
+      "description": "User managed by Kubernetes job"
+    }
+  dataProvider:
+    config:
+      users_base_dir: /srv
+
+# -- SFTPGo Backup CronJob Configuration
+backupCronJob:
+  enabled: false
+  schedule: "0 2 * * *" # Daily at 2 AM UTC
+  image: busybox:latest # For `cp -a`, consider custom image for `rsync`
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+
+# --- Configuration for the local-path-provisioner subchart ---
+local-path-provisioner: # This key must match the `name` in Chart.yaml dependencies
+  enabled: true         # Ensure the subchart is enabled
+  storageClass:
+    create: true        # Ensure it creates the StorageClass
+    defaultClass: true  # Make it the default StorageClass (optional, but convenient)
+    name: local-path    # Ensure the StorageClass name is 'local-path'
+    reclaimPolicy: Retain # <--- IMPORTANT: Set reclaim policy to Retain
+    volumeBindingMode: WaitForFirstConsumer
+  # You can customize other local-path-provisioner values here if needed
+  # For example, to change the base path on the node (advanced):
+  # nodePathMap:
+  # - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
+  #   paths: [/opt/my-sftpgo-data]

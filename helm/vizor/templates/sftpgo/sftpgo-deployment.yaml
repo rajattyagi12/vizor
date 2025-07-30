@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vizor-sftpgo
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: sftpgo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sftpgo
+  template:
+    metadata:
+      labels:
+        app: sftpgo
+    spec:
+      securityContext:
+        fsGroup: {{ .Values.sftpGo.fsGroup }}
+      containers:
+        - name: sftpgo
+          image: {{ .Values.sftpGo.image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: {{ .Values.sftpGo.port }}
+            - containerPort: {{ .Values.sftpGo.httpPort }}
+          env:
+            - name: SFTPGO_HTTPD__BINDINGS__0__PORT
+              value: "{{ .Values.sftpGo.httpPort }}"
+            - name: SFTPGO_SFTPD__BINDINGS__0__PORT
+              value: "{{ .Values.sftpGo.port }}"
+            - name: SFTPGO_HTTPD__ENABLELOGINMETHODS
+              value: "1"
+            - name: SFTPGO_DEFAULT_ADMIN__USERNAME
+              value: "admin"
+            - name: SFTPGO_DEFAULT_ADMIN__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sftpgo-admin-token
+                  key: token
+            - name: SFTPGO_DATA_PROVIDER__DRIVER
+              value: "sqlite"
+            - name: SFTPGO_DATA_PROVIDER__NAME
+              value: "sqlite"
+            - name: SFTPGO_LOG__LEVEL
+              value: "debug"
+            - name: SFTPGO_DATA_PROVIDER__USERS_BASE_DIR
+              value: "/srv"
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.sftpGo.httpPort }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - name: home
+              mountPath: /srv
+            - name: data
+              mountPath: /var/lib/sftpgo
+            - name: run
+              mountPath: /var/run/sftpgo
+      volumes:
+        - name: home
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.sftpPvcName }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.sftpgoDbPvcName }}
+        - name: run
+          emptyDir: {}

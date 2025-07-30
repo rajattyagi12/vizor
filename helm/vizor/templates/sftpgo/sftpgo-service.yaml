@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vizor-sftpgo
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: sftpgo
+spec:
+  selector:
+    app: sftpgo
+  ports:
+    - name: sftp
+      port: {{ .Values.sftpGo.port }}
+      targetPort: {{ .Values.sftpGo.port }}
+    - name: http
+      port: {{ .Values.sftpGo.httpPort }}
+      targetPort: {{ .Values.sftpGo.httpPort }}

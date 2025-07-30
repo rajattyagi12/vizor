@@ -141,11 +141,20 @@ add steps for installing k3s, podman VM on mac os, and checks for existing k3s /
             # pkgs.kind # kind has issues when restarting the system
             pkgs.git
             pkgs.krew
+            pkgs.go-task
 
 
           ];
+          shellHook = ''
+          export KREW_ROOT="$HOME/.krew"
+          export PATH="$KREW_ROOT/bin:$PATH"
 
-
+          # Symlink ~/.krew/bin/krew to kubectl-krew if missing
+          if [ ! -f "$KREW_ROOT/bin/kubectl-krew" ] && [ -f "${pkgs.krew}/bin/krew" ]; then
+            ln -s "$KREW_ROOT/bin/krew" "$KREW_ROOT/bin/kubectl-krew"
+            echo "🔗 Symlinked kubectl-krew -> krew"
+          fi
+        '';
         };
       }
     );

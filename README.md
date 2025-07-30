@@ -22,6 +22,7 @@ For more details see the [documentation for the Dapr Store Helm chart](./helm/vi
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo add dapr https://dapr.github.io/helm-charts/
+helm repo add local-path-provisioner https://charts.containeroo.ch/
 helm repo update
 ```
 

@@ -1,0 +1,41 @@
+{{- if .Values.backupCronJob.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Chart.Name }}-sftpgo-backup
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "vizor.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: sftpgo-backup
+spec:
+  schedule: "{{ .Values.backupCronJob.schedule }}"
+  successfulJobsHistoryLimit: {{ .Values.backupCronJob.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.backupCronJob.failedJobsHistoryLimit }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: sftpgo-backup-container
+            image: "{{ .Values.backupCronJob.image }}"
+            imagePullPolicy: IfNotPresent
+            command: ["sh", "-c"]
+            args:
+            - |
+              echo "Starting SFTPGo backup at $(date)"
+              cp -a /sftp-data/* /backup-data/
+              echo "SFTPGo backup completed."
+            volumeMounts:
+            - name: sftp-data-volume
+              mountPath: /sftp-data
+            - name: backup-data-volume
+              mountPath: /backup-data
+          volumes:
+          - name: sftp-data-volume
+            persistentVolumeClaim:
+              claimName: {{ .Values.persistence.sftpPvcName }}
+          - name: backup-data-volume
+            persistentVolumeClaim:
+              claimName: {{ .Values.persistence.backupPvcName }}
+{{- end }}

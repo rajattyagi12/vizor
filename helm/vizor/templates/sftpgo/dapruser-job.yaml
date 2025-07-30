@@ -1,0 +1,61 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sftpgo-create-dapruser
+  namespace: vizor
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: create-user
+          image: alpine:3.20
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+
+              echo "Installing curl and jq..."
+              apk add --no-cache curl jq
+
+              echo "Waiting for SFTPGo to be ready..."
+              until curl -s --fail http://vizor-sftpgo:8080/healthz | grep -q ok; do
+                echo "waiting..."
+                sleep 2
+              done
+
+              echo "SFTPGo is ready. Getting JWT..."
+              ADMIN_PASSWORD=$(cat /mnt/token/token)
+
+              TOKEN=$(curl -s -X POST http://vizor-sftpgo:8080/api/v2/login \
+                -H "Content-Type: application/json" \
+                -d "{\"username\": \"admin\", \"password\": \"${ADMIN_PASSWORD}\"}" | jq -r .access_token)
+
+              if [ "$TOKEN" = "null" ] || [ -z "$TOKEN" ]; then
+                echo "❌ Failed to get JWT. Exiting."
+                exit 1
+              fi
+
+              echo "✅ JWT obtained. Creating dapruser..."
+
+              curl -s -X POST http://vizor-sftpgo:8080/api/v2/admin/users \
+                -H "Authorization: Bearer ${TOKEN}" \
+                -H "Content-Type: application/json" \
+                --data @/mnt/payload/payload.json
+
+              echo "✅ dapruser created successfully."
+          volumeMounts:
+            - name: token
+              mountPath: /mnt/token
+              readOnly: true
+            - name: payload
+              mountPath: /mnt/payload
+              readOnly: true
+      volumes:
+        - name: token
+          secret:
+            secretName: sftpgo-admin-token
+        - name: payload
+          configMap:
+            name: sftpgo-dapruser-config

@@ -61,3 +61,10 @@ Create the name of the service account to use
     {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Convert a string to kebab-case
+*/}}
+{{- define "kebabcase" -}}
+{{- . | lower | replace "_" "-" -}}
+{{- end -}}
