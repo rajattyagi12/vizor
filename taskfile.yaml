@@ -1,0 +1,112 @@
+version: '3'
+
+vars:
+  namespace: vizor
+
+tasks:
+
+  check-cluster:
+    desc: Verify Kubernetes access and Ready node count
+    preconditions:
+      - sh:  '[ "$(kubectl version --client 2>/dev/null)" != "" ]'
+        msg: "❌ kubectl not configured or cluster unreachable."
+      - sh: '[ $(kubectl get nodes --no-headers | grep -c " Ready") -ge 2 ]'
+        msg: "❌ Less than 2 Ready nodes found."
+    cmds:
+      - echo "✅ Cluster is accessible and has sufficient Ready nodes."
+
+  install-deps:
+    desc: Add necessary Helm repositories
+    status:
+      - helm repo list | grep -q "bitnami"
+      - helm repo list | grep -q "ingress-nginx"
+      - helm repo list | grep -q "dapr"
+    cmds:
+      - echo "🔧 Adding missing Helm repos..."
+      - helm repo add bitnami https://charts.bitnami.com/bitnami || true
+      - helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx || true
+      - helm repo add dapr https://dapr.github.io/helm-charts/ || true
+      - helm repo update
+
+  create-namespace:
+    desc: Create Kubernetes namespace if it doesn't exist
+    status:
+      - kubectl get ns {{.namespace}} > /dev/null 2>&1
+    cmds:
+      - echo "📁 Creating namespace '{{.namespace}}'..."
+      - kubectl create namespace {{.namespace}}
+
+  deploy-dapr:
+    desc: Deploy Dapr control plane
+    status:
+      - helm list -n dapr-system | grep -q "^dapr"
+    cmds:
+      - helm upgrade --install dapr dapr/dapr --namespace dapr-system --create-namespace --wait
+      - kubectl wait --for=condition=Ready pods --all -n dapr-system --timeout=300s
+
+  dapr-dashboard:
+    desc: Forward Dapr dashboard locally
+    status:
+      - lsof -i :8080 | grep LISTEN
+    preconditions:
+      - sh: kubectl get deploy/dapr-dashboard -n dapr-system
+        msg: "❌ Dapr dashboard deployment not found."
+    cmds:
+      - echo "📊 Starting port-forward for Dapr dashboard..."
+      - kubectl port-forward deploy/dapr-dashboard -n dapr-system 8080:8080 &
+
+  deploy-redis:
+    desc: Install Redis if not already present
+    status:
+      - helm list -n {{.namespace}} | grep -q "^dapr-redis"
+    cmds:
+      - helm upgrade --install dapr-redis bitnami/redis --values ./config/redis-values.yaml --namespace {{.namespace}}
+      - kubectl wait --for=condition=Ready pods --all -n {{.namespace}} --timeout=300s
+
+  deploy-ingress:
+    desc: Install ingress-nginx if not already present
+    status:
+      - helm list -n {{.namespace}} | grep -q "^api-gateway"
+    cmds:
+      - helm install api-gateway ingress-nginx/ingress-nginx --values ./config/ingress-values.yaml --namespace {{.namespace}}
+      - kubectl wait --for=condition=Ready pods --all -n {{.namespace}} --timeout=300s
+
+  deploy-sftpgo:
+    desc: Deploy SFTPGo application
+    status:
+      - helm list -n {{.namespace}} | grep -q "^vizor-sftp"
+    cmds:
+      - helm upgrade --install vizor-sftp oci://ghcr.io/sftpgo/helm-charts/sftpgo --values ./config/sftpgo-values.yaml --namespace {{.namespace}}
+      - kubectl wait --for=condition=Ready pods --all -n {{.namespace}} --timeout=300s
+
+  deploy-vizor-apps:
+    desc: Deploy Vizor application
+    status:
+      - helm list -n {{.namespace}} | grep -q "^vizor"
+    cmds:
+      - helm upgrade --install vizor ./helm/vizor --namespace {{.namespace}}
+      - kubectl wait --for=condition=Ready pods --all -n {{.namespace}} --timeout=300s
+      - helm list -n {{.namespace}}
+
+  deploy-all:
+    desc: Run full pipeline
+    deps:
+      - check-cluster
+      - install-deps
+      - create-namespace
+      - deploy-dapr
+      - deploy-redis
+      - deploy-ingress
+      - deploy-vizor-apps
+  destroy:
+    desc: Remove all deployed components
+    cmds:
+      - echo "🧨 Destroying Vizor deployment and dependencies..."
+      - helm uninstall vizor -n {{.namespace}} || echo "ℹ️ Vizor not found."
+      - helm uninstall dapr-redis -n {{.namespace}} || echo "ℹ️ Redis not found."
+      - helm uninstall api-gateway -n {{.namespace}} || echo "ℹ️ Ingress NGINX not found."
+      - helm uninstall dapr -n dapr-system || echo "ℹ️ Dapr not found."
+      - echo "🧹 Deleting namespaces..."
+      - kubectl delete namespace {{.namespace}} || echo "ℹ️ {{.namespace}} already deleted."
+      - kubectl delete namespace dapr-system || echo "ℹ️ dapr-system already deleted."
+      - echo "✅ Teardown complete."

@@ -71,6 +71,12 @@ Ingress NGINX
 helm install api-gateway ingress-nginx/ingress-nginx --values ./config/ingress-values.yaml --namespace $namespace
 ```
 
+SFTPGO
+
+```bash
+helm install vizor-sftp --wait oci://ghcr.io/sftpgo/helm-charts/sftpgo --values ./config/sftpgo-values.yaml --namespace $namespace
+```
+
 ## 🚀 Deploy Dapr Store
 
 Now deploy the Dapr Store application and all services using Helm
