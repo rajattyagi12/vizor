@@ -102,6 +102,7 @@ sqlServer:
 
 # -- Persistent Volume and Claim configuration for SFTPGo and backups
 persistence:
+  enabled: false # Enable persistence for SFTPGo and backups
   # Removed: sftpPvName, sftpStoragePath, sftpgoDbPvName, sftpgoDbStoragePath, backupPvName, backupStoragePath
   sftpPvcName: sftp-pvc        # This PVC will be for /srv (SFTP user homes)
   sftpgoDbPvcName: sftpgo-db-pvc # This PVC will be for /data (SFTPGo database)
