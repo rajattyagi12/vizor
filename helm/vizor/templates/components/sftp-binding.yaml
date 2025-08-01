@@ -1,0 +1,15 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: sftp
+  namespace: vizor
+spec:
+  type: bindings.http
+  version: v1
+  metadata:
+  - name: url
+    value: http://sftpgo-svc.vizor.svc.cluster.local:80/api/v2
+  - name: username
+    value: dapr-client
+  - name: privateKeySecret
+    value: sftpgo-ssh-key  # k8s Secret with your private key

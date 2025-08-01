@@ -16,23 +16,23 @@ image:
   pullPolicy: IfNotPresent
 
   # -- Image tag override for the default value (chart appVersion).
-  tag: ""
+  tag: ''
 
 # -- Reference to one or more secrets to be used when [pulling images](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-pod-that-uses-your-secret) (from private registries).
 imagePullSecrets: []
 
 # -- A name in place of the chart name for `app:` labels.
-nameOverride: ""
+nameOverride: ''
 
 # -- A name to substitute for the full names of resources.
-fullnameOverride: ""
+fullnameOverride: ''
 
 sftpd:
   # -- Enable SFTP service.
   enabled: true
 
   # -- Container SFTP port. Set to 0 to disable the service. The 'enabled' flag may be removed in the future in favor of this setting.
-  port: 2022
+  port: 22
 
 ftpd:
   # -- Enable FTP service.
@@ -57,7 +57,21 @@ httpd:
 
 # -- Application configuration.
 # See the [official documentation](https://docs.sftpgo.com/latest/config-file/).
-config: {}
+config:
+  listeners:
+    - name: sftp
+      network: tcp
+      address: 0.0.0.0:22
+  users:
+    - username: dapr-client
+      public_keys:
+        - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDf0rYAuDaDUr1/Ji2NqiI0WcCLzfzxJTkTaDEhA+I/j+oOrmT4JLHmhcF5Ij/FevNxkO6fH7SUuhmF1Sb0P0ilNezOSA+ihzAUxay4OhctCHX2Wd4rPj2gD8/5iF5op6cYgQ/stXK0AHs3/8TDmt5XSGrxfqrDe76hwzsamsFJutwR6SSo01DadRehOs6Aa/JN4Df7MrRzu4KN2C/mzFzbB4U/HJuHVB176WwhFusKpuklZvfbXdLpkYw619ddwzkmwtgSwvDuLWLuPGACVW9KABZUCbxFcjgzXgmrxUD9/TPgpGmX/3grVyYjtVRINiPbprvBOnP3hZjj8BraWH3ELWPN1cl3rMoiM/92ewfW/YkCvmw/t1hmgj4szokuK//sHRaWKBA8FFXEXFqKFl6HnEcNKQfOgFCApd7iJVhO16g4C4LmqNU9KCwF8LvyhVuoIMipCwZr9MXCD9LfH4Ex8yzJhXhK8KjnEn9Si4zSsbwgG6gWPYo8zs32HZv/3w2klfmMi7MwYjwqKUYzTmWKgrEBzwHXSpVkthUWoL7w0RZf6sPxVnQdt4LAEB/3iUY+GkG7j74ZIAM63UrkNJH6TKq9/A/jU2uKFT6VOAO9qorrdDOxDwBg7s/pkJxTKa3qwCB6Npa5u3LaIrhotr6tTMvfkT8NcAStGQ9h0JAHSQ== codet@INBook_X1
+      home_dir: /var/lib/sftpgo/data
+      permissions:
+        upload: true
+        download: true
+        list: true
+        delete: true
 
 # -- Additional storage [volumes](https://kubernetes.io/docs/concepts/storage/volumes/).
 # See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) for details.
@@ -73,7 +87,11 @@ envFrom: []
 
 # -- Additional environment variables passed directly to containers.
 # See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#environment-variables) for details.
-envVars: []
+envVars:
+  - name: SFTPGO_ADMIN_USERNAME
+    value: admin
+  - name: SFTPGO_ADMIN_PASSWORD
+    value: password
   # - name: SOME_ENV_VAR
   #   value: SOME_VALUE
   # - name: SOME_ENV_VAR2
@@ -87,9 +105,9 @@ envVars: []
   #       name: SOME_CONFIGMAP_NAME
   #       key: SOME_CONFIGMAP_KEY
 
-
 # -- Additional environment variables passed directly to containers using a simplified key-value syntax.
-env: {}
+env:
+  {}
   # SOME_ENV_VAR: SOME_VALUE
 
 serviceAccount:
@@ -101,7 +119,7 @@ serviceAccount:
 
   # -- The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template.
-  name: ""
+  name: ''
 
 # -- Annotations to be added to deployment.
 deploymentAnnotations: {}
@@ -122,7 +140,8 @@ podSecurityContext:
 
 # -- Container [security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container).
 # See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context-1) for details.
-securityContext: {}
+securityContext:
+  {}
   # capabilities:
   #   drop:
   #   - ALL
@@ -156,6 +175,7 @@ service:
 
       # -- (int) SFTP node port (when applicable).
       nodePort:
+      targetPort: 22
 
     ftp:
       # -- FTP service port.
@@ -194,7 +214,8 @@ service:
 
 # -- Additional services exposing servers (SFTP, FTP, WebDAV, HTTP) individually.
 # The schema matches the one under the `service` key. Additional services need at least one port.
-services: {}
+services:
+  {}
   # public:
   #   annotations: {}
   #   type: LoadBalancer
@@ -207,17 +228,17 @@ services: {}
   #   externalTrafficPolicy:
   #   sessionAffinity:
 
-
 ui:
   ingress:
     # -- Enable [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/).
     enabled: false
 
     # -- Ingress [class name](https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class).
-    className: ""
+    className: ''
 
     # -- Annotations to be added to the ingress.
-    annotations: {}
+    annotations:
+      {}
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
 
@@ -243,10 +264,11 @@ api:
     enabled: false
 
     # -- Ingress [class name](https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class).
-    className: ""
+    className: ''
 
     # -- Annotations to be added to the ingress.
-    annotations: {}
+    annotations:
+      {}
       # nginx.ingress.kubernetes.io/rewrite-target: /$1
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
@@ -270,7 +292,8 @@ api:
 # -- Container resource [requests and limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/).
 # See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#resources) for details.
 # @default -- No requests or limits.
-resources: {}
+resources:
+  {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -289,12 +312,12 @@ autoscaling:
   minReplicas: 1
   maxReplicas: 100
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 80
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
   # - type: Resource
   #   resource:
   #     name: cpu
@@ -351,7 +374,7 @@ topologySpreadConstraints:
 
 persistence:
   # -- Enable persistent storage for the /var/lib/sftpgo directory, saving state of the default sqlite db.
-  enabled: false
+  enabled: true
 
   # -- Create the pvc desired specificiation.
   pvc:
@@ -360,4 +383,4 @@ persistence:
     resources:
       requests:
         storage: 5Gi
-    storageClassName: "local-path"
+    storageClassName: 'local-path'
