@@ -1,0 +1,19 @@
+{
+  "$id": "https://your-app.example/schemas/default",
+  "title": "Default Identity Schema",
+  "type": "object",
+  "properties": {
+    "traits": {
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "role": {
+          "type": "string",
+          "enum": ["admin", "client_user", "configuration_manager"]
+        },
+        "client_id": { "type": "string" }
+      },
+      "required": ["email", "role", "client_id"]
+    }
+  }
+}

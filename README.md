@@ -23,6 +23,7 @@ helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo add dapr https://dapr.github.io/helm-charts/
 helm repo add local-path-provisioner https://charts.containeroo.ch/
+helm repo add ory https://k8s.ory.sh/helm/charts
 helm repo update
 ```
 
@@ -71,18 +72,29 @@ Ingress NGINX
 helm install api-gateway ingress-nginx/ingress-nginx --values ./config/ingress-values.yaml --namespace $namespace
 ```
 
-SFTPGO
+## Deploy Postgresql for indentity provider
 
 ```bash
-helm install vizor-sftp --wait oci://ghcr.io/sftpgo/helm-charts/sftpgo --values ./config/sftpgo-values.yaml --namespace $namespace
+helm install postgres bitnami/postgresql \
+  --namespace vizor \
+  --set auth.username=vizor \
+  --set auth.password=P@55w0rd \
+  --set auth.database=orydb
 ```
 
-## 🚀 Deploy Dapr Store
+## 🚀 Deploy Vizor Apps
 
-Now deploy the Dapr Store application and all services using Helm
+Now deploy the Vizor application and all services using Helm
 
 ```bash
 helm install vizor ./helm/vizor --namespace $namespace
+```
+
+Now deploy the Vizor-Auth applications and all services using Helm
+
+```bash
+helm install kratos ory/kratos --values ./config/kratos/values.yaml --namespace $namespace
+helm install hydra ory/hydra --values ./config/hydra/values.yaml --namespace $namespace
 ```
 
 Validate & check status
@@ -90,6 +102,12 @@ Validate & check status
 ```bash
 helm list --namespace $namespace
 kubectl get pod -l app.kubernetes.io/instance=vizor-apps --namespace $namespace
+```
+
+## 🚀 Deploy SFTPGo
+
+```bash
+helm install vizor-sftp --wait oci://ghcr.io/sftpgo/helm-charts/sftpgo --values ./config/sftpgo-values.yaml --namespace $namespace
 ```
 
 To get the URL of the deployed store run the following command:
@@ -103,7 +121,7 @@ echo -e "Access Dapr Store here: http://$(kubectl get svc -l "purpose=vizor-api-
 
 
 # Port forwarding sqlserver service locally
-nohup  kubectl port-forward svc/sql-server-service 1433:1433 -n vizor &
+nohup kubectl port-forward svc/sql-server-service 1433:1433 -n vizor &
 
 # Port forwarding for ingress controller service
 kubectl port-forward svc/api-gateway-ingress-nginx-controller -n vizor 8080:80

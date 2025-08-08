@@ -1,0 +1,28 @@
+hydra:
+  config:
+    dsn: postgres://${postgresUser}:${postgresPassword}@postgres-postgresql.vizor.svc.cluster.local:5432/orydb?sslmode=disable
+    serve:
+      public:
+        port: 4444
+      admin:
+        port: 4445
+    urls:
+      self:
+        issuer: http://hydra-public.vizor.svc.cluster.local
+        public: http://hydra-public.vizor.svc.cluster.local
+      consent: http://localhost:4200/login
+      login: http://localhost:4200/login
+      logout: http://localhost:4200/logout
+    secrets:
+      system:
+        - changemehydra
+  autoMigrate: true
+
+deployment:
+  extraEnvFrom:
+    - secretRef:
+        name: vizor-secrets
+  extraArgs:
+    - serve
+    - all
+    - --dev
