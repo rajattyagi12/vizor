@@ -1,0 +1,44 @@
+apiVersion: oauth2clients.hydra.ory.sh/v1alpha1
+kind: OAuth2Client
+metadata:
+  name: my-frontend-app-client # A unique name for your OAuth2 client
+  namespace: vizor # Must be in the same namespace as Hydra Maester
+spec:
+  # Replace with a strong, unique client ID and secret.
+  # For production, consider using a Kubernetes Secret to store these.
+  # If you omit secretName, Hydra Maester can generate them for you. [7]
+  secretName: my-frontend-app-client-secret # Name of a Kubernetes Secret to store client_id/secret
+
+  # Allowed OAuth 2.0 grant types for your application
+  grantTypes:
+    - authorization_code # Standard flow for web applications [7]
+    - refresh_token # Allows obtaining new access tokens without re-authentication [7]
+
+  # Allowed OAuth 2.0 response types
+  responseTypes:
+    - code # For Authorization Code Flow [7]
+    - id_token # For OpenID Connect identity token [7]
+
+  # Scopes your application will request.
+  # `openid` is required for OIDC. `offline_access` for refresh tokens.
+  # Add custom scopes as needed for your application's permissions. [7]
+  scope: "openid offline_access profile email" # Space-separated list of scopes
+
+  # List of allowed redirect URIs for your application.
+  # Hydra will only redirect to these URLs after successful authorization.
+  redirectUris:
+    - "http://localhost:8081/callback" # Your frontend's OAuth2 callback URL
+    - "http://your-frontend-domain.com/callback" # Add your production domain here
+
+  # --- Auto-Consent Configuration ---
+  # Set to true to skip the consent screen for this client. [8]
+  skipConsent: true
+
+  # Optional: Audience for the access tokens.
+  # This restricts which resource servers can accept tokens issued for this client.
+  # audience:
+  #   - "your-backend-api"
+  #   - "another-microservice"
+
+  # Optional: Client name for display purposes
+  # clientName: "My Enterprise Frontend"

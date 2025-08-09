@@ -1,4 +1,18 @@
 {{- if .Values.postgresql.enabled }}
+
+# ConfigMap for init SQL
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.postgresql.releaseName }}-initdb
+data:
+  init-multiple-dbs.sql: |
+{{- range .Values.postgresql.databases }}
+    CREATE DATABASE "{{ . }}";
+{{- end }}
+
+---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -30,10 +44,16 @@ spec:
               value: {{ .Values.postgresql.database }}
           volumeMounts:
             - name: postgres-data
-              mountPath: /var/lib/postgresql/data
+              mountPath: /var/lib/postgresql/db
+            - name: postgres-initdb
+              mountPath: /docker-entrypoint-initdb.d
       volumes:
         - name: postgres-data
-          emptyDir: {} # For production, replace with PVC
+          persistentVolumeClaim:
+            claimName: postgresql-local-pvc
+        - name: postgres-initdb
+          configMap:
+            name: {{ .Values.postgresql.releaseName }}-initdb
 ---
 apiVersion: v1
 kind: Service

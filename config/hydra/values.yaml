@@ -1,28 +1,63 @@
+# hydra-values.yaml
 hydra:
+  image:
+    repository: oryd/hydra
+    tag: v2.3.0 # Ensure this matches the version you intend to deploy
   config:
-    dsn: postgres://${postgresUser}:${postgresPassword}@postgres-postgresql.vizor.svc.cluster.local:5432/orydb?sslmode=disable
-    serve:
-      public:
-        port: 4444
-      admin:
-        port: 4445
-    urls:
-      self:
-        issuer: http://hydra-public.vizor.svc.cluster.local
-        public: http://hydra-public.vizor.svc.cluster.local
-      consent: http://localhost:4200/login
-      login: http://localhost:4200/login
-      logout: http://localhost:4200/logout
+    # Database Connection (DSN)
+    dsn: "postgres://vizor:P@55w0rd@postgres-postgresql.vizor.svc.cluster.local:5432/vizor-oauth2?sslmode=disable"
+
+    # System Secrets
     secrets:
       system:
-        - changemehydra
-  autoMigrate: true
+        - "a-very-long-and-secure-random-string-for-hydra-system-secret"
+      cookie:
+        - "a-very-long-and-secure-random-string-for-hydra-cookie-secret"
 
-deployment:
-  extraEnvFrom:
-    - secretRef:
-        name: vizor-secrets
-  extraArgs:
-    - serve
-    - all
-    - --dev
+    # URLs for Hydra's public and admin APIs, and UI delegation
+    urls:
+      self:
+        issuer: "http://hydra.public.local" # Still HTTP for now
+      login: "http://localhost:8081/login" # Your frontend's login page
+      consent: "http://localhost:8081/login" # Can be your login page or a placeholder
+      logout: "http://localhost:8081/logout"
+
+    # OAuth2 Token Hook for Custom Claims
+    oauth2:
+      token_hook: "http://your-token-webhook-service.vizor.svc.cluster.local:8080/token-webhook" # Example URL
+
+    # Configuration version (align with Hydra version)
+    version: v1.11.0 # Adjust to your specific Hydra version if different
+
+  # Enable automatic database migrations for Hydra
+  automigration:
+    enabled: true
+    type: job # Can be 'job' or 'initContainer'
+
+  # Keep this as it sets the flag, but also add extraEnv for redundancy/directness
+  dev: true
+  # This flag is also crucial for allowing HTTP issuer URL [2, 3, 4, 5, 6]
+  dangerousForceHttp: true
+
+  deployment:
+    # Keep extraArgs for --dev flag [7, 3, 6, 8, 9]
+    extraArgs:
+      - --dev
+    # --- ADD THIS BLOCK ---
+    # Explicitly set the DEV environment variable to ensure development mode is active [1]
+    extraEnv:
+      - name: DEV
+        value: "true"
+
+  # Ingress configuration to expose Hydra's public and admin endpoints
+  ingress:
+    public:
+      enabled: true
+      hosts:
+        - host: hydra.public.local # Adjust this to your desired public hostname
+          paths: ["/"]
+    admin:
+      enabled: true
+      hosts:
+        - host: hydra.admin.local # Adjust this to your desired admin hostname
+          paths: ["/"]

@@ -103,12 +103,21 @@ postgresql:
   image: "postgres"
   version: "16"
   releaseName: postgres
-  username: "postgres"
-  database: "orydb"
+  username: "vizor"
+  database: "vizor-identity"
   dbPassword: "P@55w0rd"
+  databases:
+    - "vizor-oauth2"
   service:
     name: postgres-postgresql
     port: 5432
+  primary:
+    persistence:
+      enabled: true
+      storageClass: "local-path" # Use your specified storage class
+      size: 5Gi # You can adjust this size as needed
+    volumePermissions: # Often needed for local-path to ensure correct permissions
+      enabled: true
 
 # -- Persistent Volume and Claim configuration for SFTPGo and backups
 persistence:
