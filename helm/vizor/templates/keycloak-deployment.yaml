@@ -1,0 +1,66 @@
+# Keycloak Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  labels:
+    app: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:latest
+          imagePullPolicy: IfNotPresent
+          args: ["start-dev"]
+          env:
+            - name: KEYCLOAK_ADMIN
+              value: "admin"
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: "password"
+            - name: KC_DB
+              value: "mssql"
+            - name: KC_DB_USERNAME
+              value: "sa"
+            - name: KC_DB_PASSWORD
+              value: "P@55w0rd"
+            - name: KC_DB_URL
+              value: "jdbc:sqlserver://sql-server-service:1433;databaseName=keycloak;encrypt=true;trustServerCertificate=true"
+            - name: KC_HTTP_RELATIVE_PATH
+              value: "/auth"
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1"
+            limits:
+              memory: "4Gi"
+              cpu: "2"
+          volumeMounts:
+            - name: theme-volume
+              mountPath: /opt/keycloak/themes/VizorTheme
+              readOnly: true
+      volumes:
+        - name: theme-volume
+          hostPath:
+            path: /themes/VizorTheme
+            type: Directory
+---
+# Keycloak Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  labels:
+    app: keycloak
+spec:
+  ports:
+    - port: 8080
+  selector:
+    app: keycloak

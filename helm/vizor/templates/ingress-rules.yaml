@@ -7,12 +7,12 @@ metadata:
   annotations:
     {{ if .Values.ingress.certIssuer }}
     cert-manager.io/cluster-issuer: {{ .Values.ingress.certIssuer }}
-    {{ end }}    
+    {{ end }}
     {{ if $tlsEnabled }}
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     {{ else }}
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    {{ end }}    
+    {{ end }}
 spec:
   ingressClassName: dapr
   {{ if $tlsEnabled }}
@@ -28,11 +28,19 @@ spec:
   rules:
     {{ if .Values.ingress.host }}
     - host: "{{ .Values.ingress.host }}"
-      http: 
+      http:
     {{ else }}
     - http:
     {{ end }}
-        paths:          
+        paths:
+        #Keycloak ingress path
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8080
           # Only expose the Dapr invoke API, lets us call our services and nothing more
           - path: /v1.0/invoke
             pathType: ImplementationSpecific
@@ -40,9 +48,10 @@ spec:
               service:
                 # Send to the Dapr sidecar, which exposes the Dapr invoke API
                 name: api-gateway-dapr
-                port: 
-                  number: 80                
-          # Everything else falls through to the frontend-host for serving the SPA         
+                port:
+                  number: 80
+          
+          # Everything else falls through to the frontend-host for serving the SPA
           - path: /
             pathType: Prefix
             backend:

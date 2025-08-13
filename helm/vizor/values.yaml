@@ -80,13 +80,11 @@ daprComponents:
     redisHost: vizor-redis-master:6379
 
   secrets:
-    
-  
+
   secretStore:
     name: vizor-secretstore
     componentType: secretstores.kubernetes
     secretName: vizor-secrets
-
 
 sqlServer:
   enabled: true
@@ -100,14 +98,35 @@ sqlServer:
     name: sql-server-service
     port: 1433
 
+postgresql:
+  enabled: false
+  image: "postgres"
+  version: "16"
+  releaseName: postgres
+  username: "vizor"
+  database: "vizor-identity"
+  dbPassword: "P@55w0rd"
+  databases:
+    - "vizor-oauth2"
+  service:
+    name: postgres-postgresql
+    port: 5432
+  primary:
+    persistence:
+      enabled: true
+      storageClass: "local-path" # Use your specified storage class
+      size: 5Gi # You can adjust this size as needed
+    volumePermissions: # Often needed for local-path to ensure correct permissions
+      enabled: true
+
 # -- Persistent Volume and Claim configuration for SFTPGo and backups
 persistence:
   enabled: false # Enable persistence for SFTPGo and backups
   # Removed: sftpPvName, sftpStoragePath, sftpgoDbPvName, sftpgoDbStoragePath, backupPvName, backupStoragePath
-  sftpPvcName: sftp-pvc        # This PVC will be for /srv (SFTP user homes)
+  sftpPvcName: sftp-pvc # This PVC will be for /srv (SFTP user homes)
   sftpgoDbPvcName: sftpgo-db-pvc # This PVC will be for /data (SFTPGo database)
-  backupPvcName: backup-pvc    # This PVC will be for backups
-  storageClass: local-path     # Use the StorageClass provided by the subchart
+  backupPvcName: backup-pvc # This PVC will be for backups
+  storageClass: local-path # Use the StorageClass provided by the subchart
 
 # -- Backup CronJob Configuration
 backupCronJob:
@@ -119,11 +138,11 @@ backupCronJob:
 
 # --- Configuration for the local-path-provisioner subchart ---
 local-path-provisioner: # This key must match the `name` in Chart.yaml dependencies
-  enabled: true         # Ensure the subchart is enabled
+  enabled: true # Ensure the subchart is enabled
   storageClass:
-    create: true        # Ensure it creates the StorageClass
-    defaultClass: true  # Make it the default StorageClass (optional, but convenient)
-    name: local-path    # Ensure the StorageClass name is 'local-path'
+    create: true # Ensure it creates the StorageClass
+    defaultClass: true # Make it the default StorageClass (optional, but convenient)
+    name: local-path # Ensure the StorageClass name is 'local-path'
     reclaimPolicy: Retain # <--- IMPORTANT: Set reclaim policy to Retain
     volumeBindingMode: WaitForFirstConsumer
   # You can customize other local-path-provisioner values here if needed

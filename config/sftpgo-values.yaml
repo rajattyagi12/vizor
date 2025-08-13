@@ -32,7 +32,7 @@ sftpd:
   enabled: true
 
   # -- Container SFTP port. Set to 0 to disable the service. The 'enabled' flag may be removed in the future in favor of this setting.
-  port: 22
+  port: 2022
 
 ftpd:
   # -- Enable FTP service.
@@ -58,40 +58,42 @@ httpd:
 # -- Application configuration.
 # See the [official documentation](https://docs.sftpgo.com/latest/config-file/).
 config:
-  listeners:
-    - name: sftp
-      network: tcp
-      address: 0.0.0.0:22
-  users:
-    - username: dapr-client
-      public_keys:
-        - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDf0rYAuDaDUr1/Ji2NqiI0WcCLzfzxJTkTaDEhA+I/j+oOrmT4JLHmhcF5Ij/FevNxkO6fH7SUuhmF1Sb0P0ilNezOSA+ihzAUxay4OhctCHX2Wd4rPj2gD8/5iF5op6cYgQ/stXK0AHs3/8TDmt5XSGrxfqrDe76hwzsamsFJutwR6SSo01DadRehOs6Aa/JN4Df7MrRzu4KN2C/mzFzbB4U/HJuHVB176WwhFusKpuklZvfbXdLpkYw619ddwzkmwtgSwvDuLWLuPGACVW9KABZUCbxFcjgzXgmrxUD9/TPgpGmX/3grVyYjtVRINiPbprvBOnP3hZjj8BraWH3ELWPN1cl3rMoiM/92ewfW/YkCvmw/t1hmgj4szokuK//sHRaWKBA8FFXEXFqKFl6HnEcNKQfOgFCApd7iJVhO16g4C4LmqNU9KCwF8LvyhVuoIMipCwZr9MXCD9LfH4Ex8yzJhXhK8KjnEn9Si4zSsbwgG6gWPYo8zs32HZv/3w2klfmMi7MwYjwqKUYzTmWKgrEBzwHXSpVkthUWoL7w0RZf6sPxVnQdt4LAEB/3iUY+GkG7j74ZIAM63UrkNJH6TKq9/A/jU2uKFT6VOAO9qorrdDOxDwBg7s/pkJxTKa3qwCB6Npa5u3LaIrhotr6tTMvfkT8NcAStGQ9h0JAHSQ== codet@INBook_X1
-      home_dir: /var/lib/sftpgo/data
-      permissions:
-        upload: true
-        download: true
-        list: true
-        delete: true
+  existingConfigmap: vizor-sftp-sftpgo
 
 # -- Additional storage [volumes](https://kubernetes.io/docs/concepts/storage/volumes/).
 # See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) for details.
-volumes: []
+volumes:
+  - name: ssh-keys
+    configMap:
+      name: ssh-public-keys
+  - name: backend-ssh-key
+    secret:
+      secretName: backend-ssh-key
+      defaultMode: 0600
 
 # -- Additional [volume mounts](https://kubernetes.io/docs/tasks/configure-pod-container/configure-volume-storage/).
 # See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) for details.
-volumeMounts: []
+volumeMounts:
+  - name: ssh-keys
+    mountPath: /ssh-keys
+    readOnly: true
+  - name: backend-ssh-key
+    mountPath: /backend-keys
+    readOnly: true
 
 # -- Additional environment variables mounted from [secrets](https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables) or [config maps](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables).
 # See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#environment-variables) for details.
-envFrom: []
+envFrom:
+  - secretRef:
+      name: sftpgo-admin-secret
 
 # -- Additional environment variables passed directly to containers.
 # See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#environment-variables) for details.
 envVars:
-  - name: SFTPGO_ADMIN_USERNAME
-    value: admin
-  - name: SFTPGO_ADMIN_PASSWORD
-    value: password
+  - name: SFTPGO_DATA_PROVIDER__CREATE_DEFAULT_ADMIN
+    value: "true"
+  - name: SFTPGO_HTTPD__ENABLED_LOGIN_METHODS # Add this line
+    value: "3"
   # - name: SOME_ENV_VAR
   #   value: SOME_VALUE
   # - name: SOME_ENV_VAR2
@@ -107,7 +109,6 @@ envVars:
 
 # -- Additional environment variables passed directly to containers using a simplified key-value syntax.
 env:
-  {}
   # SOME_ENV_VAR: SOME_VALUE
 
 serviceAccount:
@@ -141,7 +142,9 @@ podSecurityContext:
 # -- Container [security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container).
 # See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context-1) for details.
 securityContext:
-  {}
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
   # capabilities:
   #   drop:
   #   - ALL
@@ -149,7 +152,8 @@ securityContext:
   # runAsNonRoot: true
 
 # -- Add [init containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) to the pod.
-initContainers: []
+initContainers:
+
 
 service:
   # -- Annotations to be added to the service.
@@ -171,11 +175,11 @@ service:
   ports:
     sftp:
       # -- SFTP service port.
-      port: 22
+      port: 2022
 
       # -- (int) SFTP node port (when applicable).
       nodePort:
-      targetPort: 22
+      targetPort: 2022
 
     ftp:
       # -- FTP service port.
@@ -200,10 +204,11 @@ service:
 
     http:
       # -- REST API service port.
-      port: 80
+      port: 8080
 
       # -- (int) REST API node port (when applicable).
       nodePort:
+      targetPort: 8080
 
   # -- Route external traffic to node-local or cluster-wide endoints.
   # Useful for [preserving the client source IP](https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip).

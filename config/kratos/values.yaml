@@ -1,0 +1,126 @@
+# kratos-values.yaml
+kratos:
+  identitySchemas:
+    # Default identity schema for basic email/password users
+    identity.schema.json: |-
+      {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "traits": {
+            "type": "object",
+            "properties": {
+              "email": {
+                "type": "string",
+                "format": "email",
+                "title": "E-Mail",
+                "ory.sh/kratos": {
+                  "credentials": {
+                    "password": { "identifier": true },
+                    "code": { "identifier": true, "via": "email" }
+                  },
+                  "recovery": { "via": "email" },
+                  "verification": { "via": "email" }
+                }
+              }
+            },
+            "required": ["email"],
+            "additionalProperties": false
+          }
+        }
+      }
+    # Your custom enterprise user schema
+    enterprise_user.schema.json: |-
+      {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "traits": {
+            "type": "object",
+            "properties": {
+              "email": {
+                "type": "string",
+                "format": "email",
+                "title": "E-Mail",
+                "ory.sh/kratos": {
+                  "credentials": {
+                    "password": { "identifier": true },
+                    "code": { "identifier": true, "via": "email" }
+                  },
+                  "recovery": { "via": "email" },
+                  "verification": { "via": "email" }
+                }
+              },
+              "first_name": { "type": "string", "title": "First Name" },
+              "last_name": { "type": "string", "title": "Last Name" },
+              "enterprise_id": { "type": "string", "title": "Associated Enterprise ID" },
+              "user_type": {
+                "type": "string",
+                "enum": ["client", "config_manager", "admin"],
+                "title": "User Type"
+              },
+              "roles": {
+                "type": "array",
+                "items": { "type": "string" },
+                "title": "Assigned Roles"
+              }
+            },
+            "required": ["email", "user_type", "roles"],
+            "additionalProperties": false
+          }
+        }
+      }
+  config:
+    # Add the config version
+    version: v1.3.1 # Or the specific version of Kratos you are using
+    dsn: "postgres://vizor:P@55w0rd@postgres-postgresql.vizor.svc.cluster.local:5432/vizor-identity?sslmode=disable"
+    serve:
+      public:
+        # Set the public base URL for Kratos. This should be accessible from your frontend.
+        # For Kind, if you're using hostPort 8081 for ingress, it might be:
+        base_url: "http://localhost:8081/.ory/kratos/public" # Adjust based on your ingress setup
+      admin:
+        # Set the admin base URL for Kratos. This should be accessible internally or from your admin tools.
+        base_url: "http://kratos.admin.vizor.svc.cluster.local:4434" # Internal cluster URL
+    selfservice:
+      default_browser_return_url: "http://localhost:8081/dashboard" # Your frontend dashboard
+      allowed_return_urls:
+        - "http://localhost:8081/*"
+        - "http://your-frontend-domain.com/*"
+      flows:
+        login:
+          ui_url: "http://localhost:8081/login" # Your custom login UI
+        registration:
+          ui_url: "http://localhost:8081/registration" # Your custom registration UI
+        settings:
+          ui_url: "http://localhost:8081/settings" # Your custom settings UI
+        recovery:
+          ui_url: "http://localhost:8081/recovery" # Your custom recovery UI
+        verification:
+          ui_url: "http://localhost:8081/verification" # Your custom verification UI
+    identity:
+      schemas:
+        - id: default
+          url: file:///etc/config/identity.schema.json # Default schema
+        - id: enterprise_user # Custom schema for enterprise roles
+          url: file:///etc/config/enterprise_user.schema.json
+  secret:
+    cookie:
+      - "a-very-long-and-secure-random-string-for-cookies"
+    default:
+      - "another-very-long-and-secure-random-string-for-secrets"
+  automigration:
+    enabled: true
+    type: job
+  development: true # REMEMBER TO CHANGE TO 'false' FOR PRODUCTION!
+  ingress:
+    public:
+      enabled: true
+      hosts:
+        - host: kratos.public.local
+          paths: ["/"]
+    admin:
+      enabled: true
+      hosts:
+        - host: kratos.admin.local
+          paths: ["/"]

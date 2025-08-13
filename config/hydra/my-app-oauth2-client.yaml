@@ -1,0 +1,23 @@
+apiVersion: hydra.ory.sh/v1alpha1
+kind: OAuth2Client
+metadata:
+  name: my-frontend-app-client
+  namespace: vizor
+spec:
+  secretName: my-frontend-app-client-secret
+  grantTypes:
+    - authorization_code
+    - refresh_token
+  responseTypes:
+    - code
+    - id_token
+  scopeArray:
+    - openid
+    - offline_access
+    - profile
+    - email
+  redirectUris:
+    - "http://localhost:8081/callback"
+    - "https://your-frontend-domain.com/callback"
+  skipConsent: true
+  clientName: "My Vizor Frontend"

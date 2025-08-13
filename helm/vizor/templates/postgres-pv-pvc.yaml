@@ -1,0 +1,27 @@
+# postgres-local-pv.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgresql-local-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-path
+  hostPath:
+    path: /mnt/data/postgresql # Ensure this path exists on your host machine
+---
+# postgres-local-pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgresql-local-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: local-path
