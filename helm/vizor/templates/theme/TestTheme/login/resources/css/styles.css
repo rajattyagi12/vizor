@@ -1,0 +1,160 @@
+:root {
+  --keycloak-logo-url: url('../img/Logo__Black.svg');
+  --keycloak-logo-height: 5rem;
+  --keycloak-logo-width: 7rem;
+  --keycloak-card-top-color: var(--pf-v5-global--palette--blue-400);
+}
+
+/* Full page split layout */
+  .pf-v5-c-login{
+    align-items: normal !important;
+  }
+.login-pf body, .pf-v5-c-login__container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  margin: 0;
+  background-color: #ffffff;
+  color: #000 !important;
+}
+
+/* Left side: login form container */
+.pf-v5-c-login__container {
+  padding: 5vw;
+  background-color: #ffffff;
+  height: 60%;
+  width: 60%;
+  transform: translate(0%, 14%);
+}
+
+.main__login__form{
+  align-self: start;
+  background-color: #ffffff;
+  box-shadow:0 0px 0px rgb(248, 248, 248);
+  grid-area: main;
+  margin-block-end: var(--pf-v5-c-login__main--MarginBottom);
+  width: 100dvh;
+}
+
+.pf-v5-c-login__header{
+    margin: 0;
+}
+
+/* Right side: image */
+body::after {
+  content: "";
+  flex: 1;
+  background: url('../img/login__banner.svg') no-repeat center center;
+  background-size: cover;
+  max-width: 50%;
+  max-height: 100%;
+}
+
+/* Logo styling */
+div.kc-logo-text {
+  background-image: var(--keycloak-logo-url);
+  height: var(--keycloak-logo-height);
+  width: var(--keycloak-logo-width);
+  background-repeat: no-repeat;
+  background-size: contain;
+  margin: 0 0rem 1rem 3rem;
+}
+
+div.kc-logo-text span {
+  display: none;
+}
+
+/* Header Text */
+#kc-header-wrapper {
+  font-size: 22px;
+  font-weight: 600;
+  color: #000;
+  text-transform: none;
+  text-align: left;
+  margin-bottom: 0;
+  margin-left: 3rem;
+}
+
+/* Input fields */
+input {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+  margin-bottom: 0rem;
+  width: 100%;
+  background-color: #ffffff;
+  color: #000; /* Black text */
+  border-color: #000;
+  border-block-end: none;
+}
+
+.pf-v5-c-form-control{
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+  margin-bottom: 0rem;
+  width: 100%;
+  background-color: #ffffff;
+  color: transparent;
+  border-block-end: none;
+}
+
+input:focus {
+  border-color: #007bff;
+  outline: none;
+  color: #000; /* Black text */
+}
+
+/* Login button */
+#kc-login {
+  background-color: #007bff;
+  border: none;
+  color: white;
+  padding: 12px;
+  width: 100%;
+  font-size: 16px;
+  border-radius: 4px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+/* Forgot password link */
+a {
+  font-size: 0.9rem;
+  color: #007bff;
+  float: right;
+  margin-top: 0.5rem;
+  text-decoration: none;
+}
+
+/* Tooltip and others (unchanged) */
+.kc-login-tooltip { position: relative; display: inline-block; }
+.kc-login-tooltip .kc-tooltip-text {
+  top:-3px;
+  left:160%;
+  background-color: black;
+  visibility: hidden;
+  color: #fff;
+  min-width:130px;
+  text-align: center;
+  border-radius: 2px;
+  box-shadow:0 1px 8px rgba(0,0,0,0.6);
+  padding: 5px;
+  position: absolute;
+  opacity:0;
+  transition:opacity 0.5s;
+}
+.kc-login-tooltip:hover .kc-tooltip-text {
+  visibility: visible;
+  opacity:0.7;
+}
+.kc-login-tooltip .kc-tooltip-text::after {
+  content: " ";
+  position: absolute;
+  top: 15px;
+  right: 100%;
+  margin-top: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent black transparent transparent;
+}
