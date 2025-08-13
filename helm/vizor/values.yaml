@@ -99,7 +99,7 @@ sqlServer:
     port: 1433
 
 postgresql:
-  enabled: true
+  enabled: false
   image: "postgres"
   version: "16"
   releaseName: postgres

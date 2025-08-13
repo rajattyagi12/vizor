@@ -34,7 +34,7 @@ helm upgrade --install dapr dapr/dapr --namespace dapr-system --create-namespace
 kubectl get pod --namespace dapr-system
 ```
 
-Full instructions here:  
+Full instructions here:
 📃 https://docs.dapr.io/operations/hosting/kubernetes/kubernetes-overview/
 
 Optional - If you wish to view or check the Dapr dashboard
@@ -120,8 +120,12 @@ echo -e "Access Dapr Store here: http://$(kubectl get svc -l "purpose=vizor-api-
 
 
 
-# Port forwarding sqlserver service locally
+## 🚀 Port forwarding sqlserver service locally
+```bash
 nohup kubectl port-forward svc/sql-server-service 1433:1433 -n vizor &
+```
 
-# Port forwarding for ingress controller service
-kubectl port-forward svc/api-gateway-ingress-nginx-controller -n vizor 8080:80
+## 🚀 Port forwarding for ingress controller service
+```bash
+nohup kubectl port-forward svc/api-gateway-ingress-nginx-controller -n vizor 8080:80 &
+```

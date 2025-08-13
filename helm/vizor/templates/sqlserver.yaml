@@ -26,6 +26,13 @@ spec:
               value: "Y"
             - name: SA_PASSWORD
               value: {{ .Values.sqlServer.dbPassword }}
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1"
+            limits:
+              memory: "4Gi"
+              cpu: "2"
 ---
 apiVersion: v1
 kind: Service
