@@ -33,6 +33,8 @@ spec:
               value: "P@55w0rd"
             - name: KC_DB_URL
               value: "jdbc:sqlserver://sql-server-service:1433;databaseName=keycloak;encrypt=true;trustServerCertificate=true"
+            - name: KC_HTTP_RELATIVE_PATH
+              value: "/auth"
           resources:
             requests:
               memory: "2Gi"
