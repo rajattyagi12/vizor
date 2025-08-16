@@ -1,0 +1,19 @@
+{{- if .Values.sftpgo.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "vizor.fullname" . }}-sftpgo
+spec:
+  selector:
+    app: sftpgo
+  ports:
+    - protocol: TCP
+      name: sftp
+      port: {{ .Values.sftpgo.service.port | default 2022 }}
+      targetPort: 2022
+    - protocol: TCP
+      name: http
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
+{{- end }}

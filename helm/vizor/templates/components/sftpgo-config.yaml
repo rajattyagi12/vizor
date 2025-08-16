@@ -1,0 +1,9 @@
+{{- if .Values.sftpgo.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "vizor.fullname" . }}-sftpgo-config
+data:
+  sftpgo.yaml: |
+{{ toYaml .Values.sftpgo.config | indent 4 }}
+{{- end }}

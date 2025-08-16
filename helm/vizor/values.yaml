@@ -122,10 +122,7 @@ postgresql:
 # -- Persistent Volume and Claim configuration for SFTPGo and backups
 persistence:
   enabled: false # Enable persistence for SFTPGo and backups
-  # Removed: sftpPvName, sftpStoragePath, sftpgoDbPvName, sftpgoDbStoragePath, backupPvName, backupStoragePath
-  sftpPvcName: sftp-pvc # This PVC will be for /srv (SFTP user homes)
-  sftpgoDbPvcName: sftpgo-db-pvc # This PVC will be for /data (SFTPGo database)
-  backupPvcName: backup-pvc # This PVC will be for backups
+  size: 5Gi # Size of the persistent volume
   storageClass: local-path # Use the StorageClass provided by the subchart
 
 # -- Backup CronJob Configuration
@@ -150,3 +147,60 @@ local-path-provisioner: # This key must match the `name` in Chart.yaml dependenc
   # nodePathMap:
   # - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
   #   paths: [/opt/my-sftpgo-data]
+
+# -- SFTPGo Configuration
+sftpgo:
+  enabled: true
+  image:
+    repository: drakkan/sftpgo
+    tag: latest
+    pullPolicy: IfNotPresent
+  config:
+    common:
+      proxy_protocol: 1
+    data_provider:
+      create_default_admin: false
+      description_file: /etc/sftpgo/description.json
+    users:
+      - username: vizor
+        password: password
+        status: 1
+        permissions:
+          - read
+          - write
+        home_dir: /srv/sftpgo/data/vizor
+    admins:
+      - username: admin
+        password: admin
+        status: 1
+        permissions:
+          - "*"
+    folders: []
+    version: 7
+  description:
+    admins:
+      - id: 1
+        username: admin
+        password: admin
+        status: 1
+        permissions:
+          - "*"
+    users:
+      - id: 2
+        username: vizor
+        password: password
+        status: 1
+        home_dir: /srv/sftpgo/data/vizor
+        permissions:
+          - read
+          - write
+    folders: []
+    version: 7
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: local-path
+  service:
+    port: 2022
+  ui:
+    enabled: true

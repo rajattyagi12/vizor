@@ -1,0 +1,18 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: sftpgo-binding
+spec:
+  type: bindings.sftp
+  version: v1
+  metadata:
+    - name: rootPath
+      value: "/srv/sftpgo/data/vizor" # User's home directory
+    - name: address
+      value: "vizor-sftpgo:2022" # Change as per your SFTPGo service location
+    - name: username
+      value: "vizor" # SFTPGo user
+    - name: password
+      value: "password" # SFTPGo user's password
+    - name: insecureIgnoreHostKey
+      value: "true" # For testing; set to false for production

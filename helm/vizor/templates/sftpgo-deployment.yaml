@@ -1,0 +1,52 @@
+{{- if .Values.sftpgo.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "vizor.fullname" . }}-sftpgo
+  labels:
+    app: sftpgo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sftpgo
+  template:
+    metadata:
+      labels:
+        app: sftpgo
+    spec:
+      containers:
+        - name: sftpgo
+          image: "{{ .Values.sftpgo.image.repository }}:{{ .Values.sftpgo.image.tag }}"
+          imagePullPolicy: {{ .Values.sftpgo.image.pullPolicy }}
+          ports:
+            - containerPort: 2022
+          env:
+            - name: SFTPGO_CONFIG_FILE
+              value: /etc/sftpgo/sftpgo.yaml
+            - name: SFTPGO_DATA_PROVIDER__DESCRIPTION_FILE
+              value: /etc/sftpgo/description.json
+            - name: SFTPGO_LOG_LEVEL
+              value: "info"
+            - name: SFTPGO_DATA_PROVIDER__CREATE_DEFAULT_ADMIN
+              value: "false"
+          volumeMounts:
+            - name: sftpgo-config
+              mountPath: /etc/sftpgo/sftpgo.yaml
+              subPath: sftpgo.yaml
+            - name: sftpgo-description
+              mountPath: /etc/sftpgo/description.json
+              subPath: description.json
+            - name: sftpgo-data
+              mountPath: /srv/sftpgo
+      volumes:
+        - name: sftpgo-config
+          configMap:
+            name: {{ include "vizor.fullname" . }}-sftpgo-config
+        - name: sftpgo-description
+          configMap:
+            name: {{ include "vizor.fullname" . }}-sftpgo-description
+        - name: sftpgo-data
+          persistentVolumeClaim:
+            claimName: {{ include "vizor.fullname" . }}-sftpgo-pvc
+{{- end }}
