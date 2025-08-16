@@ -72,29 +72,12 @@ Ingress NGINX
 helm install api-gateway ingress-nginx/ingress-nginx --values ./config/ingress-values.yaml --namespace $namespace
 ```
 
-## Deploy Postgresql for indentity provider
-
-```bash
-helm install postgres bitnami/postgresql \
-  --namespace vizor \
-  --set auth.username=vizor \
-  --set auth.password=P@55w0rd \
-  --set auth.database=orydb
-```
-
 ## 🚀 Deploy Vizor Apps
 
 Now deploy the Vizor application and all services using Helm
 
 ```bash
 helm install vizor ./helm/vizor --namespace $namespace
-```
-
-Now deploy the Vizor-Auth applications and all services using Helm
-
-```bash
-helm install kratos ory/kratos --values ./config/kratos/values.yaml --namespace $namespace
-helm install hydra ory/hydra --values ./config/hydra/values.yaml --namespace $namespace
 ```
 
 Validate & check status
@@ -115,10 +98,6 @@ To get the URL of the deployed store run the following command:
 ```bash
 echo -e "Access Dapr Store here: http://$(kubectl get svc -l "purpose=vizor-api-gateway" -o jsonpath="{.items[0].status.loadBalancer.ingress[0].ip}")/"
 ```
-
-
-
-
 
 ## 🚀 Port forwarding sqlserver service locally
 ```bash
