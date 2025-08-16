@@ -2,36 +2,38 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "vizor.fullname" . }}-sftpgo-description
+  name: vizor-sftpgo-description
+  namespace: vizor
 data:
   description.json: |
     {
-      "admins": [
-        {{- range $index, $admin := .Values.sftpgo.description.admins }}
-        {{- if $index }},{{ end }}
-        {
-          "id": {{ $admin.id }},
-          "username": "{{ $admin.username }}",
-          "password": "{{ $admin.password }}",
-          "status": {{ $admin.status }},
-          "permissions": ["*"]
-        }
-        {{- end }}
-      ],
       "users": [
-        {{- range $index, $user := .Values.sftpgo.description.users }}
-        {{- if $index }},{{ end }}
         {
-          "id": {{ $user.id }},
-          "username": "{{ $user.username }}",
-          "password": "{{ $user.password }}",
-          "status": {{ $user.status }},
-          "home_dir": "{{ $user.home_dir }}",
-          "permissions": ["read", "write"]
+          "username": "admin",
+          "password": "Admin@123",
+          "email": "admin@example.com",
+          "status": 1,
+          "is_admin": true,
+          "home_dir": "/srv/sftpgo/data/admin_home",
+          "permissions": {
+            "/": ["list", "download", "upload", "delete", "rename", "chmod"]
+          }
+        },
+        {
+          "username": "vizor",
+          "password": "Vizor@123",
+          "home_dir": "/srv/sftpgo/data/vizor",
+          "uid": 1000,
+          "gid": 1000,
+          "max_sessions": 10,
+          "quota_size": 0,
+          "quota_files": 0,
+          "status": 1,
+          "permissions": {
+            "/": ["list", "download", "upload", "delete", "rename", "chmod"]
+          }
         }
-        {{- end }}
-      ],
-      "folders": [],
-      "version": 7
+      ]
     }
+
 {{- end }}

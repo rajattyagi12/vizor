@@ -4,6 +4,6 @@ kind: ConfigMap
 metadata:
   name: {{ include "vizor.fullname" . }}-sftpgo-config
 data:
-  sftpgo.yaml: |
-{{ toYaml .Values.sftpgo.config | indent 4 }}
+  config.yml: |
+{{ .Values.sftpgo.config | indent 4 }}
 {{- end }}
