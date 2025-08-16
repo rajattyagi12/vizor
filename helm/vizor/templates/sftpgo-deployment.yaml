@@ -15,6 +15,13 @@ spec:
       labels:
         app: sftpgo
     spec:
+      initContainers:
+        - name: set-permissions
+          image: busybox:latest
+          command: ["sh", "-c", "chown -R 1000:1000 /srv/sftpgo && chmod -R 755 /srv/sftpgo"]
+          volumeMounts:
+            - name: sftpgo-data
+              mountPath: /srv/sftpgo
       containers:
         - name: sftpgo
           image: "{{ .Values.sftpgo.image.repository }}:{{ .Values.sftpgo.image.tag }}"
@@ -25,7 +32,7 @@ spec:
             - name: SFTPGO_CONFIG_FILE
               value: /etc/sftpgo/sftpgo.yaml
             - name: SFTPGO_DATA_PROVIDER__DESCRIPTION_FILE
-              value: /etc/sftpgo/description.json
+              value: /etc/sftpgo/description/description.json
             - name: SFTPGO_LOG_LEVEL
               value: "info"
             - name: SFTPGO_DATA_PROVIDER__CREATE_DEFAULT_ADMIN
@@ -35,8 +42,7 @@ spec:
               mountPath: /etc/sftpgo/sftpgo.yaml
               subPath: sftpgo.yaml
             - name: sftpgo-description
-              mountPath: /etc/sftpgo/description.json
-              subPath: description.json
+              mountPath: /etc/sftpgo/description
             - name: sftpgo-data
               mountPath: /srv/sftpgo
       volumes:

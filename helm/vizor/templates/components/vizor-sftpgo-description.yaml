@@ -7,23 +7,29 @@ data:
   description.json: |
     {
       "admins": [
+        {{- range $index, $admin := .Values.sftpgo.description.admins }}
+        {{- if $index }},{{ end }}
         {
-          "id": 1,
-          "username": "admin",
-          "password": "admin",
-          "status": 1,
+          "id": {{ $admin.id }},
+          "username": "{{ $admin.username }}",
+          "password": "{{ $admin.password }}",
+          "status": {{ $admin.status }},
           "permissions": ["*"]
         }
+        {{- end }}
       ],
       "users": [
+        {{- range $index, $user := .Values.sftpgo.description.users }}
+        {{- if $index }},{{ end }}
         {
-          "id": 2,
-          "username": "vizor",
-          "password": "password",
-          "status": 1,
-          "home_dir": "/srv/sftpgo/data/vizor",
+          "id": {{ $user.id }},
+          "username": "{{ $user.username }}",
+          "password": "{{ $user.password }}",
+          "status": {{ $user.status }},
+          "home_dir": "{{ $user.home_dir }}",
           "permissions": ["read", "write"]
         }
+        {{- end }}
       ],
       "folders": [],
       "version": 7

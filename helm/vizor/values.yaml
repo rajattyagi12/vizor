@@ -144,9 +144,10 @@ local-path-provisioner: # This key must match the `name` in Chart.yaml dependenc
     volumeBindingMode: WaitForFirstConsumer
   # You can customize other local-path-provisioner values here if needed
   # For example, to change the base path on the node (advanced):
-  # nodePathMap:
-  # - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
-  #   paths: [/opt/my-sftpgo-data]
+  nodePathMap:
+    - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
+      paths:
+        - /opt/local-path-provisioner
 
 # -- SFTPGo Configuration
 sftpgo:
@@ -160,7 +161,9 @@ sftpgo:
       proxy_protocol: 1
     data_provider:
       create_default_admin: false
-      description_file: /etc/sftpgo/description.json
+      description_file: /etc/sftpgo/description/description.json
+      driver: sqlite
+      name: /srv/sftpgo/sftpgo.db
     users:
       - username: vizor
         password: password
