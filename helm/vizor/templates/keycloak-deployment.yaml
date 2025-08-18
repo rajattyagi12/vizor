@@ -1,8 +1,64 @@
+# Keycloak Realm Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vizor-realm
+  namespace: vizor
+data:
+  vizor-realm-realm.json: |
+    {
+      "realm": "vizor-realm",
+      "enabled": true,
+      "ssoSessionMaxLifespan": 36000,
+      "ssoSessionIdleTimeout": 1800,
+      "accessTokenLifespan": 300,
+      "editUsernameAllowed": true,
+      "registrationEmailAsUsername": true,
+      "loginWithEmailAllowed": true,
+      "verifyEmail": true,
+      "loginTheme": "VizorTheme",
+      "resetPasswordAllowed": true,
+      "passwordPolicy": "length(8) and digits(1) and upperCase(1) and lowerCase(1) and specialChars(1)",
+      "bruteForceProtected": true,
+      "permanentLockout": true,
+      "failureFactor": 3,
+      "rememberMe": true,
+
+      "roles": {
+        "realm": [
+          { "name": "Superuser", "description": "Superuser role" },
+          { "name": "Director", "description": "Director role" },
+          { "name": "Associate", "description": "Associate role" },
+          { "name": "Events Admin", "description": "Events Admin role" },
+          { "name": "Viewer", "description": "Viewer role" },
+          { "name": "Client", "description": "Client role" },
+          { "name": "Configuration Manager", "description": "Configuration Manager role" }
+        ]
+      },
+
+      "clients": [
+        {
+          "clientId": "vizor",
+          "name": "Vizor Client",
+          "rootUrl": "http://localhost:3000",
+          "publicClient": true,
+          "directAccessGrantsEnabled": true,
+          "redirectUris": [
+            "http://localhost:3000/*"
+          ],
+          "enabled": true
+        }
+      ]
+    }
+
+
+---
 # Keycloak Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: keycloak
+  namespace: vizor
   labels:
     app: keycloak
 spec:
@@ -19,7 +75,7 @@ spec:
         - name: keycloak
           image: quay.io/keycloak/keycloak:latest
           imagePullPolicy: IfNotPresent
-          args: ["start-dev"]
+          args: ["start-dev", "--import-realm"]
           env:
             - name: KEYCLOAK_ADMIN
               value: "admin"
@@ -46,17 +102,24 @@ spec:
             - name: theme-volume
               mountPath: /opt/keycloak/themes/VizorTheme
               readOnly: true
+            - name: realm-config
+              mountPath: /opt/keycloak/data/import
+              readOnly: true
       volumes:
         - name: theme-volume
           hostPath:
             path: /themes/VizorTheme
             type: Directory
+        - name: realm-config
+          configMap:
+            name: vizor-realm
 ---
 # Keycloak Service
 apiVersion: v1
 kind: Service
 metadata:
   name: keycloak
+  namespace: vizor
   labels:
     app: keycloak
 spec:
@@ -64,3 +127,197 @@ spec:
     - port: 8080
   selector:
     app: keycloak
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: keycloak-realm-init
+  namespace: vizor
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: realm-init
+          image: alpine:3.20
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              apk add --no-cache curl jq
+
+              REALM_NAME="vizor-realm"
+              CLIENT_ID="vizor"
+
+              CLIENT_SCOPE="User-Client-ID"
+
+              echo "Waiting for Keycloak to be ready..."
+              until curl -s http://keycloak:8080/auth/realms/master > /dev/null; do
+                sleep 5
+              done
+
+              echo "Keycloak is ready. Getting admin token..."
+              TOKEN=$(curl -s \
+                -d "client_id=admin-cli" \
+                -d "username=admin" \
+                -d "password=password" \
+                -d "grant_type=password" \
+                http://keycloak:8080/auth/realms/master/protocol/openid-connect/token | jq -r '.access_token')
+
+              if [ -z "$TOKEN" ]; then
+                echo "Failed to get token"
+                exit 1
+              fi
+
+              echo "Configuring user profile for custom attribute: clientID"
+              PROFILE=$(curl -s \
+                -H "Authorization: Bearer $TOKEN" \
+                -H "Content-Type: application/json" \
+                http://keycloak:8080/auth/admin/realms/$REALM_NAME/users/profile)
+
+              UPDATED_PROFILE=$(echo "$PROFILE" | jq '.attributes += [{
+                "name": "clientID",
+                "displayName": "ClientID",
+                "required": { "roles": ["user"] },
+                "permissions": { "view": ["admin"], "edit": ["admin"] },
+                "multivalued": false,
+                "validations": {
+                  "integer": { }
+                }
+              }]')
+
+              curl -s -X PUT \
+                -H "Authorization: Bearer $TOKEN" \
+                -H "Content-Type: application/json" \
+                -d "$UPDATED_PROFILE" \
+                http://keycloak:8080/auth/admin/realms/$REALM_NAME/users/profile || echo "User profile may already be set"
+
+              echo "Creating client scope: $CLIENT_SCOPE"
+              curl -s -X POST \
+                -H "Authorization: Bearer $TOKEN" \
+                -H "Content-Type: application/json" \
+                -d "{
+                  \"name\": \"$CLIENT_SCOPE\",
+                  \"protocol\": \"openid-connect\",
+                  \"attributes\": {
+                    \"include.in.token.scope\": \"true\",
+                    \"display.on.consent.screen\": \"false\",
+                    \"consent.screen.text\": \"\",
+                    \"gui.order\": \"0\"
+                  }
+                }" \
+                http://keycloak:8080/auth/admin/realms/$REALM_NAME/client-scopes || echo "Client scope may already exist"
+
+              echo "Adding mapper to client scope"
+              CLIENT_SCOPE_ID=$(curl -s \
+                -H "Authorization: Bearer $TOKEN" \
+                http://keycloak:8080/auth/admin/realms/$REALM_NAME/client-scopes | jq -r ".[] | select(.name==\"$CLIENT_SCOPE\") | .id")
+
+              curl -s -X POST \
+                -H "Authorization: Bearer $TOKEN" \
+                -H "Content-Type: application/json" \
+                -d "{
+                  \"name\": \"ClientID\",
+                  \"protocol\": \"openid-connect\",
+                  \"protocolMapper\": \"oidc-usermodel-attribute-mapper\",
+                  \"consentRequired\": false,
+                  \"config\": {
+                    \"user.attribute\": \"clientID\",
+                    \"claim.name\": \"ClientID\",
+                    \"id.token.claim\": \"true\",
+                    \"access.token.claim\": \"true\",
+                    \"userinfo.token.claim\": \"true\",
+                    \"access.tokenResponse.claim\": \"true\",
+                    \"lightweight.claim\": \"true\",
+                    \"multivalued\": \"false\"
+                  }
+                }" \
+                http://keycloak:8080/auth/admin/realms/$REALM_NAME/client-scopes/$CLIENT_SCOPE_ID/protocol-mappers/models || echo "Mapper may already exist"
+
+              echo "Assigning client scope to client as DEFAULT"
+              CLIENT_UUID=$(curl -s \
+                -H "Authorization: Bearer $TOKEN" \
+                http://keycloak:8080/auth/admin/realms/$REALM_NAME/clients | jq -r ".[] | select(.clientId==\"$CLIENT_ID\") | .id")
+
+              curl -s -X PUT \
+                -H "Authorization: Bearer $TOKEN" \
+                -H "Content-Type: application/json" \
+                -d "{
+                  \"id\": \"$CLIENT_SCOPE_ID\",
+                  \"name\": \"$CLIENT_SCOPE\",
+                  \"optional\": false
+                }" \
+                http://keycloak:8080/auth/admin/realms/$REALM_NAME/clients/$CLIENT_UUID/default-client-scopes/$CLIENT_SCOPE_ID || echo "Scope may already be assigned"
+
+              echo "Configuring SMTP settings for realm..."
+              curl -s -X PUT \
+                -H "Authorization: Bearer $TOKEN" \
+                -H "Content-Type: application/json" \
+                -d '{
+                  "smtpServer": {
+                    "host": "smtp.gmail.com",
+                    "port": "587",
+                    "from": "sudipta.das.office.desktop@gmail.com",
+                    "fromDisplayName": "Keycloak",
+                    "replyTo": "sudipta.das.office.desktop@gmail.com",
+                    "replyToDisplayName": "Keycloak",
+                    "starttls": "true",
+                    "auth": "true",
+                    "user": "sudipta.das.office.desktop@gmail.com",
+                    "password": "ryzf zlcu rxnl dbyx"
+                  }
+                }' \
+                http://keycloak:8080/auth/admin/realms/$REALM_NAME || echo "SMTP may already be set"
+
+              echo "Creating user admin.user@techsectorit.com ..."
+              curl -s -X POST \
+                -H "Authorization: Bearer $TOKEN" \
+                -H "Content-Type: application/json" \
+                -d "{
+                  \"username\": \"admin.user@techsectorit.com\",
+                  \"email\": \"admin.user@techsectorit.com\",
+                  \"firstName\": \"Admin\",
+                  \"lastName\": \"User\",
+                  \"enabled\": true,
+                  \"emailVerified\": true,
+                  \"attributes\": {
+                    \"clientID\": [\"1\"]
+                  }
+                }" \
+                http://keycloak:8080/auth/admin/realms/$REALM_NAME/users || echo "User may already exist"
+
+              ## Get the created user's ID
+              USER_ID=$(curl -s \
+                -H "Authorization: Bearer $TOKEN" \
+                http://keycloak:8080/auth/admin/realms/$REALM_NAME/users?username=admin.user@techsectorit.com | jq -r '.[0].id')
+
+              ##SET ADMIN-USER PASSWORD
+              if [ -n "$USER_ID" ]; then
+                echo "Setting password for user..."
+                curl -s -X PUT \
+                  -H "Authorization: Bearer $TOKEN" \
+                  -H "Content-Type: application/json" \
+                  -d "{
+                    \"type\": \"password\",
+                    \"value\": \"Vizor@123\",
+                    \"temporary\": false
+                  }" \
+                  http://keycloak:8080/auth/admin/realms/$REALM_NAME/users/$USER_ID/reset-password || echo "Failed to set password"
+              fi
+
+              ##REMOVE DEFAULT ROLES ----------
+              echo "Removing default roles from admin user..."
+              DEFAULT_ROLE=$(curl -s \
+                -H "Authorization: Bearer $TOKEN" \
+                http://keycloak:8080/auth/admin/realms/$REALM_NAME/roles/default-roles-$REALM_NAME | jq -c '{id: .id, name: .name}')
+
+              if [ -n "$USER_ID" ] && [ -n "$DEFAULT_ROLE" ]; then
+                curl -s -X DELETE \
+                  -H "Authorization: Bearer $TOKEN" \
+                  -H "Content-Type: application/json" \
+                  -d "[$DEFAULT_ROLE]" \
+                  http://keycloak:8080/auth/admin/realms/$REALM_NAME/users/$USER_ID/role-mappings/realm || echo "Failed to remove default roles"
+              fi
+
+              echo "Realm, client, roles, user attribute, client scope, and mapper setup complete."
