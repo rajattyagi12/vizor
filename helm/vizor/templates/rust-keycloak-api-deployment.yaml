@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vizor-keycloak-api-deployment
+  namespace: vizor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vizor-keycloak
+  template:
+    metadata:
+      labels:
+        app: vizor-keycloak
+    spec:
+      containers:
+        - name: vizor-keycloak
+          image: {{ .Values.image.registry }}/{{ .Values.image.repo }}/keycloak-rust-service:{{ .Values.image.tag }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4567
+          env:
+            - name: CLIENT_ID
+              value: vizor
+            - name: REDIRECT_URI
+              value: http://localhost:3000/ 
+          command: ["./app"]
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vizor-keycloak-api-service
+  namespace: vizor
+spec:
+  selector:
+    app: vizor-keycloak
+  ports:
+    - port: 4567

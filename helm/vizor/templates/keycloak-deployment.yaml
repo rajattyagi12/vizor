@@ -73,7 +73,7 @@ spec:
     spec:
       containers:
         - name: keycloak
-          image: quay.io/keycloak/keycloak:latest
+          image: localhost/vizor-themed-keycloak:latest
           imagePullPolicy: IfNotPresent
           args: ["start-dev", "--import-realm"]
           env:
@@ -99,17 +99,10 @@ spec:
               memory: "3Gi"
               cpu: "6"
           volumeMounts:
-            - name: theme-volume
-              mountPath: /opt/keycloak/themes/VizorTheme
-              readOnly: true
             - name: realm-config
               mountPath: /opt/keycloak/data/import
               readOnly: true
       volumes:
-        - name: theme-volume
-          hostPath:
-            path: /themes/VizorTheme
-            type: Directory
         - name: realm-config
           configMap:
             name: vizor-realm
@@ -149,7 +142,7 @@ spec:
 
               REALM_NAME="vizor-realm"
               CLIENT_ID="vizor"
-
+              ROLE_NAME="Superuser"
               CLIENT_SCOPE="User-Client-ID"
 
               echo "Waiting for Keycloak to be ready..."
@@ -275,8 +268,8 @@ spec:
                 -H "Authorization: Bearer $TOKEN" \
                 -H "Content-Type: application/json" \
                 -d "{
-                  \"username\": \"admin.user@techsectorit.com\",
-                  \"email\": \"admin.user@techsectorit.com\",
+                  \"username\": \"ljacoby@roundtables.us\",
+                  \"email\": \"ljacoby@roundtables.us\",
                   \"firstName\": \"Admin\",
                   \"lastName\": \"User\",
                   \"enabled\": true,
@@ -287,12 +280,12 @@ spec:
                 }" \
                 http://keycloak:8080/auth/admin/realms/$REALM_NAME/users || echo "User may already exist"
 
-              ## Get the created user's ID
+              #Get the created user's ID
               USER_ID=$(curl -s \
                 -H "Authorization: Bearer $TOKEN" \
                 http://keycloak:8080/auth/admin/realms/$REALM_NAME/users?username=admin.user@techsectorit.com | jq -r '.[0].id')
 
-              ##SET ADMIN-USER PASSWORD
+              #SET ADMIN-USER PASSWORD
               if [ -n "$USER_ID" ]; then
                 echo "Setting password for user..."
                 curl -s -X PUT \
@@ -306,7 +299,7 @@ spec:
                   http://keycloak:8080/auth/admin/realms/$REALM_NAME/users/$USER_ID/reset-password || echo "Failed to set password"
               fi
 
-              ##REMOVE DEFAULT ROLES ----------
+              #REMOVE DEFAULT ROLES
               echo "Removing default roles from admin user..."
               DEFAULT_ROLE=$(curl -s \
                 -H "Authorization: Bearer $TOKEN" \
@@ -318,6 +311,24 @@ spec:
                   -H "Content-Type: application/json" \
                   -d "[$DEFAULT_ROLE]" \
                   http://keycloak:8080/auth/admin/realms/$REALM_NAME/users/$USER_ID/role-mappings/realm || echo "Failed to remove default roles"
+              fi
+
+              #Fetch role object for the role to assign
+              ROLE_OBJ=$(curl -s \
+                -H "Authorization: Bearer $TOKEN" \
+                http://keycloak:8080/auth/admin/realms/$REALM_NAME/roles/$ROLE_NAME \
+                | jq -c '{id: .id, name: .name}')
+
+              #Assign only that role
+              if [ -n "$ROLE_OBJ" ]; then
+                echo "Assigning role $ROLE_NAME to admin user..."
+                curl -s -X POST \
+                  -H "Authorization: Bearer $TOKEN" \
+                  -H "Content-Type: application/json" \
+                  -d "[$ROLE_OBJ]" \
+                  http://keycloak:8080/auth/admin/realms/$REALM_NAME/users/$USER_ID/role-mappings/realm
+              else
+                echo "Role $ROLE_NAME not found in realm!"
               fi
 
               echo "Realm, client, roles, user attribute, client scope, and mapper setup complete."
