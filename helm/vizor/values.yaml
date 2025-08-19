@@ -162,7 +162,7 @@ sftpgo:
     storageClass: "local-path"
     accessModes:
       - ReadWriteOnce
-    size: 1Gi    
+    size: 1Gi
 
   service:
     type: ClusterIP
@@ -185,10 +185,10 @@ sftpgo:
       value: /etc/sftpgo/description.json
     - name: SFTPGO_LOADDATA_FROM
       value: /etc/sftpgo/description.json
-    - name: SFTPGO_CONFIG_FILE         # 👈 NEW
+    - name: SFTPGO_CONFIG_FILE # 👈 NEW
       value: /etc/sftpgo/config.yml
     - name: SFTPGO_DEFAULT_ADMIN_ENABLED
-      value: "false"   # because we load from json instead
+      value: "false" # because we load from json instead
 
   # Write config.yml into a ConfigMap
   config: |
@@ -219,9 +219,9 @@ sftpgo:
       enabled: false
 
     create_default_admin: false
-  
+
   extraConfigmapMounts:
-    - name: vizor-sftpgo-description   # 👈 use the existing ConfigMap name
+    - name: vizor-sftpgo-description # 👈 use the existing ConfigMap name
       mountPath: /etc/sftpgo/description.json
       subPath: description.json
       readOnly: true

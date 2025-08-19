@@ -23,7 +23,6 @@ helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo add dapr https://dapr.github.io/helm-charts/
 helm repo add local-path-provisioner https://charts.containeroo.ch/
-helm repo add ory https://k8s.ory.sh/helm/charts
 helm repo update
 ```
 
@@ -85,12 +84,6 @@ Validate & check status
 ```bash
 helm list --namespace $namespace
 kubectl get pod -l app.kubernetes.io/instance=vizor-apps --namespace $namespace
-```
-
-## 🚀 Deploy SFTPGo
-
-```bash
-helm install vizor-sftp --wait oci://ghcr.io/sftpgo/helm-charts/sftpgo --values ./config/sftpgo-values.yaml --namespace $namespace
 ```
 
 To get the URL of the deployed store run the following command:
