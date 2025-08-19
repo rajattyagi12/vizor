@@ -273,3 +273,19 @@ sftpgo:
         items:
           - key: description.json
             path: description.json
+
+
+
+
+keycloakRealmConfiguration:
+  realmName: "vizor-realm"
+  clientId: "vizor"
+  roleName: "Superuser"
+  clientScope: "User-Client-ID"
+  adminEmail: "sudipta.das.office.desktop@gmail.com"
+  frontendUrl: "http://127.0.0.1:38537/auth"
+  smtp:
+    host: "mailhog"
+    port: "1025"
+    starttls: "false"
+    auth: "false"

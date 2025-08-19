@@ -128,6 +128,7 @@ metadata:
   name: keycloak-realm-init
   namespace: vizor
 spec:
+  ttlSecondsAfterFinished: 60
   template:
     spec:
       restartPolicy: Never
@@ -144,6 +145,9 @@ spec:
               CLIENT_ID="vizor"
               ROLE_NAME="Superuser"
               CLIENT_SCOPE="User-Client-ID"
+              ADMIN_EMAIL="sudipta.das.office.desktop@gmail.com"
+              #FRONTEND_URL="http://127.0.0.1:38537/auth"
+
 
               echo "Waiting for Keycloak to be ready..."
               until curl -s http://keycloak:8080/auth/realms/master > /dev/null; do
@@ -243,25 +247,64 @@ spec:
                 }" \
                 http://keycloak:8080/auth/admin/realms/$REALM_NAME/clients/$CLIENT_UUID/default-client-scopes/$CLIENT_SCOPE_ID || echo "Scope may already be assigned"
 
-              echo "Configuring SMTP settings for realm..."
+              # echo "Configuring SMTP settings for realm..."
+              # curl -s -X PUT \
+              #   -H "Authorization: Bearer $TOKEN" \
+              #   -H "Content-Type: application/json" \
+              #   -d "{
+              #     \"smtpServer\": {
+              #       \"host\": \"smtp.gmail.com\",
+              #       \"port\": \"587\",
+              #       \"from\": \"$ADMIN_EMAIL\",
+              #       \"fromDisplayName\": \"Keycloak\",
+              #       \"replyTo\": \"$ADMIN_EMAIL\",
+              #       \"replyToDisplayName\": \"Keycloak\",
+              #       \"starttls\": \"true\",
+              #       \"auth\": \"true\",
+              #       \"user\": \"$ADMIN_EMAIL\",
+              #       \"password\": \"ryzf zlcu rxnl dbyx\"
+              #     }
+              #   }" \
+              #   http://keycloak:8080/auth/admin/realms/$REALM_NAME || echo "SMTP may already be set"
+
+              echo "ONLY FOR DEV TESTING WITH MAILHOG Configuring SMTP settings for realm..."
               curl -s -X PUT \
                 -H "Authorization: Bearer $TOKEN" \
                 -H "Content-Type: application/json" \
-                -d '{
-                  "smtpServer": {
-                    "host": "smtp.gmail.com",
-                    "port": "587",
-                    "from": "sudipta.das.office.desktop@gmail.com",
-                    "fromDisplayName": "Keycloak",
-                    "replyTo": "sudipta.das.office.desktop@gmail.com",
-                    "replyToDisplayName": "Keycloak",
-                    "starttls": "true",
-                    "auth": "true",
-                    "user": "sudipta.das.office.desktop@gmail.com",
-                    "password": "ryzf zlcu rxnl dbyx"
+                -d "{
+                  \"smtpServer\": {
+                    \"host\": \"$SMTP_HOST\",
+                    \"port\": \"$SMTP_PORT\",
+                    \"from\": \"$ADMIN_EMAIL\",
+                    \"fromDisplayName\": \"Keycloak\",
+                    \"replyTo\": \"$ADMIN_EMAIL\",
+                    \"replyToDisplayName\": \"Keycloak\",
+                    \"starttls\": \"$SMTP_STARTTLS\",
+                    \"auth\": \"$SMTP_AUTH\"
                   }
-                }' \
+                }" \
                 http://keycloak:8080/auth/admin/realms/$REALM_NAME || echo "SMTP may already be set"
+
+
+              #Update master realm "admin" user's email
+              echo "Updating master realm admin user's email..."
+              ADMIN_ID=$(curl -s \
+                -H "Authorization: Bearer $TOKEN" \
+                "http://keycloak:8080/auth/admin/realms/master/users?username=admin" \
+                | jq -r '.[0].id')
+
+              if [ -n "$ADMIN_ID" ]; then
+                curl -s -X PUT \
+                  -H "Authorization: Bearer $TOKEN" \
+                  -H "Content-Type: application/json" \
+                  -d "{
+                    \"email\": \"$ADMIN_EMAIL\",
+                    \"emailVerified\": true
+                  }" \
+                  http://keycloak:8080/auth/admin/realms/master/users/$ADMIN_ID || echo "Failed to update admin email"
+              else
+                echo "Admin user not found in master realm!"
+              fi
 
               echo "Creating user admin.user@techsectorit.com ..."
               curl -s -X POST \
@@ -299,6 +342,21 @@ spec:
                   http://keycloak:8080/auth/admin/realms/$REALM_NAME/users/$USER_ID/reset-password || echo "Failed to set password"
               fi
 
+              ## Update frontend URL for this realm
+              echo "Setting frontend URL for realm $REALM_NAME..."
+              curl -s -X PUT \
+                -H "Authorization: Bearer $TOKEN" \
+                -H "Content-Type: application/json" \
+                -d "{
+                  \"realm\": \"$REALM_NAME\",
+                  \"attributes\": {
+                    \"frontendUrl\": \"$FRONTEND_URL\"
+                  }
+                }" \
+                http://keycloak:8080/auth/admin/realms/$REALM_NAME || echo "Failed to set frontend URL"
+
+
+
               #REMOVE DEFAULT ROLES
               echo "Removing default roles from admin user..."
               DEFAULT_ROLE=$(curl -s \
@@ -332,3 +390,24 @@ spec:
               fi
 
               echo "Realm, client, roles, user attribute, client scope, and mapper setup complete."
+          env:
+            - name: REALM_NAME
+              value: {{ .Values.keycloakRealmConfiguration.realmName | quote }}
+            - name: CLIENT_ID
+              value: {{ .Values.keycloakRealmConfiguration.clientId | quote }}
+            - name: ROLE_NAME
+              value: {{ .Values.keycloakRealmConfiguration.roleName | quote }}
+            - name: CLIENT_SCOPE
+              value: {{ .Values.keycloakRealmConfiguration.clientScope | quote }}
+            - name: ADMIN_EMAIL
+              value: {{ .Values.keycloakRealmConfiguration.adminEmail | quote }}
+            - name: FRONTEND_URL
+              value: {{ .Values.keycloakRealmConfiguration.frontendUrl | quote }}
+            - name: SMTP_HOST
+              value: {{ .Values.keycloakRealmConfiguration.smtp.host | quote }}
+            - name: SMTP_PORT
+              value: {{ .Values.keycloakRealmConfiguration.smtp.port | quote }}
+            - name: SMTP_STARTTLS
+              value: {{ .Values.keycloakRealmConfiguration.smtp.starttls | quote }}
+            - name: SMTP_AUTH
+              value: {{ .Values.keycloakRealmConfiguration.smtp.auth | quote }}

@@ -23,7 +23,7 @@ spec:
             - name: CLIENT_ID
               value: vizor
             - name: REDIRECT_URI
-              value: http://localhost:3000/ 
+              value: http://localhost:3000/ #Chnage to Fronend URL
           command: ["./app"]
 
 ---
