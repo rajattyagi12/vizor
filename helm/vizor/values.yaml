@@ -305,7 +305,6 @@ keycloakRealmConfiguration:
     KC_DB: "mssql"
     KC_DB_USERNAME: "sa"
     KC_DB_PASSWORD: "P@55w0rd"
-    KC_DB_URL: "jdbc:sqlserver://sql-server-service:1433;databaseName=vizor_auth;encrypt=true;trustServerCertificate=true" #Update the database name here as well
     KC_HTTP_RELATIVE_PATH: "/auth"
   resources:
     requested_memory: "1280Mi"
