@@ -44,7 +44,7 @@ spec:
             - name: KC_DB_PASSWORD
               value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_DB_PASSWORD }}
             - name: KC_DB_URL
-              value: "jdbc:sqlserver://{{ .Values.sqlServer.service.name }}:{{ .Values.sqlServer.service.port }};databaseName={{ .Values.keycloakEnv.AUTH_DATABASE_NAME }};encrypt=true;trustServerCertificate=true"
+              value: "jdbc:sqlserver://{{ .Values.sqlServer.service.name }}:{{ .Values.sqlServer.service.port }};databaseName={{ .Values.keycloakRealmConfiguration.keycloakEnv.AUTH_DATABASE_NAME }};encrypt=true;trustServerCertificate=true"
             - name: KC_HTTP_RELATIVE_PATH
               value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_HTTP_RELATIVE_PATH }}
           resources:
