@@ -7,16 +7,16 @@ spec:
   version: v1
   metadata:
     - name: rootPath
-      value: "{{ .Values.daprComponents.sftp.rootPath }}" # The home directory for the 'vizor' user
+      value: "{{ .Values.daprComponents.sftp.rootPath }}"
     - name: address
-      value: "{{ .Values.daprComponents.sftp.address }}" # Your SFTPGo service address
+      value: "{{ .Values.daprComponents.sftp.address }}"
     - name: username
-      value: "{{ .Values.daprComponents.sftp.username }}" # SFTPGo user
+      value: "{{ .Values.daprComponents.sftp.username }}"
     - name: password
       secretKeyRef:
-        name: vizor-secrets # The name of the Kubernetes Secret
+        name: vizor-secrets
         key: sftpPassword
-    {{ - if .Values.daprComponents.sftp.insecureIgnoreHostKey }}
+{{- if .Values.daprComponents.sftp.insecureIgnoreHostKey }}
     - name: insecureIgnoreHostKey
-      value: "true" # Caution: Use only for testing. Set to "false" in production.
-    {{ - end }}
+      value: "true"
+{{- end }}
