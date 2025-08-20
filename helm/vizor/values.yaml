@@ -307,10 +307,10 @@ keycloakRealmConfiguration:
     KC_DB_PASSWORD: "P@55w0rd"
     KC_HTTP_RELATIVE_PATH: "/auth"
   resources:
-    requested_memory: "1280Mi"
-    requested_cpu: "2000m"
-    limit_memory: "3Gi"
-    limit_cpu: "6"
+    requested_memory: "512Mi"
+    requested_cpu: "350m"
+    limit_memory: "1Gi"
+    limit_cpu: "750m"
   #FirstUser
   adminUser:
     email: "ljacoby@roundtables.us"
