@@ -273,3 +273,99 @@ sftpgo:
         items:
           - key: description.json
             path: description.json
+
+
+
+
+keycloakRealmConfiguration:
+  realmName: "vizor"
+  clientId: "vizor-client"
+  roleName: "Superuser"
+  clientScope: "User-Client-ID"
+  #any smtp related email is the admin email
+  adminEmail: "sudipta.das.office.desktop@gmail.com"
+  frontendUrl: "http://127.0.0.1:8080/auth"
+  smtp:
+    host: "mailhog"
+    port: "1025"
+    starttls: "true"
+    auth: "true"
+    mailDisplayName: "Keycloak"
+    smtppassword: "set the password"
+  keycloakEnv:
+    AUTH_DATABASE_NAME: "vizor_auth"
+    KEYCLOAK_ADMIN: "admin"
+    KEYCLOAK_ADMIN_PASSWORD: "password"
+    KC_DB: "mssql"
+    KC_DB_USERNAME: "sa"
+    KC_DB_PASSWORD: "P@55w0rd"
+    KC_DB_URL: "jdbc:sqlserver://sql-server-service:1433;databaseName=vizor_auth;encrypt=true;trustServerCertificate=true" #Update the database name here as well
+    KC_HTTP_RELATIVE_PATH: "/auth"
+  resources:
+    requested_memory: "1280Mi"
+    requested_cpu: "2000m"
+    limit_memory: "3Gi"
+    limit_cpu: "6"
+  #FirstUser
+  adminUser:
+    email: "ljacoby@roundtables.us"
+    firstName: "Admin"
+    lastName: "User"
+    attributes_clientID: "1"
+    password: "Vizor@123"
+
+  realmJson: |
+    {
+      "realm": "vizor",
+      "enabled": true,
+      "ssoSessionMaxLifespan": 36000,
+      "ssoSessionIdleTimeout": 7200,
+      "accessTokenLifespan": 3600,
+      "editUsernameAllowed": true,
+      "registrationEmailAsUsername": true,
+      "loginWithEmailAllowed": true,
+      "verifyEmail": true,
+      "loginTheme": "VizorTheme",
+      "resetPasswordAllowed": true,
+      "passwordPolicy": "length(8) and digits(1) and upperCase(1) and lowerCase(1) and specialChars(1)",
+      "bruteForceProtected": true,
+      "permanentLockout": true,
+      "failureFactor": 3,
+      "rememberMe": false,
+      "clientSessionIdleTimeout": 3600,
+      "clientSessionMaxLifespan": 7200,
+
+      "roles": {
+        "realm": [
+          { "name": "Superuser", "description": "Superuser role" },
+          { "name": "Director", "description": "Director role" },
+          { "name": "Associate", "description": "Associate role" },
+          { "name": "Events Admin", "description": "Events Admin role" },
+          { "name": "Viewer", "description": "Viewer role" },
+          { "name": "Client", "description": "Client role" },
+          { "name": "Configuration Manager", "description": "Configuration Manager role" }
+        ]
+      },
+
+      "clients": [
+        {
+          "clientId": "vizor-client",
+          "name": "Vizor Client",
+          "rootUrl": "http://127.0.0.1:8080",
+          "publicClient": true,
+          "directAccessGrantsEnabled": true,
+          "redirectUris": [
+            "http://127.0.0.1:8080/*"
+          ],
+          "attributes": {
+            "post.logout.redirect.uris": "http://127.0.0.1:8080/*"
+          },
+          "enabled": true
+        }
+      ]
+    }
+
+
+keycloakAPIConfiguration:
+  client_id: vizor-client
+  port: 4567

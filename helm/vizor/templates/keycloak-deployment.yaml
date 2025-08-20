@@ -1,8 +1,20 @@
+# Keycloak Realm Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vizor-realm
+  namespace: vizor
+data:
+  vizor-realm.json: |
+{{ .Values.keycloakRealmConfiguration.realmJson | nindent 4 }}
+
+---
 # Keycloak Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: keycloak
+  namespace: vizor
   labels:
     app: keycloak
 spec:
@@ -17,46 +29,46 @@ spec:
     spec:
       containers:
         - name: keycloak
-          image: quay.io/keycloak/keycloak:latest
-          imagePullPolicy: IfNotPresent
-          args: ["start-dev"]
+          image: {{ .Values.image.registry }}/{{ .Values.image.repo }}/vizor-themed-keycloak:{{ .Values.image.tag }}
+          imagePullPolicy: Always
+          args: ["start-dev", "--import-realm"]
           env:
             - name: KEYCLOAK_ADMIN
-              value: "admin"
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KEYCLOAK_ADMIN }}
             - name: KEYCLOAK_ADMIN_PASSWORD
-              value: "password"
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KEYCLOAK_ADMIN_PASSWORD }}
             - name: KC_DB
-              value: "mssql"
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_DB }}
             - name: KC_DB_USERNAME
-              value: "sa"
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_DB_USERNAME }}
             - name: KC_DB_PASSWORD
-              value: "P@55w0rd"
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_DB_PASSWORD }}
             - name: KC_DB_URL
-              value: "jdbc:sqlserver://sql-server-service:1433;databaseName=keycloak;encrypt=true;trustServerCertificate=true"
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_DB_URL }}
             - name: KC_HTTP_RELATIVE_PATH
-              value: "/auth"
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_HTTP_RELATIVE_PATH }}
           resources:
             requests:
-              memory: "1280Mi"
-              cpu: "2000m"
+              memory: {{ .Values.keycloakRealmConfiguration.resources.requested_memory }}
+              cpu: {{ .Values.keycloakRealmConfiguration.resources.requested_cpu }}
             limits:
-              memory: "3Gi"
-              cpu: "6"
+              memory: {{ .Values.keycloakRealmConfiguration.resources.limit_memory }}
+              cpu: {{ .Values.keycloakRealmConfiguration.resources.limit_cpu }}
           volumeMounts:
-            - name: theme-volume
-              mountPath: /opt/keycloak/themes/VizorTheme
+            - name: realm-config
+              mountPath: /opt/keycloak/data/import
               readOnly: true
       volumes:
-        - name: theme-volume
-          hostPath:
-            path: /themes/VizorTheme
-            type: Directory
+        - name: realm-config
+          configMap:
+            name: vizor-realm
 ---
 # Keycloak Service
 apiVersion: v1
 kind: Service
 metadata:
   name: keycloak
+  namespace: vizor
   labels:
     app: keycloak
 spec:
