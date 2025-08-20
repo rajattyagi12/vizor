@@ -1,0 +1,46 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Chart.Name }}-migrations
+  labels:
+    {{- include "vizor.labels" . | nindent 4 }}
+    vizor: migrations
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        vizor: migrations
+        {{- include "vizor.selectorLabels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrations
+          image: {{ .Values.image.registry }}/{{ .Values.image.repo }}/ef-core-migration:{{ .Values.image.tag }}
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: vizor-secrets
+                  key: connectionString
+          workingDir: /app/DotNetScaffolding
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "===== Debug: List /app contents =====" && \
+              ls -la /app && \
+              echo "===== Debug: File type of /app/DotNetScaffolding =====" && \
+              file /app/DotNetScaffolding && \
+              echo "===== Debug: List /app/DotNetScaffolding contents if directory =====" && \
+              if [ -d /app/DotNetScaffolding ]; then ls -la /app/DotNetScaffolding; else echo "/app/DotNetScaffolding is not a directory"; fi && \
+              echo "===== Debug: Environment PATH =====" && \
+              echo $PATH && \
+              echo "===== Debug: Dotnet SDK versions =====" && \
+              dotnet --list-sdks && \
+              echo "===== Debug: Dotnet tools installed =====" && \
+              dotnet tool list --global || true && \
+              echo "===== Debug: Running dotnet tool restore =====" && \
+              dotnet tool restore && \
+              echo "===== Debug: Running EF Core migrations =====" && \
+              dotnet tool run dotnet-ef database update --project DotNetScaffolding.csproj
