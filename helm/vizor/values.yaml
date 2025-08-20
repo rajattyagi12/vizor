@@ -282,7 +282,7 @@ keycloakRealmConfiguration:
   clientId: "vizor-client"
   roleName: "Superuser"
   clientScope: "User-Client-ID"
-  #the any smtp related email is the admin email
+  #any smtp related email is the admin email
   adminEmail: "sudipta.das.office.desktop@gmail.com"
   frontendUrl: "http://127.0.0.1:8080/auth"
   smtp:
@@ -293,12 +293,13 @@ keycloakRealmConfiguration:
     mailDisplayName: "Keycloak"
     smtppassword: "set the password"
   keycloakEnv:
+    AUTH_DATABASE_NAME: "vizor_auth"
     KEYCLOAK_ADMIN: "admin"
     KEYCLOAK_ADMIN_PASSWORD: "password"
     KC_DB: "mssql"
     KC_DB_USERNAME: "sa"
     KC_DB_PASSWORD: "P@55w0rd"
-    KC_DB_URL: "jdbc:sqlserver://sql-server-service:1433;databaseName=keycloak;encrypt=true;trustServerCertificate=true"
+    KC_DB_URL: "jdbc:sqlserver://sql-server-service:1433;databaseName=vizor_auth;encrypt=true;trustServerCertificate=true" #Update the database name here as well
     KC_HTTP_RELATIVE_PATH: "/auth"
   resources:
     requested_memory: "1280Mi"
@@ -318,8 +319,8 @@ keycloakRealmConfiguration:
       "realm": "vizor",
       "enabled": true,
       "ssoSessionMaxLifespan": 36000,
-      "ssoSessionIdleTimeout": 1800,
-      "accessTokenLifespan": 300,
+      "ssoSessionIdleTimeout": 7200,
+      "accessTokenLifespan": 3600,
       "editUsernameAllowed": true,
       "registrationEmailAsUsername": true,
       "loginWithEmailAllowed": true,
@@ -331,6 +332,8 @@ keycloakRealmConfiguration:
       "permanentLockout": true,
       "failureFactor": 3,
       "rememberMe": false,
+      "clientSessionIdleTimeout": 3600,
+      "clientSessionMaxLifespan": 7200,
 
       "roles": {
         "realm": [

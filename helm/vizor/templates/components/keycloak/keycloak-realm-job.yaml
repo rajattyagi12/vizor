@@ -181,8 +181,8 @@ spec:
                 -d "{
                   \"username\": \"$ADMIN_USER_EMAIL\",
                   \"email\": \"$ADMIN_USER_EMAIL\",
-                  \"firstName\": \"admin\",
-                  \"lastName\": \"password\",
+                  \"firstName\": \"$ADMIN_USER_FIRSTNAME\",
+                  \"lastName\": \"$ADMIN_USER_LASTNAME\",
                   \"enabled\": true,
                   \"emailVerified\": true,
                   \"attributes\": {
@@ -290,9 +290,9 @@ spec:
             - name: ADMIN_USER_EMAIL
               value: {{ .Values.keycloakRealmConfiguration.adminUser.email | quote }}
             - name: ADMIN_USER_FIRSTNAME
-              value: {{ .Values.keycloakRealmConfiguration.adminUser.Admin }}
+              value: {{ .Values.keycloakRealmConfiguration.adminUser.firstName | quote }}
             - name: ADMIN_USER_LASTNAME
-              value: {{ .Values.keycloakRealmConfiguration.adminUser.User }}
+              value: {{ .Values.keycloakRealmConfiguration.adminUser.lastName | quote }}
             - name: ADMIN_USER_ATTRIBUTES_CLIENTID
               value: {{ .Values.keycloakRealmConfiguration.adminUser.attributes_clientID | quote }}
             - name: ADMIN_USER_PASSWORD_REALM

@@ -69,10 +69,12 @@ spec:
               done
 
               echo "Connected. Creating databases..."
-              /opt/mssql-tools/bin/sqlcmd -S "$SERVER" -U "$USER" -P "$PASSWORD" -Q "IF NOT EXISTS(SELECT name FROM sys.databases WHERE name='keycloak') CREATE DATABASE keycloak;"
+              /opt/mssql-tools/bin/sqlcmd -S "$SERVER" -U "$USER" -P "$PASSWORD" -Q "IF NOT EXISTS(SELECT name FROM sys.databases WHERE name='$AUTH_DATABASE_NAME') CREATE DATABASE $AUTH_DATABASE_NAME;"
           env:
             - name: connectionString
               valueFrom:
                 secretKeyRef:
                   name: vizor-secrets
                   key: connectionString
+            - name: AUTH_DATABASE_NAME
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.AUTH_DATABASE_NAME }}
