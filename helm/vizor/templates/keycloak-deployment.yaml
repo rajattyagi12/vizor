@@ -5,9 +5,9 @@ metadata:
   name: vizor-realm
   namespace: vizor
 data:
-  vizor-realm-realm.json: |
+  vizor-realm.json: |
     {
-      "realm": "vizor-realm",
+      "realm": "vizor",
       "enabled": true,
       "ssoSessionMaxLifespan": 36000,
       "ssoSessionIdleTimeout": 1800,
@@ -22,7 +22,7 @@ data:
       "bruteForceProtected": true,
       "permanentLockout": true,
       "failureFactor": 3,
-      "rememberMe": true,
+      "rememberMe": false,
 
       "roles": {
         "realm": [
@@ -38,13 +38,13 @@ data:
 
       "clients": [
         {
-          "clientId": "vizor",
+          "clientId": "vizor-client",
           "name": "Vizor Client",
-          "rootUrl": "http://localhost:3000",
+          "rootUrl": "http://127.0.0.1:8080",
           "publicClient": true,
           "directAccessGrantsEnabled": true,
           "redirectUris": [
-            "http://localhost:3000/*"
+            "http://127.0.0.1:8080/*"
           ],
           "enabled": true
         }
@@ -78,26 +78,26 @@ spec:
           args: ["start-dev", "--import-realm"]
           env:
             - name: KEYCLOAK_ADMIN
-              value: "admin"
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KEYCLOAK_ADMIN }}
             - name: KEYCLOAK_ADMIN_PASSWORD
-              value: "password"
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KEYCLOAK_ADMIN_PASSWORD }}
             - name: KC_DB
-              value: "mssql"
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_DB }}
             - name: KC_DB_USERNAME
-              value: "sa"
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_DB_USERNAME }}
             - name: KC_DB_PASSWORD
-              value: "P@55w0rd"
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_DB_PASSWORD }}
             - name: KC_DB_URL
-              value: "jdbc:sqlserver://sql-server-service:1433;databaseName=keycloak;encrypt=true;trustServerCertificate=true"
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_DB_URL }}
             - name: KC_HTTP_RELATIVE_PATH
-              value: "/auth"
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_HTTP_RELATIVE_PATH }}
           resources:
             requests:
-              memory: "1280Mi"
-              cpu: "2000m"
+              memory: {{ .Values.keycloakRealmConfiguration.resources.requested_memory }}
+              cpu: {{ .Values.keycloakRealmConfiguration.resources.requested_cpu }}
             limits:
-              memory: "3Gi"
-              cpu: "6"
+              memory: {{ .Values.keycloakRealmConfiguration.resources.limit_memory }}
+              cpu: {{ .Values.keycloakRealmConfiguration.resources.limit_cpu }}
           volumeMounts:
             - name: realm-config
               mountPath: /opt/keycloak/data/import
@@ -141,14 +141,6 @@ spec:
               set -e
               apk add --no-cache curl jq
 
-              REALM_NAME="vizor-realm"
-              CLIENT_ID="vizor"
-              ROLE_NAME="Superuser"
-              CLIENT_SCOPE="User-Client-ID"
-              ADMIN_EMAIL="sudipta.das.office.desktop@gmail.com"
-              #FRONTEND_URL="http://127.0.0.1:38537/auth"
-
-
               echo "Waiting for Keycloak to be ready..."
               until curl -s http://keycloak:8080/auth/realms/master > /dev/null; do
                 sleep 5
@@ -157,8 +149,8 @@ spec:
               echo "Keycloak is ready. Getting admin token..."
               TOKEN=$(curl -s \
                 -d "client_id=admin-cli" \
-                -d "username=admin" \
-                -d "password=password" \
+                -d "username=$KEYCLOAK_ADMIN" \
+                -d "password=$KEYCLOAK_ADMIN_PASSWORD" \
                 -d "grant_type=password" \
                 http://keycloak:8080/auth/realms/master/protocol/openid-connect/token | jq -r '.access_token')
 
@@ -253,16 +245,16 @@ spec:
               #   -H "Content-Type: application/json" \
               #   -d "{
               #     \"smtpServer\": {
-              #       \"host\": \"smtp.gmail.com\",
-              #       \"port\": \"587\",
+              #       \"host\": \"$SMTP_HOST\",
+              #       \"port\": \"$SMTP_PORT\",
               #       \"from\": \"$ADMIN_EMAIL\",
-              #       \"fromDisplayName\": \"Keycloak\",
+              #       \"fromDisplayName\": \"$MAILDISPLAYNAME\",
               #       \"replyTo\": \"$ADMIN_EMAIL\",
-              #       \"replyToDisplayName\": \"Keycloak\",
-              #       \"starttls\": \"true\",
-              #       \"auth\": \"true\",
+              #       \"replyToDisplayName\": \"$MAILDISPLAYNAME\",
+              #       \"starttls\": \"$SMTP_STARTTLS\",
+              #       \"auth\": \"$SMTP_AUTH\",
               #       \"user\": \"$ADMIN_EMAIL\",
-              #       \"password\": \"ryzf zlcu rxnl dbyx\"
+              #       \"password\": \"$SMTPPASSWORD\"
               #     }
               #   }" \
               #   http://keycloak:8080/auth/admin/realms/$REALM_NAME || echo "SMTP may already be set"
@@ -276,9 +268,9 @@ spec:
                     \"host\": \"$SMTP_HOST\",
                     \"port\": \"$SMTP_PORT\",
                     \"from\": \"$ADMIN_EMAIL\",
-                    \"fromDisplayName\": \"Keycloak\",
+                    \"fromDisplayName\": \"$MAILDISPLAYNAME\",
                     \"replyTo\": \"$ADMIN_EMAIL\",
-                    \"replyToDisplayName\": \"Keycloak\",
+                    \"replyToDisplayName\": \"$MAILDISPLAYNAME\",
                     \"starttls\": \"$SMTP_STARTTLS\",
                     \"auth\": \"$SMTP_AUTH\"
                   }
@@ -306,19 +298,19 @@ spec:
                 echo "Admin user not found in master realm!"
               fi
 
-              echo "Creating user admin.user@techsectorit.com ..."
+              echo "Creating user ljacoby@roundtables.us ..."
               curl -s -X POST \
                 -H "Authorization: Bearer $TOKEN" \
                 -H "Content-Type: application/json" \
                 -d "{
-                  \"username\": \"ljacoby@roundtables.us\",
-                  \"email\": \"ljacoby@roundtables.us\",
-                  \"firstName\": \"Admin\",
-                  \"lastName\": \"User\",
+                  \"username\": \"$ADMIN_USER_EMAIL\",
+                  \"email\": \"$ADMIN_USER_EMAIL\",
+                  \"firstName\": \"admin\",
+                  \"lastName\": \"password\",
                   \"enabled\": true,
                   \"emailVerified\": true,
                   \"attributes\": {
-                    \"clientID\": [\"1\"]
+                    \"clientID\": [\"$ADMIN_USER_ATTRIBUTES_CLIENTID\"]
                   }
                 }" \
                 http://keycloak:8080/auth/admin/realms/$REALM_NAME/users || echo "User may already exist"
@@ -326,7 +318,7 @@ spec:
               #Get the created user's ID
               USER_ID=$(curl -s \
                 -H "Authorization: Bearer $TOKEN" \
-                http://keycloak:8080/auth/admin/realms/$REALM_NAME/users?username=admin.user@techsectorit.com | jq -r '.[0].id')
+                http://keycloak:8080/auth/admin/realms/$REALM_NAME/users?username=ljacoby@roundtables.us | jq -r '.[0].id')
 
               #SET ADMIN-USER PASSWORD
               if [ -n "$USER_ID" ]; then
@@ -336,7 +328,7 @@ spec:
                   -H "Content-Type: application/json" \
                   -d "{
                     \"type\": \"password\",
-                    \"value\": \"Vizor@123\",
+                    \"value\": \"$ADMIN_USER_PASSWORD_REALM\",
                     \"temporary\": false
                   }" \
                   http://keycloak:8080/auth/admin/realms/$REALM_NAME/users/$USER_ID/reset-password || echo "Failed to set password"
@@ -393,6 +385,10 @@ spec:
           env:
             - name: REALM_NAME
               value: {{ .Values.keycloakRealmConfiguration.realmName | quote }}
+            - name: KEYCLOAK_ADMIN
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KEYCLOAK_ADMIN }}
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KEYCLOAK_ADMIN_PASSWORD }}
             - name: CLIENT_ID
               value: {{ .Values.keycloakRealmConfiguration.clientId | quote }}
             - name: ROLE_NAME
@@ -411,3 +407,17 @@ spec:
               value: {{ .Values.keycloakRealmConfiguration.smtp.starttls | quote }}
             - name: SMTP_AUTH
               value: {{ .Values.keycloakRealmConfiguration.smtp.auth | quote }}
+            - name: MAILDISPLAYNAME
+              value: {{ .Values.keycloakRealmConfiguration.smtp.mailDisplayName }}
+            - name: SMTPPASSWORD
+              value: {{ .Values.keycloakRealmConfiguration.smtp.smtppassword }}
+            - name: ADMIN_USER_EMAIL
+              value: {{ .Values.keycloakRealmConfiguration.adminUser.email | quote }}
+            - name: ADMIN_USER_FIRSTNAME
+              value: {{ .Values.keycloakRealmConfiguration.adminUser.Admin }}
+            - name: ADMIN_USER_LASTNAME
+              value: {{ .Values.keycloakRealmConfiguration.adminUser.User }}
+            - name: ADMIN_USER_ATTRIBUTES_CLIENTID
+              value: {{ .Values.keycloakRealmConfiguration.adminUser.attributes_clientID | quote }}
+            - name: ADMIN_USER_PASSWORD_REALM
+              value: {{ .Values.keycloakRealmConfiguration.adminUser.password | quote }}
