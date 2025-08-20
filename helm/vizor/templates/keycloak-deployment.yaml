@@ -51,9 +51,6 @@ spec:
             requests:
               memory: {{ .Values.keycloakRealmConfiguration.resources.requested_memory }}
               cpu: {{ .Values.keycloakRealmConfiguration.resources.requested_cpu }}
-            limits:
-              memory: {{ .Values.keycloakRealmConfiguration.resources.limit_memory }}
-              cpu: {{ .Values.keycloakRealmConfiguration.resources.limit_cpu }}
           volumeMounts:
             - name: realm-config
               mountPath: /opt/keycloak/data/import

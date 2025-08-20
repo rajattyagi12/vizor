@@ -6,6 +6,7 @@ metadata:
     {{- include "vizor.labels" . | nindent 4 }}
     vizor: migrations
 spec:
+  ttlSecondsAfterFinished: 0
   backoffLimit: 1
   template:
     metadata:
