@@ -1,20 +1,22 @@
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
-  name: sftpgo-binding
+  name: "{{ .Values.daprComponents.sftp.name }}"
 spec:
   type: bindings.sftp
   version: v1
   metadata:
     - name: rootPath
-      value: "/srv/sftpgo/data/vizor" # The home directory for the 'vizor' user
+      value: "{{ .Values.daprComponents.sftp.rootPath }}" # The home directory for the 'vizor' user
     - name: address
-      value: "vizor-sftpgo:2022" # Your SFTPGo service address
+      value: "{{ .Values.daprComponents.sftp.address }}" # Your SFTPGo service address
     - name: username
-      value: "vizor" # SFTPGo user
+      value: "{{ .Values.daprComponents.sftp.username }}" # SFTPGo user
     - name: password
       secretKeyRef:
         name: vizor-secrets # The name of the Kubernetes Secret
-        key: sftpgoPassword 
+        key: sftpPassword
+    {{ - if .Values.daprComponents.sftp.insecureIgnoreHostKey }}
     - name: insecureIgnoreHostKey
       value: "true" # Caution: Use only for testing. Set to "false" in production.
+    {{ - end }}

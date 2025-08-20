@@ -86,6 +86,15 @@ daprComponents:
     componentType: secretstores.kubernetes
     secretName: vizor-secrets
 
+  sftp:
+    name: sftpgo-binding
+    componentType: bindings.sftp
+    rootPath: "/srv/sftpgo/data/vizor" # The home directory for the 'vizor' user
+    address: "vizor-sftpgo:2022" # Your SFTPGo service address
+    username: "vizor" # SFTPGo user
+    password: "Vizor@123" # The key in the secret that contains the password
+    insecureIgnoreHostKey: true # Caution: Use only for testing. Set to "false" in production.
+
 sqlServer:
   enabled: true
   image: "mcr.microsoft.com/mssql/server"
@@ -274,9 +283,6 @@ sftpgo:
           - key: description.json
             path: description.json
 
-
-
-
 keycloakRealmConfiguration:
   realmName: "vizor"
   clientId: "vizor-client"
@@ -364,7 +370,6 @@ keycloakRealmConfiguration:
         }
       ]
     }
-
 
 keycloakAPIConfiguration:
   client_id: vizor-client
