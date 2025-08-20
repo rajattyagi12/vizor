@@ -1,3 +1,39 @@
+# apiVersion: batch/v1
+# kind: Job
+# metadata:
+#   name: mssql-init-job
+# spec:
+#   backoffLimit: 3
+#   template:
+#     spec:
+#       restartPolicy: OnFailure
+#       containers:
+#         - name: init-mssql
+#           image: mcr.microsoft.com/mssql-tools
+#           command:
+#             - /bin/bash
+#             - -c
+#             - |
+#               echo "Waiting for MSSQL to become available..."
+#               until /opt/mssql-tools/bin/sqlcmd -S sql-server-service -U "$SA_USERNAME" -P "$SA_PASSWORD" -Q "SELECT 1" > /dev/null 2>&1; do
+#                 echo "Still waiting..."
+#                 sleep 3
+#               done
+#               echo "Connected. Creating databases..."
+#               /opt/mssql-tools/bin/sqlcmd -S sql-server-service -U "$SA_USERNAME" -P "$SA_PASSWORD" -Q "IF NOT EXISTS(SELECT name FROM sys.databases WHERE name='keycloak') CREATE DATABASE keycloak;"
+#           env:
+#             - name: SA_PASSWORD
+#               valueFrom:
+#                 secretKeyRef:
+#                   name: vizor-secrets
+#                   key: SA_PASSWORD
+#             - name: SA_USERNAME
+#               valueFrom:
+#                 secretKeyRef:
+#                   name: vizor-secrets
+#                   key: SA_USERNAME
+
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -14,21 +50,29 @@ spec:
             - /bin/bash
             - -c
             - |
-              echo "Waiting for MSSQL to become available..."
-              until /opt/mssql-tools/bin/sqlcmd -S sql-server-service -U "$SA_USERNAME" -P "$SA_PASSWORD" -Q "SELECT 1" > /dev/null 2>&1; do
+              # Parse connection string into variables
+              IFS=';' read -ra PARTS <<< "$connectionString"
+              for PART in "${PARTS[@]}"; do
+                KEY=$(echo $PART | cut -d= -f1 | xargs)
+                VALUE=$(echo $PART | cut -d= -f2- | xargs)
+                case "$KEY" in
+                  "Data Source") SERVER=$VALUE ;;
+                  "User Id") USER=$VALUE ;;
+                  "Password") PASSWORD=$VALUE ;;
+                esac
+              done
+
+              echo "Waiting for MSSQL to become available at $SERVER..."
+              until /opt/mssql-tools/bin/sqlcmd -S "$SERVER" -U "$USER" -P "$PASSWORD" -Q "SELECT 1" > /dev/null 2>&1; do
                 echo "Still waiting..."
                 sleep 3
               done
+
               echo "Connected. Creating databases..."
-              /opt/mssql-tools/bin/sqlcmd -S sql-server-service -U "$SA_USERNAME" -P "$SA_PASSWORD" -Q "IF NOT EXISTS(SELECT name FROM sys.databases WHERE name='keycloak') CREATE DATABASE keycloak;"
+              /opt/mssql-tools/bin/sqlcmd -S "$SERVER" -U "$USER" -P "$PASSWORD" -Q "IF NOT EXISTS(SELECT name FROM sys.databases WHERE name='keycloak') CREATE DATABASE keycloak;"
           env:
-            - name: SA_PASSWORD
+            - name: connectionString
               valueFrom:
                 secretKeyRef:
                   name: vizor-secrets
-                  key: SA_PASSWORD
-            - name: SA_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: vizor-secrets
-                  key: SA_USERNAME
+                  key: connectionString
