@@ -369,3 +369,4 @@ keycloakRealmConfiguration:
 keycloakAPIConfiguration:
   client_id: vizor-client
   port: 4567
+  redirect_uri: http://127.0.0.1:8080/
