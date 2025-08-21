@@ -32,7 +32,7 @@
 #                 secretKeyRef:
 #                   name: vizor-secrets
 #                   key: SA_USERNAME
-
+{{- if .Values.sqlServer.enabled }}
 ---
 apiVersion: batch/v1
 kind: Job
@@ -79,3 +79,5 @@ spec:
                   key: connectionString
             - name: AUTH_DATABASE_NAME
               value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.AUTH_DATABASE_NAME }}
+
+{{end}}
