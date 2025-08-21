@@ -289,14 +289,14 @@ keycloakRealmConfiguration:
   roleName: "Superuser"
   clientScope: "User-Client-ID"
   #any smtp related email is the admin email
-  adminEmail: "sudipta.das.office.desktop@gmail.com"
+  adminEmail: "vizor.auth@roundtables.us"
   frontendUrl: "http://127.0.0.1:8080/auth"
   smtp:
     host: "mailhog"
     port: "1025"
     starttls: "true"
     auth: "true"
-    mailDisplayName: "Keycloak"
+    mailDisplayName: "Vizor Auth"
     smtppassword: "set the password"
   keycloakEnv:
     AUTH_DATABASE_NAME: "vizor_auth"
@@ -369,6 +369,6 @@ keycloakRealmConfiguration:
     }
 
 keycloakAPIConfiguration:
-  client_id: vizor-client
+  client_id: "vizor-client"
   port: 4567
-  redirect_uri: http://127.0.0.1:8080/
+  redirect_uri: "http://127.0.0.1:8080/"

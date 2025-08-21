@@ -23,7 +23,7 @@ spec:
             - name: CLIENT_ID
               value: {{ .Values.keycloakAPIConfiguration.client_id }}
             - name: REDIRECT_URI
-              value: {{ .Values.keycloakRealmConfiguration.frontendUrl }}
+              value: {{ .Values.keycloakRealmConfiguration.redirect_uri }}
           command: ["./app"]
 
 ---
