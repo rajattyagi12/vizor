@@ -5,6 +5,10 @@ metadata:
   labels:
     {{- include "vizor.labels" . | nindent 4 }}
     vizor: migrations
+  annotations:
+    "helm.sh/hook": pre-upgrade,post-install
+    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-weight": "10"
 spec:
   ttlSecondsAfterFinished: 0
   backoffLimit: 1
