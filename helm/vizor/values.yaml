@@ -2,6 +2,7 @@
 # Default values for vizor Helm chart
 #
 
+
 # -- Global settings for the Helm chart
 global:
   namespace: vizor # Your target namespace. All resources will be deployed here.
@@ -22,7 +23,7 @@ auth:
 
 ingress:
   # -- Ingress host DNS name
-  host:
+  host: 
   # -- Set this to enable TLS, leave unset to run in insecure mode
   certName:
   # -- Cert manager issuer, leave unset to run in insecure mode
