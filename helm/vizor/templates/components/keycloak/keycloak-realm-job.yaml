@@ -3,6 +3,10 @@ kind: Job
 metadata:
   name: keycloak-realm-init
   namespace: vizor
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade  # Run after install/upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded  # Delete after success
+
 spec:
   ttlSecondsAfterFinished: 0
   template:
