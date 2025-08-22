@@ -10,7 +10,7 @@ metadata:
     "helm.sh/hook-delete-policy": hook-succeeded
     "helm.sh/hook-weight": "10"
 spec:
-  ttlSecondsAfterFinished: 0
+  ttlSecondsAfterFinished: 180
   backoffLimit: 1
   template:
     metadata:
