@@ -8,7 +8,7 @@ metadata:
     "helm.sh/hook-delete-policy": hook-succeeded  # Delete after success
 
 spec:
-  ttlSecondsAfterFinished: 60 # Allow Job to exist for ArgoCD to discover completion
+  ttlSecondsAfterFinished: 30 # Allow Job to exist for ArgoCD to discover completion
   template:
     spec:
       restartPolicy: Never
