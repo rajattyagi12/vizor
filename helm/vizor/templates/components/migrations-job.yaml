@@ -10,7 +10,7 @@ metadata:
     "helm.sh/hook-delete-policy": hook-succeeded
     "helm.sh/hook-weight": "10"
 spec:
-  ttlSecondsAfterFinished: 180
+  ttlSecondsAfterFinished: 30 # keeps the Job visible only for 60 seconds
   backoffLimit: 1
   template:
     metadata:
