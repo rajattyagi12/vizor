@@ -40,13 +40,13 @@ coreService:
   # -- Dapr store core annotations
   annotations:
   # -- Dapr store core replica count
-  replicas: 1
+  replicas: 2
 
 engagementService:
   # -- Dapr store engagement annotations
   annotations:
   # -- Dapr store engagement replica count
-  replicas: 1
+  replicas: 2
 
 interactionService:
   # -- Dapr store interaction annotations
