@@ -18,12 +18,12 @@ spec:
           image: {{ .Values.image.registry }}/{{ .Values.image.repo }}/keycloak-rust-service:{{ .Values.image.tag }}
           imagePullPolicy: Always
           ports:
-            - containerPort: {{ .Values.keycloakAPIConfiguration.port}}
+            - containerPort: 4567
           env:
             - name: CLIENT_ID
-              value: {{ .Values.keycloakAPIConfiguration.client_id }}
+              value: {{ .Values.keycloakRealmConfiguration.clientId }}
             - name: REDIRECT_URI
-              value: {{ .Values.keycloakAPIConfiguration.redirect_uri }}
+              value: "{{ .Values.keycloakRealmConfiguration.serverUrl }}/"
           command: ["./app"]
 
 ---
@@ -36,4 +36,4 @@ spec:
   selector:
     app: vizor-keycloak
   ports:
-    - port: {{ .Values.keycloakAPIConfiguration.port}}
+    - port: 4567

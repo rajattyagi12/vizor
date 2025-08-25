@@ -292,7 +292,6 @@ keycloakRealmConfiguration:
   #any smtp related email is the admin email
   adminEmail: "vizor.auth@roundtables.us"
   serverUrl: "http://127.0.0.1:8080"
-  frontendUrl: "http://127.0.0.1:8080/auth"
   smtp:
     host: "mailhog"
     port: "1025"
@@ -367,9 +366,3 @@ keycloakRealmConfiguration:
         attributes:
           post.logout.redirect.uris: "{{ .Values.keycloakRealmConfiguration.serverUrl }}/*"
         enabled: true
-
-
-keycloakAPIConfiguration:
-  client_id: "vizor-client"
-  port: 4567
-  redirect_uri: "http://127.0.0.1:8080/"
