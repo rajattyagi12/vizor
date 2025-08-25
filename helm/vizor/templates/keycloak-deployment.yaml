@@ -8,9 +8,12 @@ data:
   vizor-realm.json: |
     {{- $cfg := .Values.keycloakRealmConfiguration }}
     {{- $realm := deepCopy $cfg.realmJson }}
-    {{- $_ := set $realm.clients 0 "rootUrl" $cfg.serverUrl }}
-    {{- $_ := set $realm.clients 0 "redirectUris" (list (printf "%s/*" $cfg.serverUrl)) }}
-    {{- $_ := set $realm.clients 0 "attributes" (dict "post.logout.redirect.uris" (printf "%s/*" $cfg.serverUrl)) }}
+    
+    {{- $client := index $realm.clients 0 }}  # Access the first client in the list
+    {{- $_ := set $client "rootUrl" $cfg.serverUrl }}
+    {{- $_ := set $client "redirectUris" (list (printf "%s/*" $cfg.serverUrl)) }}
+    {{- $_ := set $client "attributes" (dict "post.logout.redirect.uris" (printf "%s/*" $cfg.serverUrl)) }}
+
     {{ $realm | toJson | nindent 4 }}
 
 ---
