@@ -20,7 +20,6 @@ spec:
         dapr.io/app-id: "core-service"
         dapr.io/app-port: "8080"
         dapr.io/log-as-json: "true"
-        dapr.io/config: "tracing"
       {{- with .Values.coreService.annotations }}
           {{- toYaml . | nindent 8 }}
       {{- end }}
