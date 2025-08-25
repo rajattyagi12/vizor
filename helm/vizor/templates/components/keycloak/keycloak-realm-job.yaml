@@ -278,7 +278,7 @@ spec:
             - name: ADMIN_EMAIL
               value: {{ .Values.keycloakRealmConfiguration.adminEmail | quote }}
             - name: FRONTEND_URL
-              value: {{ ( .Values.keycloakRealmConfiguration.serverUrl | cat "/auth" ) | quote }}
+              value: {{ .Values.keycloakRealmConfiguration.serverUrl}}/auth
             - name: SMTP_HOST
               value: {{ .Values.keycloakRealmConfiguration.smtp.host | quote }}
             - name: SMTP_PORT
