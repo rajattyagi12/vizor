@@ -319,56 +319,55 @@ keycloakRealmConfiguration:
     attributes_clientID: "1"
     password: "Vizor@123"
 
-  realmJson: |
-    {
-      "realm": "vizor",
-      "enabled": true,
-      "ssoSessionMaxLifespan": 36000,
-      "ssoSessionIdleTimeout": 7200,
-      "accessTokenLifespan": 3600,
-      "editUsernameAllowed": true,
-      "registrationEmailAsUsername": true,
-      "loginWithEmailAllowed": true,
-      "verifyEmail": true,
-      "loginTheme": "VizorTheme",
-      "resetPasswordAllowed": true,
-      "passwordPolicy": "length(8) and digits(1) and upperCase(1) and lowerCase(1) and specialChars(1)",
-      "bruteForceProtected": true,
-      "permanentLockout": true,
-      "failureFactor": 3,
-      "rememberMe": false,
-      "clientSessionIdleTimeout": 3600,
-      "clientSessionMaxLifespan": 7200,
+  realmJson:
+    realm: vizor
+    enabled: true
+    ssoSessionMaxLifespan: 36000
+    ssoSessionIdleTimeout: 7200
+    accessTokenLifespan: 3600
+    editUsernameAllowed: true
+    registrationEmailAsUsername: true
+    loginWithEmailAllowed: true
+    verifyEmail: true
+    loginTheme: VizorTheme
+    resetPasswordAllowed: true
+    passwordPolicy: "length(8) and digits(1) and upperCase(1) and lowerCase(1) and specialChars(1)"
+    bruteForceProtected: true
+    permanentLockout: true
+    failureFactor: 3
+    rememberMe: false
+    clientSessionIdleTimeout: 3600
+    clientSessionMaxLifespan: 7200
 
-      "roles": {
-        "realm": [
-          { "name": "Superuser", "description": "Superuser role" },
-          { "name": "Director", "description": "Director role" },
-          { "name": "Associate", "description": "Associate role" },
-          { "name": "Events Admin", "description": "Events Admin role" },
-          { "name": "Viewer", "description": "Viewer role" },
-          { "name": "Client", "description": "Client role" },
-          { "name": "Configuration Manager", "description": "Configuration Manager role" }
-        ]
-      },
+    roles:
+      realm:
+        - name: Superuser
+          description: Superuser role
+        - name: Director
+          description: Director role
+        - name: Associate
+          description: Associate role
+        - name: Events Admin
+          description: Events Admin role
+        - name: Viewer
+          description: Viewer role
+        - name: Client
+          description: Client role
+        - name: Configuration Manager
+          description: Configuration Manager role
 
-      "clients": [
-        {
-          "clientId": "vizor-client",
-          "name": "Vizor Client",
-          "rootUrl": "{{ .Values.keycloakRealmConfiguration.serverUrl }}",
-          "publicClient": true,
-          "directAccessGrantsEnabled": true,
-          "redirectUris": [
-            "{{ .Values.keycloakRealmConfiguration.serverUrl }}/*"
-          ],
-          "attributes": {
-            "post.logout.redirect.uris": "{{ .Values.keycloakRealmConfiguration.serverUrl }}/*"
-          },
-          "enabled": true
-        }
-      ]
-    }
+    clients:
+      - clientId: vizor-client
+        name: Vizor Client
+        rootUrl: "{{ .Values.keycloakRealmConfiguration.serverUrl }}"
+        publicClient: true
+        directAccessGrantsEnabled: true
+        redirectUris:
+          - "{{ .Values.keycloakRealmConfiguration.serverUrl }}/*"
+        attributes:
+          post.logout.redirect.uris: "{{ .Values.keycloakRealmConfiguration.serverUrl }}/*"
+        enabled: true
+
 
 keycloakAPIConfiguration:
   client_id: "vizor-client"

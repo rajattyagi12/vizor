@@ -6,7 +6,7 @@ metadata:
   namespace: vizor
 data:
   vizor-realm.json: |
-{{ .Values.keycloakRealmConfiguration.realmJson | nindent 4 }}
+{{ .Values.keycloakRealmConfiguration.realmJson | toJson | nindent 4 }}
 
 ---
 # Keycloak Deployment
