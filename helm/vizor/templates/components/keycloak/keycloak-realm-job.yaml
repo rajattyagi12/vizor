@@ -139,24 +139,6 @@ spec:
                 }" \
                 http://keycloak:8080/auth/admin/realms/$REALM_NAME || echo "SMTP may already be set"
 
-              # echo "ONLY FOR DEV TESTING WITH MAILHOG Configuring SMTP settings for realm..."
-              # curl -s -X PUT \
-              #   -H "Authorization: Bearer $TOKEN" \
-              #   -H "Content-Type: application/json" \
-              #   -d "{
-              #     \"smtpServer\": {
-              #       \"host\": \"$SMTP_HOST\",
-              #       \"port\": \"$SMTP_PORT\",
-              #       \"from\": \"$ADMIN_EMAIL\",
-              #       \"fromDisplayName\": \"$MAILDISPLAYNAME\",
-              #       \"replyTo\": \"$ADMIN_EMAIL\",
-              #       \"replyToDisplayName\": \"$MAILDISPLAYNAME\",
-              #       \"starttls\": \"$SMTP_STARTTLS\",
-              #       \"auth\": \"$SMTP_AUTH\"
-              #     }
-              #   }" \
-              #   http://keycloak:8080/auth/admin/realms/$REALM_NAME || echo "SMTP may already be set"
-
 
               #Update master realm "admin" user's email
               echo "Updating master realm admin user's email..."
@@ -278,7 +260,7 @@ spec:
             - name: ADMIN_EMAIL
               value: {{ .Values.keycloakRealmConfiguration.adminEmail | quote }}
             - name: FRONTEND_URL
-              value: {{ .Values.keycloakRealmConfiguration.serverUrl}}/auth
+              value: "{{ .Values.keycloakRealmConfiguration.serverUrl }}/auth"
             - name: SMTP_HOST
               value: {{ .Values.keycloakRealmConfiguration.smtp.host | quote }}
             - name: SMTP_PORT
