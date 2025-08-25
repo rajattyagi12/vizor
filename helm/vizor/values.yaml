@@ -291,7 +291,8 @@ keycloakRealmConfiguration:
   clientScope: "User-Client-ID"
   #any smtp related email is the admin email
   adminEmail: "vizor.auth@roundtables.us"
-  frontendUrl: "http://127.0.0.1:8080/auth"
+  serverUrl: "http://127.0.0.1:8080"
+  frontendUrl: "{{ .Values.keycloakRealmConfiguration.serverUrl }}/auth"
   smtp:
     host: "mailhog"
     port: "1025"
@@ -355,14 +356,14 @@ keycloakRealmConfiguration:
         {
           "clientId": "vizor-client",
           "name": "Vizor Client",
-          "rootUrl": "http://127.0.0.1:8080",
+          "rootUrl": "{{ .Values.keycloakRealmConfiguration.serverUrl }}",
           "publicClient": true,
           "directAccessGrantsEnabled": true,
           "redirectUris": [
-            "http://127.0.0.1:8080/*"
+            "{{ .Values.keycloakRealmConfiguration.serverUrl }}/*"
           ],
           "attributes": {
-            "post.logout.redirect.uris": "http://127.0.0.1:8080/*"
+            "post.logout.redirect.uris": "{{ .Values.keycloakRealmConfiguration.serverUrl }}/*"
           },
           "enabled": true
         }
