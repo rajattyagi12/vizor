@@ -6,7 +6,12 @@ metadata:
   namespace: vizor
 data:
   vizor-realm.json: |
-{{ .Values.keycloakRealmConfiguration.realmJson | toJson | nindent 4 }}
+    {{- $cfg := .Values.keycloakRealmConfiguration }}
+    {{- $realm := deepCopy $cfg.realmJson }}
+    {{- $_ := set $realm.clients 0 "rootUrl" $cfg.serverUrl }}
+    {{- $_ := set $realm.clients 0 "redirectUris" (list (printf "%s/*" $cfg.serverUrl)) }}
+    {{- $_ := set $realm.clients 0 "attributes" (dict "post.logout.redirect.uris" (printf "%s/*" $cfg.serverUrl)) }}
+    {{ $realm | toJson | nindent 4 }}
 
 ---
 # Keycloak Deployment
