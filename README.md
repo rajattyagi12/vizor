@@ -26,6 +26,7 @@ helm repo add local-path-provisioner https://charts.containeroo.ch/
 helm repo update
 ```
 
+## 🥾 Deploy Dapr control plane
 Skip this if the Dapr control plane is already deployed
 
 ```bash
@@ -36,15 +37,15 @@ kubectl get pod --namespace dapr-system
 Full instructions here:
 📃 https://docs.dapr.io/operations/hosting/kubernetes/kubernetes-overview/
 
-Optional - If you wish to view or check the Dapr dashboard
+### Optional - If you wish to view or check the Dapr dashboard
 
 ```bash
 kubectl port-forward deploy/dapr-dashboard --namespace dapr-system 8080:8080
 ```
-
 Open the dashboard at http://localhost:8080/
 
-### Create namespace for Dapr Store app
+
+## Create namespace for Dapr Store app
 
 ```bash
 namespace=vizor
@@ -58,14 +59,7 @@ kubectl create namespace $namespace
 helm install dapr-redis bitnami/redis --values ./config/redis-values.yaml --namespace $namespace
 ```
 
-Validate & check status
-
-```bash
-helm list --namespace $namespace
-kubectl get pod vizor-redis-master-0 --namespace $namespace
-```
-
-Ingress NGINX
+## 🚀 Ingress NGINX
 
 ```bash
 helm install api-gateway ingress-nginx/ingress-nginx --values ./config/ingress-values.yaml --namespace $namespace
@@ -79,25 +73,12 @@ Now deploy the Vizor application and all services using Helm
 helm install vizor ./helm/vizor --namespace $namespace
 ```
 
-Validate & check status
-
-```bash
-helm list --namespace $namespace
-kubectl get pod -l app.kubernetes.io/instance=vizor-apps --namespace $namespace
-```
-
-To get the URL of the deployed store run the following command:
-
-```bash
-echo -e "Access Dapr Store here: http://$(kubectl get svc -l "purpose=vizor-api-gateway" -o jsonpath="{.items[0].status.loadBalancer.ingress[0].ip}")/"
-```
-
-## 🚀 Port forwarding sqlserver service locally
+### 🚀 Port forwarding sqlserver service locally
 ```bash
 nohup kubectl port-forward svc/sql-server-service 1433:1433 -n vizor &
 ```
 
-## 🚀 Port forwarding for ingress controller service
+### 🚀 Port forwarding for ingress controller service
 ```bash
 nohup kubectl port-forward svc/api-gateway-ingress-nginx-controller -n vizor 8080:80 &
 ```
