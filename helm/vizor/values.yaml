@@ -290,15 +290,25 @@ keycloakRealmConfiguration:
   roleName: "Superuser"
   clientScope: "User-Client-ID"
   #any smtp related email is the admin email
-  adminEmail: "vizor.auth@roundtables.us"
+  adminEmail: "no-reply@vizoruat.roundtables.us"
   serverUrl: "http://127.0.0.1:8080"
+  # smtp:
+  #   host: "mailhog"
+  #   port: "1025"
+  #   starttls: "true"
+  #   auth: "true"
+  #   mailDisplayName: "Vizor Auth"
+  #   smtppassword: "set the password"
+
   smtp:
-    host: "mailhog"
-    port: "1025"
+    host: "email-smtp.us-east-1.amazonaws.com"
+    port: "587"
     starttls: "true"
     auth: "true"
-    mailDisplayName: "Vizor Auth"
-    smtppassword: "set the password"
+    mailDisplayName: "Vizor"
+    smtpusername: "AKIAVWE2WCVHKTCNHJEE"
+    smtppassword: "BIqlgWKuB3MhaFYTxaAXCeglcjLL7mzHYGR1G54OqHLM"
+  
   keycloakEnv:
     AUTH_DATABASE_NAME: "vizor_auth"
     KEYCLOAK_ADMIN: "admin"

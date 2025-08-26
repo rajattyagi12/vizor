@@ -133,7 +133,7 @@ spec:
                     \"replyToDisplayName\": \"$MAILDISPLAYNAME\",
                     \"starttls\": \"$SMTP_STARTTLS\",
                     \"auth\": \"$SMTP_AUTH\",
-                    \"user\": \"$ADMIN_EMAIL\",
+                    \"user\": \"$SMTP_USERNAME\",
                     \"password\": \"$SMTPPASSWORD\"
                   }
                 }" \
@@ -271,6 +271,8 @@ spec:
               value: {{ .Values.keycloakRealmConfiguration.smtp.auth | quote }}
             - name: MAILDISPLAYNAME
               value: {{ .Values.keycloakRealmConfiguration.smtp.mailDisplayName }}
+            - name: SMTP_USERNAME
+              value: {{ .Values.keycloakRealmConfiguration.smtp.smtpusername | quote }}
             - name: SMTPPASSWORD
               value: {{ .Values.keycloakRealmConfiguration.smtp.smtppassword }}
             - name: ADMIN_USER_EMAIL
