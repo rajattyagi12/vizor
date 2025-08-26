@@ -48,4 +48,4 @@ spec:
               echo "===== Debug: Running dotnet tool restore =====" && \
               dotnet tool restore && \
               echo "===== Debug: Running EF Core migrations =====" && \
-              dotnet tool run dotnet-ef database update --project DotNetScaffolding.csproj --no-build -v
+              dotnet tool run dotnet-ef database update --project DotNetScaffolding.csproj
