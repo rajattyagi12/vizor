@@ -42,7 +42,7 @@ spec:
               echo "Decomposing connection string, as it is not supported by sqlcmd"
               # Decompose each component using 'cut' and 'grep'
               MSSQL_HOST=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*Data Source=\([^;]*\);.*/\1/p' | cut -d',' -f1)
-              MSSQL_HOST=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*Data Source=[^,]*,\([^;]*\);.*/\1/p')
+              MSSQL_PORT=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*Data Source=[^,]*,\([^;]*\);.*/\1/p')
               MSSQL_DB=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*Initial Catalog=\([^;]*\);.*/\1/p')
               MSSQL_USER=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*User Id=\([^;]*\);.*/\1/p')
               MSSQL_PASSWORD=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*Password=\([^;]*\);.*/\1/p')
@@ -51,7 +51,7 @@ spec:
 
               # Output the decomposed values
               echo "SQL Server Host: $MSSQL_HOST"
-              echo "SQL Server Port: $MSSQL_HOST"
+              echo "SQL Server Port: $MSSQL_PORT"
               echo "SQL Database: $MSSQL_DB"
               echo "SQL User: $MSSQL_USER"
               echo "SQL Password: $MSSQL_PASSWORD"
@@ -63,9 +63,9 @@ spec:
               cat /app/migrations.txt
               for i in $(seq 1 $RETRIES); do
                 echo "🔁 Attempt $i: Applying migration script..."
-                /opt/mssql-tools/bin/sqlcmd -S "$MSSQL_HOST,$MSSQL_HOST" -U "$MSSQL_USER" -P "$MSSQL_PASSWORD" -d "$MSSQL_DB" -i /app/migration.sql \
+                /opt/mssql-tools/bin/sqlcmd -S "$MSSQL_HOST,$MSSQL_PORT" -U "$MSSQL_USER" -P "$MSSQL_PASSWORD" -d "$MSSQL_DB" -i /app/migration.sql \
                   && echo "List of migrations applied to the server" \
-                  && /opt/mssql-tools/bin/sqlcmd -S "$MSSQL_HOST,$MSSQL_HOST" -U "$MSSQL_USER" -P "$MSSQL_PASSWORD" -d "$MSSQL_DB" -Q "SELECT MigrationId, ProductVersion FROM __EFMigrationsHistory" \
+                  && /opt/mssql-tools/bin/sqlcmd -S "$MSSQL_HOST,$MSSQL_PORT" -U "$MSSQL_USER" -P "$MSSQL_PASSWORD" -d "$MSSQL_DB" -Q "SELECT MigrationId, ProductVersion FROM __EFMigrationsHistory" \
                   && break
                 echo "⚠️ Migration failed. Retrying in $DELAY seconds..."
                 sleep $DELAY
