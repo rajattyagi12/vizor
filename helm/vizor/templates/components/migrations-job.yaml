@@ -11,7 +11,7 @@ metadata:
     "helm.sh/hook-weight": "10"
 spec:
   ttlSecondsAfterFinished: 30 # keeps the Job visible only for 60 seconds
-  backoffLimit: 1
+  backoffLimit: 4
   template:
     metadata:
       labels:
@@ -24,28 +24,27 @@ spec:
           image: {{ .Values.image.registry }}/{{ .Values.image.repo }}/ef-core-migration:{{ .Values.image.tag }}
           imagePullPolicy: Always
           env:
-            - name: ConnectionStrings__DefaultConnection
+            - name: MSSQL_CONNECTIONSTRING
               valueFrom:
                 secretKeyRef:
                   name: vizor-secrets
                   key: connectionString
-          workingDir: /app/DotNetScaffolding
-          command: ["/bin/sh", "-c"]
+          workingDir: /app
+          command: ["/bin/bash", "-c"]
           args:
             - |
-              echo "===== Debug: List /app contents =====" && \
-              ls -la /app && \
-              echo "===== Debug: File type of /app/DotNetScaffolding =====" && \
-              file /app/DotNetScaffolding && \
-              echo "===== Debug: List /app/DotNetScaffolding contents if directory =====" && \
-              if [ -d /app/DotNetScaffolding ]; then ls -la /app/DotNetScaffolding; else echo "/app/DotNetScaffolding is not a directory"; fi && \
-              echo "===== Debug: Environment PATH =====" && \
-              echo $PATH && \
-              echo "===== Debug: Dotnet SDK versions =====" && \
-              dotnet --list-sdks && \
-              echo "===== Debug: Dotnet tools installed =====" && \
-              dotnet tool list --global || true && \
-              echo "===== Debug: Running dotnet tool restore =====" && \
-              dotnet tool restore && \
-              echo "===== Debug: Running EF Core migrations =====" && \
-              dotnet tool run dotnet-ef database update --project DotNetScaffolding.csproj
+              set -e
+              RETRIES=5
+              DELAY=10
+              echo "This image contains following migrations:"
+              cat /app/migrations.txt
+              for i in $(seq 1 $RETRIES); do
+                echo "Attempt $i: Running migration..."
+                sqlcmd -S "$MSSQL_CONNECTIONSTRING" -i /app/migration.sql \
+                  && echo "List of migrations applied to the server" \
+                  && sqlcmd -S "$MSSQL_CONNECTIONSTRING" -Q -Q "SELECT MigrationId, ProductVersion FROM __EFMigrationsHistory" \
+                  && break
+                echo "Migration failed. Retrying in $DELAY seconds..."
+                sleep $DELAY
+              done
+              echo "Migration completed or max retries reached."
