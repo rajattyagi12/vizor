@@ -40,9 +40,9 @@ spec:
               cat /app/migrations.txt
               for i in $(seq 1 $RETRIES); do
                 echo "Attempt $i: Running migration..."
-                sqlcmd -S "$MSSQL_CONNECTIONSTRING" -i /app/migration.sql \
+                /opt/mssql-tools/bin/sqlcmd -S "$MSSQL_CONNECTIONSTRING" -i /app/migration.sql \
                   && echo "List of migrations applied to the server" \
-                  && sqlcmd -S "$MSSQL_CONNECTIONSTRING" -Q -Q "SELECT MigrationId, ProductVersion FROM __EFMigrationsHistory" \
+                  && /opt/mssql-tools/bin/sqlcmd -S "$MSSQL_CONNECTIONSTRING" -Q -Q "SELECT MigrationId, ProductVersion FROM __EFMigrationsHistory" \
                   && break
                 echo "Migration failed. Retrying in $DELAY seconds..."
                 sleep $DELAY
