@@ -6,9 +6,11 @@ metadata:
     {{- include "vizor.labels" . | nindent 4 }}
     vizor: migrations
   annotations:
-    "helm.sh/hook": pre-upgrade,post-install
-    "helm.sh/hook-delete-policy": hook-succeeded
-    "helm.sh/hook-weight": "10"
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    # "helm.sh/hook": pre-upgrade,post-install
+    # "helm.sh/hook-delete-policy": hook-succeeded
+    # "helm.sh/hook-weight": "10"
 spec:
   ttlSecondsAfterFinished: 30 # keeps the Job visible only for 60 seconds
   backoffLimit: 4
@@ -24,7 +26,7 @@ spec:
           image: {{ .Values.image.registry }}/{{ .Values.image.repo }}/ef-core-migration:{{ .Values.image.tag }}
           imagePullPolicy: Always
           env:
-            - name: MSSQL_CONNECTIONSTRING
+            - name: MSSQL_CONNECTION_STRING
               valueFrom:
                 secretKeyRef:
                   name: vizor-secrets
@@ -37,15 +39,35 @@ spec:
               RETRIES=5
               DELAY=10
               env
+              echo "Decomposing connection string, as it is not supported by sqlcmd"
+              # Decompose each component using 'cut' and 'grep'
+              MSSQL_HOST=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*Data Source=\([^;]*\);.*/\1/p' | cut -d',' -f1)
+              MSSQL_HOST=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*Data Source=[^,]*,\([^;]*\);.*/\1/p')
+              MSSQL_DB=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*Initial Catalog=\([^;]*\);.*/\1/p')
+              MSSQL_USER=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*User Id=\([^;]*\);.*/\1/p')
+              MSSQL_PASSWORD=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*Password=\([^;]*\);.*/\1/p')
+              MSSQL_TRUST_CERTIFICATE=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*Trust Server Certificate=\([^;]*\);.*/\1/p')
+              MSSQL_AUTHENTICATION=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*Authentication=\([^;]*\);.*/\1/p')
+
+              # Output the decomposed values
+              echo "SQL Server Host: $MSSQL_HOST"
+              echo "SQL Server Port: $MSSQL_HOST"
+              echo "SQL Database: $MSSQL_DB"
+              echo "SQL User: $MSSQL_USER"
+              echo "SQL Password: $MSSQL_PASSWORD"
+              echo "Trust Server Certificate: $MSSQL_TRUST_CERTIFICATE"
+              echo "Authentication: $MSSQL_AUTHENTICATION"
+
+
               echo "This image contains following migrations:"
               cat /app/migrations.txt
               for i in $(seq 1 $RETRIES); do
-                echo "Attempt $i: Running migration..."
-                /opt/mssql-tools/bin/sqlcmd -S "$MSSQL_CONNECTIONSTRING" -i /app/migration.sql \
+                echo "🔁 Attempt $i: Applying migration script..."
+                /opt/mssql-tools/bin/sqlcmd -S "$MSSQL_HOST,$MSSQL_HOST" -U "$MSSQL_USER" -P "$MSSQL_PASSWORD" -d "$MSSQL_DB" -i /app/migration.sql \
                   && echo "List of migrations applied to the server" \
-                  && /opt/mssql-tools/bin/sqlcmd -S "$MSSQL_CONNECTIONSTRING" -Q -Q "SELECT MigrationId, ProductVersion FROM __EFMigrationsHistory" \
+                  && /opt/mssql-tools/bin/sqlcmd -S "$MSSQL_HOST,$MSSQL_HOST" -U "$MSSQL_USER" -P "$MSSQL_PASSWORD" -d "$MSSQL_DB" -Q "SELECT MigrationId, ProductVersion FROM __EFMigrationsHistory" \
                   && break
-                echo "Migration failed. Retrying in $DELAY seconds..."
+                echo "⚠️ Migration failed. Retrying in $DELAY seconds..."
                 sleep $DELAY
               done
               echo "Migration completed or max retries reached."
