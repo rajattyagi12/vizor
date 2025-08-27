@@ -36,6 +36,7 @@ spec:
               set -e
               RETRIES=5
               DELAY=10
+              env
               echo "This image contains following migrations:"
               cat /app/migrations.txt
               for i in $(seq 1 $RETRIES); do
