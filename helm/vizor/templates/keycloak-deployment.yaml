@@ -55,6 +55,10 @@ spec:
               value: "jdbc:sqlserver://{{ .Values.sqlServer.service.name }}:{{ .Values.sqlServer.service.port }};databaseName={{ .Values.keycloakRealmConfiguration.keycloakEnv.AUTH_DATABASE_NAME }};encrypt=true;trustServerCertificate=true"
             - name: KC_HTTP_RELATIVE_PATH
               value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_HTTP_RELATIVE_PATH }}
+            - name: KC_DB_POOL_MIN_SIZE
+              value: "5"
+            - name: KC_DB_POOL_INITIAL_SIZE
+              value: "5"
           resources:
             requests:
               memory: {{ .Values.keycloakRealmConfiguration.resources.requested_memory }}
