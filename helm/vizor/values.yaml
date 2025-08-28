@@ -22,6 +22,8 @@ auth:
   clientId:
 
 ingress:
+  # -- Ingress class for ingress-rules
+  className: nginx
   # -- Ingress host DNS name
   host: 
   # -- Set this to enable TLS, leave unset to run in insecure mode

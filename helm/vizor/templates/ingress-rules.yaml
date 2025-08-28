@@ -14,7 +14,8 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     {{ end }}
 spec:
-  ingressClassName: dapr
+  # Let Ingress class be specified
+  ingressClassName: {{ .Values.ingress.className }}
   {{ if $tlsEnabled }}
   tls:
   - hosts:
