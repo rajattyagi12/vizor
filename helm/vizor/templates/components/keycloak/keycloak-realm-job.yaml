@@ -9,9 +9,10 @@ metadata:
 
 spec:
   ttlSecondsAfterFinished: 30 # Allow Job to exist for ArgoCD to discover completion
+  backoffLimit: 3
   template:
     spec:
-      restartPolicy: Never
+      restartPolicy: OnFailure
       containers:
         - name: realm-init
           image: alpine:3.20
