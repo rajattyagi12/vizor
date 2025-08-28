@@ -38,36 +38,59 @@ spec:
               set -e
               RETRIES=5
               DELAY=10
-              env
-              echo "Decomposing connection string, as it is not supported by sqlcmd"
-              # Decompose each component using 'cut' and 'grep'
-              MSSQL_HOST=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*Data Source=\([^;]*\);.*/\1/p' | cut -d',' -f1)
-              MSSQL_PORT=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*Data Source=[^,]*,\([^;]*\);.*/\1/p')
-              MSSQL_DB=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*Initial Catalog=\([^;]*\);.*/\1/p')
-              MSSQL_USER=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*User Id=\([^;]*\);.*/\1/p')
-              MSSQL_PASSWORD=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*Password=\([^;]*\);.*/\1/p')
-              MSSQL_TRUST_CERTIFICATE=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*Trust Server Certificate=\([^;]*\);.*/\1/p')
-              MSSQL_AUTHENTICATION=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*Authentication=\([^;]*\);.*/\1/p')
+              # Adding conditional migration run
+              # TODO: Remove this condition when sqlcmd migration issues are resolved
+              # 
+              if [ -f "/app/migration.sql" ]; then
+                env
+                echo "Decomposing connection string, as it is not supported by sqlcmd"
+                # Decompose each component using 'cut' and 'grep'
+                MSSQL_HOST=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*Data Source=\([^;]*\);.*/\1/p' | cut -d',' -f1)
+                MSSQL_PORT=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*Data Source=[^,]*,\([^;]*\);.*/\1/p')
+                MSSQL_DB=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*Initial Catalog=\([^;]*\);.*/\1/p')
+                MSSQL_USER=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*User Id=\([^;]*\);.*/\1/p')
+                MSSQL_PASSWORD=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*Password=\([^;]*\);.*/\1/p')
+                MSSQL_TRUST_CERTIFICATE=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*Trust Server Certificate=\([^;]*\);.*/\1/p')
+                MSSQL_AUTHENTICATION=$(echo "$MSSQL_CONNECTION_STRING" | sed -n 's/.*Authentication=\([^;]*\);.*/\1/p')
 
-              # Output the decomposed values
-              echo "SQL Server Host: $MSSQL_HOST"
-              echo "SQL Server Port: $MSSQL_PORT"
-              echo "SQL Database: $MSSQL_DB"
-              echo "SQL User: $MSSQL_USER"
-              echo "SQL Password: $MSSQL_PASSWORD"
-              echo "Trust Server Certificate: $MSSQL_TRUST_CERTIFICATE"
-              echo "Authentication: $MSSQL_AUTHENTICATION"
+                # Output the decomposed values
+                echo "SQL Server Host: $MSSQL_HOST"
+                echo "SQL Server Port: $MSSQL_PORT"
+                echo "SQL Database: $MSSQL_DB"
+                echo "SQL User: $MSSQL_USER"
+                echo "SQL Password: $MSSQL_PASSWORD"
+                echo "Trust Server Certificate: $MSSQL_TRUST_CERTIFICATE"
+                echo "Authentication: $MSSQL_AUTHENTICATION"
 
 
-              echo "This image contains following migrations:"
-              [ -f /app/migrations.txt ] && cat /app/migrations.txt
-              for i in $(seq 1 $RETRIES); do
-                echo "🔁 Attempt $i: Applying migration script..."
-                /opt/mssql-tools/bin/sqlcmd -S "$MSSQL_HOST,$MSSQL_PORT" -U "$MSSQL_USER" -P "$MSSQL_PASSWORD" -d "$MSSQL_DB" -i /app/migration.sql \
-                  && echo "List of migrations applied to the server" \
-                  && /opt/mssql-tools/bin/sqlcmd -S "$MSSQL_HOST,$MSSQL_PORT" -U "$MSSQL_USER" -P "$MSSQL_PASSWORD" -d "$MSSQL_DB" -Q "SELECT MigrationId, ProductVersion FROM __EFMigrationsHistory" \
-                  && break
-                echo "⚠️ Migration failed. Retrying in $DELAY seconds..."
-                sleep $DELAY
-              done
-              echo "Migration completed or max retries reached."
+                echo "This image contains following migrations:"
+                [ -f /app/migrations.txt ] && cat /app/migrations.txt
+                for i in $(seq 1 $RETRIES); do
+                  echo "🔁 Attempt $i: Applying migration script..."
+                  /opt/mssql-tools/bin/sqlcmd -S "$MSSQL_HOST,$MSSQL_PORT" -U "$MSSQL_USER" -P "$MSSQL_PASSWORD" -d "$MSSQL_DB" -i /app/migration.sql \
+                    && echo "List of migrations applied to the server" \
+                    && /opt/mssql-tools/bin/sqlcmd -S "$MSSQL_HOST,$MSSQL_PORT" -U "$MSSQL_USER" -P "$MSSQL_PASSWORD" -d "$MSSQL_DB" -Q "SELECT MigrationId, ProductVersion FROM __EFMigrationsHistory" \
+                    && break
+                  echo "⚠️ Migration failed. Retrying in $DELAY seconds..."
+                  sleep $DELAY
+                done
+                echo "Migration completed or max retries reached."
+              else
+                echo "===== Debug: List /app contents =====" && \
+                ls -la /app && \
+                echo "===== Debug: File type of /app/DotNetScaffolding =====" && \
+                file /app/DotNetScaffolding && \
+                echo "===== Debug: List /app/DotNetScaffolding contents if directory =====" && \
+                if [ -d /app/DotNetScaffolding ]; then ls -la /app/DotNetScaffolding; else echo "/app/DotNetScaffolding is not a directory"; fi && \
+                echo "===== Debug: Environment PATH =====" && \
+                echo $PATH && \
+                echo "===== Debug: Dotnet SDK versions =====" && \
+                dotnet --list-sdks && \
+                echo "===== Debug: Dotnet tools installed =====" && \
+                dotnet tool list --global || true && \
+                echo "===== Debug: Running dotnet tool restore =====" && \
+                dotnet tool restore && \
+                echo "===== Debug: Running EF Core migrations =====" && \
+                dotnet tool run dotnet-ef database update --project DotNetScaffolding.csproj
+              fi
+
