@@ -60,7 +60,7 @@ spec:
 
 
               echo "This image contains following migrations:"
-              cat /app/migrations.txt
+              [ -f /app/migrations.txt ] && cat /app/migrations.txt
               for i in $(seq 1 $RETRIES); do
                 echo "🔁 Attempt $i: Applying migration script..."
                 /opt/mssql-tools/bin/sqlcmd -S "$MSSQL_HOST,$MSSQL_PORT" -U "$MSSQL_USER" -P "$MSSQL_PASSWORD" -d "$MSSQL_DB" -i /app/migration.sql \
