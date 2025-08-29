@@ -2,7 +2,6 @@
 # Default values for vizor Helm chart
 #
 
-
 # -- Global settings for the Helm chart
 global:
   namespace: vizor # Your target namespace. All resources will be deployed here.
@@ -25,36 +24,38 @@ ingress:
   # -- Ingress class for ingress-rules
   className: nginx
   # -- Ingress host DNS name
-  host: 
-  # -- Set this to enable TLS, leave unset to run in insecure mode
-  certName:
-  # -- Cert manager issuer, leave unset to run in insecure mode
+  host: # -- Set this to enable TLS, leave unset to run in insecure mode
+
+  certName: # -- Cert manager issuer, leave unset to run in insecure mode
+
   certIssuer:
 
 resources:
   limits:
     # -- CPU limit for the containers, leave alone mostly
-    cpu: 128m
+    cpu: 256m
     # -- Memory limit for the containers, leave alone mostly
-    memory: 256Mi
+    memory: 512Mi
 
 coreService:
   # -- Dapr store core annotations
-  annotations:
-  # -- Dapr store core replica count
+  annotations: # -- Dapr store core replica count
+
   replicas: 2
 
 engagementService:
   # -- Dapr store engagement annotations
-  annotations:
-  # -- Dapr store engagement replica count
+  annotations: # -- Dapr store engagement replica count
+
   replicas: 2
 
 interactionService:
   # -- Dapr store interaction annotations
-  annotations:
-  # -- Dapr store interaction replica count
+  annotations: # -- Dapr store interaction replica count
+
   replicas: 0
+
+useMigrationSql: false
 
 # users:
 #   # -- Dapr store users annotations
@@ -64,8 +65,8 @@ interactionService:
 
 frontend:
   # -- Dapr store frontend host annotations
-  annotations:
-  # -- Dapr store frontend host replica count
+  annotations: # -- Dapr store frontend host replica count
+
   replicas: 1
 
 daprComponents:
@@ -128,7 +129,8 @@ postgresql:
       enabled: true
       storageClass: "local-path" # Use your specified storage class
       size: 5Gi # You can adjust this size as needed
-    volumePermissions: # Often needed for local-path to ensure correct permissions
+    volumePermissions:
+      # Often needed for local-path to ensure correct permissions
       enabled: true
 
 # -- Persistent Volume and Claim configuration for SFTPGo and backups
@@ -146,7 +148,8 @@ backupCronJob:
   failedJobsHistoryLimit: 1
 
 # --- Configuration for the local-path-provisioner subchart ---
-local-path-provisioner: # This key must match the `name` in Chart.yaml dependencies
+local-path-provisioner:
+  # This key must match the `name` in Chart.yaml dependencies
   enabled: true # Ensure the subchart is enabled
   storageClass:
     create: true # Ensure it creates the StorageClass
@@ -201,7 +204,6 @@ sftpgo:
       value: /etc/sftpgo/config.yml
     - name: SFTPGO_DEFAULT_ADMIN_ENABLED
       value: "false" # because we load from json instead
-
   # Write config.yml into a ConfigMap
   config: |
     data_provider:
@@ -237,7 +239,6 @@ sftpgo:
       mountPath: /etc/sftpgo/description.json
       subPath: description.json
       readOnly: true
-
   # Write description.json into a ConfigMap
   description: |
     {
@@ -310,7 +311,7 @@ keycloakRealmConfiguration:
     mailDisplayName: "Vizor"
     smtpusername: "AKIAVWE2WCVHKTCNHJEE"
     smtppassword: "BIqlgWKuB3MhaFYTxaAXCeglcjLL7mzHYGR1G54OqHLM"
-  
+
   keycloakEnv:
     AUTH_DATABASE_NAME: "vizor_auth"
     KEYCLOAK_ADMIN: "admin"
