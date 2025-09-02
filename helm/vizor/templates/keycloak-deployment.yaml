@@ -35,16 +35,40 @@ spec:
       labels:
         app: keycloak
     spec:
+      initContainers:
+        - name: wait-for-mssql
+          image: mcr.microsoft.com/mssql-tools
+          command:
+            - /bin/bash
+            - -c
+            - |
+              echo "Waiting for MSSQL to become available..."
+              until /opt/mssql-tools/bin/sqlcmd -S "{{ .Values.sqlServer.service.name }},{{ .Values.sqlServer.service.port }}" \
+                -U "{{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_DB_USERNAME }}" \
+                -P "{{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_DB_PASSWORD }}" \
+                -Q "SELECT 1"; do
+                echo "Still waiting..."
+                sleep 3
+              done
+
+              echo "Connected. Ensuring DB exists..."
+              /opt/mssql-tools/bin/sqlcmd -S "{{ .Values.sqlServer.service.name }},{{ .Values.sqlServer.service.port }}" \
+                -U "{{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_DB_USERNAME }}" \
+                -P "{{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_DB_PASSWORD }}" \
+                -Q "IF NOT EXISTS(SELECT name FROM sys.databases WHERE name='{{ .Values.keycloakRealmConfiguration.keycloakEnv.AUTH_DATABASE_NAME }}') CREATE DATABASE {{ .Values.keycloakRealmConfiguration.keycloakEnv.AUTH_DATABASE_NAME }};"
+              echo "DB Exists Creating Keycloak"
       containers:
         - name: keycloak
           image: {{ .Values.image.registry }}/{{ .Values.image.repo }}/vizor-themed-keycloak:{{ .Values.image.tag }}
           imagePullPolicy: Always
           args: ["start-dev", "--import-realm"]
           env:
-            - name: KEYCLOAK_ADMIN
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
               value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KEYCLOAK_ADMIN }}
-            - name: KEYCLOAK_ADMIN_PASSWORD
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
               value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KEYCLOAK_ADMIN_PASSWORD }}
+            - name: KC_BOOTSTRAP_ADMIN_EXPIRATION
+              value: "0" 
             - name: KC_DB
               value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_DB }}
             - name: KC_DB_USERNAME
