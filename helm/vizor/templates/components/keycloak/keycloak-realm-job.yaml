@@ -9,7 +9,7 @@ metadata:
 
 spec:
   ttlSecondsAfterFinished: 30 # Allow Job to exist for ArgoCD to discover completion
-  backoffLimit: 3
+  # backoffLimit: 3
   template:
     spec:
       restartPolicy: OnFailure
