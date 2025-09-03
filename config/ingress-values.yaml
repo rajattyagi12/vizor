@@ -10,9 +10,9 @@ controller:
       purpose: "vizor-api-gateway"
 
   # Use a special class to not clash with any other controllers installed
-  ingressClass: "dapr"
+  ingressClass: "nginx"
   ingressClassResource:
-    name: "dapr"
+    name: "nginx"
 
   # This Dapr-izes the workload
   podAnnotations:

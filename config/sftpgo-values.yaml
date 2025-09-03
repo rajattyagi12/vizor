@@ -16,16 +16,16 @@ image:
   pullPolicy: IfNotPresent
 
   # -- Image tag override for the default value (chart appVersion).
-  tag: ''
+  tag: ""
 
 # -- Reference to one or more secrets to be used when [pulling images](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-pod-that-uses-your-secret) (from private registries).
 imagePullSecrets: []
 
 # -- A name in place of the chart name for `app:` labels.
-nameOverride: ''
+nameOverride: ""
 
 # -- A name to substitute for the full names of resources.
-fullnameOverride: ''
+fullnameOverride: ""
 
 sftpd:
   # -- Enable SFTP service.
@@ -120,7 +120,7 @@ serviceAccount:
 
   # -- The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template.
-  name: ''
+  name: ""
 
 # -- Annotations to be added to deployment.
 deploymentAnnotations: {}
@@ -153,7 +153,6 @@ securityContext:
 
 # -- Add [init containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) to the pod.
 initContainers:
-
 
 service:
   # -- Annotations to be added to the service.
@@ -219,8 +218,7 @@ service:
 
 # -- Additional services exposing servers (SFTP, FTP, WebDAV, HTTP) individually.
 # The schema matches the one under the `service` key. Additional services need at least one port.
-services:
-  {}
+services: {}
   # public:
   #   annotations: {}
   #   type: LoadBalancer
@@ -239,11 +237,10 @@ ui:
     enabled: false
 
     # -- Ingress [class name](https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class).
-    className: ''
+    className: ""
 
     # -- Annotations to be added to the ingress.
-    annotations:
-      {}
+    annotations: {}
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
 
@@ -269,11 +266,10 @@ api:
     enabled: false
 
     # -- Ingress [class name](https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class).
-    className: ''
+    className: ""
 
     # -- Annotations to be added to the ingress.
-    annotations:
-      {}
+    annotations: {}
       # nginx.ingress.kubernetes.io/rewrite-target: /$1
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
@@ -297,8 +293,7 @@ api:
 # -- Container resource [requests and limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/).
 # See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#resources) for details.
 # @default -- No requests or limits.
-resources:
-  {}
+resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -388,4 +383,4 @@ persistence:
     resources:
       requests:
         storage: 5Gi
-    storageClassName: 'local-path'
+    storageClassName: "local-path"

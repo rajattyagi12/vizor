@@ -51,7 +51,7 @@ spec:
                 name: api-gateway-dapr
                 port:
                   number: 80
-          
+
           # Everything else falls through to the frontend-host for serving the SPA
           - path: /
             pathType: Prefix

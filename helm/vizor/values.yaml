@@ -84,7 +84,13 @@ daprComponents:
     redisHost: vizor-redis-master:6379
 
   secrets:
-
+    smtp-host: "email-smtp.us-east-1.amazonaws.com"
+    smtp-port: "587"
+    smtp-starttls: "true"
+    smtp-auth: "true"
+    smtp-mail-display-name: "Vizor"
+    smtpusername: "AKIAVWE2WCVHKTCNHJEE"
+    smtppassword: "BIqlgWKuB3MhaFYTxaAXCeglcjLL7mzHYGR1G54OqHLM"
   secretStore:
     name: vizor-secretstore
     componentType: secretstores.kubernetes
