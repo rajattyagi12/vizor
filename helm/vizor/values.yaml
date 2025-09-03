@@ -36,6 +36,11 @@ resources:
     cpu: 256m
     # -- Memory limit for the containers, leave alone mostly
     memory: 512Mi
+  requests:
+    # -- CPU limit for the containers, leave alone mostly
+    cpu: 64m
+    # -- Memory limit for the containers, leave alone mostly
+    memory: 128Mi
 
 coreService:
   # -- Dapr store core annotations
