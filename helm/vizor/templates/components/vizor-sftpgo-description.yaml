@@ -30,7 +30,7 @@ data:
           "quota_files": 0,
           "status": 1,
           "permissions": {
-            "/": ["list", "download", "upload", "delete", "rename", "chmod"]
+            "/": ["list", "download", "upload", "delete", "rename", "chmod", "create_dirs"]
           }
         }
       ]
