@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway-dapr
+  namespace: vizor
+  labels:
+    app: api-gateway-dapr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway-dapr
+  template:
+    metadata:
+      labels:
+        app: api-gateway-dapr
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "api-gateway"
+        dapr.io/app-port: "80"
+        # dapr.io/sidecar-listen-addresses: "0.0.0.0"
+    spec:
+      containers:
+        - name: caddy
+          image: caddy:latest
+          ports:
+            - containerPort: 80
