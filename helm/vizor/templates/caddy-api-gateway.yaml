@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: api-gateway
+  name: api-proxy
   namespace: vizor
   labels:
-    app: api-gateway
+    purpose: "vizor-api-gateway"
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: api-gateway
+      app: api-proxy
   template:
     metadata:
       labels:
-        app: api-gateway
+        app: api-proxy
       annotations:
         dapr.io/enabled: "true"
-        dapr.io/app-id: "api-gateway"
+        dapr.io/app-id: "api-proxy"
         dapr.io/app-port: "80"
         # dapr.io/sidecar-listen-addresses: "0.0.0.0"
     spec:
