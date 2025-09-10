@@ -7,22 +7,26 @@ metadata:
     app: api-proxy
 data:
   Caddyfile: |
-    :80 {
-      # Enable access logs
-      log {
-        output stdout
-        format console
+    {
+      tracing {
+        endpoint http://jaeger-inmemory-instance-collector.observability.svc.k8s.nbt:4318
+        service_name caddy-gateway
       }
-      reverse_proxy localhost:3500
 
-      # # Proxy all Dapr service invocation calls
-      # handle_path /v1.0/invoke/{service}/method/* {
-      #   reverse_proxy {service}-dapr:3500 {
-      #     header_up Host {host}
-      #     header_up X-Forwarded-For {remote}
-      #   }
-      # }
+      logging {
+        level DEBUG
+        logs {
+          default {
+            level DEBUG
+            output stdout
+          }
+        }
+      }
 
-      # Optional health check
-      respond /health "OK"
+
+      :80 {
+        reverse_proxy localhost:3500
+              # Optional health check
+            respond /health "OK"
+      }
     }
