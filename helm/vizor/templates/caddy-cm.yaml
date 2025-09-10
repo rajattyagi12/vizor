@@ -13,14 +13,15 @@ data:
         output stdout
         format console
       }
+      reverse_proxy localhost:3500
 
-      # Proxy all Dapr service invocation calls
-      handle_path /v1.0/invoke/{service}/method/* {
-        reverse_proxy {service}-dapr:3500 {
-          header_up Host {host}
-          header_up X-Forwarded-For {remote}
-        }
-      }
+      # # Proxy all Dapr service invocation calls
+      # handle_path /v1.0/invoke/{service}/method/* {
+      #   reverse_proxy {service}-dapr:3500 {
+      #     header_up Host {host}
+      #     header_up X-Forwarded-For {remote}
+      #   }
+      # }
 
       # Optional health check
       respond /health "OK"
