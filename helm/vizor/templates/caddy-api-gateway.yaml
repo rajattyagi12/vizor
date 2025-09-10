@@ -25,3 +25,46 @@ spec:
           image: caddy:latest
           ports:
             - containerPort: 80
+          volumeMounts:
+            - name: caddyfile
+              mountPath: /etc/caddy/Caddyfile
+              subPath: Caddyfile
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+      volumes:
+        - name: caddyfile
+          configMap:
+            name: caddy-config
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: caddy-config
+  namespace: vizor
+  labels:
+    app: api-proxy-dapr
+data:
+  Caddyfile: |
+    :80 {
+      # Enable access logs
+      log {
+        output stdout
+        format console
+      }
+
+      # Proxy all Dapr service invocation calls
+    handle_path /v1.0/invoke/{service}/method/* {
+      reverse_proxy {service}-dapr:3500 {
+        header_up Host {host}
+        header_up X-Forwarded-For {remote}
+      }
+    }
+
+      # Optional health check
+      respond /health "OK"
+    }
