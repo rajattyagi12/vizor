@@ -6,7 +6,8 @@ metadata:
     {{- include "vizor.labels" . | nindent 4 }}
     vizor: migrations
   annotations:
-    # argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "5"
     # argocd.argoproj.io/hook-delete-policy: HookSucceeded
     "helm.sh/hook": pre-upgrade,post-install
     "helm.sh/hook-delete-policy": hook-succeeded
