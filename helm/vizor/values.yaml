@@ -349,7 +349,7 @@ keycloakRealmConfiguration:
     passwordPolicy: "length(8) and digits(1) and upperCase(1) and lowerCase(1) and specialChars(1)"
     bruteForceProtected: true
     permanentLockout: true
-    failureFactor: 3
+    failureFactor: 5
     rememberMe: false
     clientSessionIdleTimeout: 3600
     clientSessionMaxLifespan: 7200
