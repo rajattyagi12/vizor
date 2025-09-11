@@ -23,6 +23,11 @@ spec:
       containers:
         - name: caddy
           image: caddy:latest
+          env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://jaeger-inmemory-instance-collector.observability.svc.k8s.nbt:4317
+            - name: OTEL_EXPORTER_OTLP_INSECURE
+              value: true
           ports:
             - containerPort: 80
           volumeMounts:
