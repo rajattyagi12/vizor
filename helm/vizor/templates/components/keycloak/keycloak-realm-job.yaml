@@ -46,16 +46,34 @@ spec:
                 -H "Content-Type: application/json" \
                 http://keycloak:8080/auth/admin/realms/$REALM_NAME/users/profile)
 
-              UPDATED_PROFILE=$(echo "$PROFILE" | jq '.attributes += [{
-                "name": "clientID",
-                "displayName": "ClientID",
-                "required": { "roles": ["user"] },
-                "permissions": { "view": ["admin"], "edit": ["admin"] },
-                "multivalued": false,
-                "validations": {
-                  "integer": { }
-                }
-              }]')
+              UPDATED_PROFILE=$(echo "$PROFILE" | jq '
+                .attributes |= (
+                  map(
+                    if .name == "firstName" or .name == "lastName" then
+                      . + {
+                        validations: {
+                          pattern: {
+                            pattern: "^(?!\\s*$)[A-Za-z0-9 @_/,-]+$"
+                          }
+                        }
+                      }
+                    else .
+                    end
+                  )
+                  + [
+                    {
+                      "name": "clientID",
+                      "displayName": "ClientID",
+                      "required": { "roles": ["user"] },
+                      "permissions": { "view": ["admin"], "edit": ["admin"] },
+                      "multivalued": false,
+                      "validations": {
+                        "integer": {}
+                      }
+                    }
+                  ]
+                )
+              ')
 
               curl -s -X PUT \
                 -H "Authorization: Bearer $TOKEN" \
