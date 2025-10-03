@@ -56,7 +56,8 @@ kubectl create namespace $namespace
 ## 💾 Deploy Redis
 
 ```bash
-helm install dapr-redis bitnami/redis --values ./config/redis-values.yaml --namespace $namespace
+# helm install dapr-redis bitnami/redis --values ./config/redis-values.yaml --namespace $namespace
+kubectl apply -f ./config/redis.yaml
 ```
 
 ## 🚀 Ingress NGINX
