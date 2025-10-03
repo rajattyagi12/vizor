@@ -30,7 +30,7 @@ helm repo update
 Skip this if the Dapr control plane is already deployed
 
 ```bash
-helm upgrade --install dapr dapr/dapr --namespace dapr-system --create-namespace --wait
+helm upgrade --install dapr dapr/dapr --version 1.16.1-rc.1 --namespace dapr-system --create-namespace --wait
 kubectl get pod --namespace dapr-system
 ```
 
