@@ -91,13 +91,13 @@ tasks:
   deploy-all:
     desc: Run full pipeline
     deps:
-      - check-cluster
-      - install-deps
-      - create-namespace
-      - deploy-dapr
-      - deploy-redis
-      - deploy-ingress
-      - deploy-vizor-apps
+      - task: check-cluster
+      - task: install-deps
+      - task: create-namespace
+      - task: deploy-dapr
+      - task: deploy-redis
+      - task: deploy-ingress
+      - task: deploy-vizor-apps
   destroy:
     desc: Remove all deployed components
     cmds:
