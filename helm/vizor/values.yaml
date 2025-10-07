@@ -58,7 +58,7 @@ interactionService:
   # -- Dapr store interaction annotations
   annotations: # -- Dapr store interaction replica count
 
-  replicas: 0
+  replicas: 2
 
 useMigrationSql: false
 
