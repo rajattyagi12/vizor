@@ -385,5 +385,5 @@ keycloakRealmConfiguration:
           post.logout.redirect.uris: "{{ .Values.keycloakRealmConfiguration.serverUrl }}/*"
         enabled: true
 
-observability: 
+observability:
   enabled: false

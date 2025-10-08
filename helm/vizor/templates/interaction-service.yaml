@@ -19,7 +19,7 @@ spec:
       annotations:
         dapr.io/enabled: "true"
         dapr.io/app-id: "interaction-service"
-        dapr.io/app-port: "9002"
+        dapr.io/app-port: "8080"
         dapr.io/log-as-json: "true"
       {{- with .Values.interactionService.annotations }}
           {{- toYaml . | nindent 8 }}
@@ -46,10 +46,10 @@ spec:
           {{- toYaml . | nindent 10 }}
         {{- end }}
 
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 9002
-            httpHeaders:
-              - name: "No-Log"
-                value: "true"
+        # readinessProbe:
+        #   httpGet:
+        #     path: /health
+        #     port: 9002
+        #     httpHeaders:
+        #       - name: "No-Log"
+        #         value: "true"
