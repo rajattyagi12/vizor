@@ -2,7 +2,7 @@ apiVersion: dapr.io/v1alpha1
 kind: Configuration
 metadata:
   name: tracing
-  namespace: default
+  namespace: dapr-system
 spec:
   tracing:
     samplingRate: "1"
