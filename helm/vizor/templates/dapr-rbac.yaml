@@ -1,0 +1,25 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: dapr-secrets-reader
+  namespace: default
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: dapr-secrets-reader-binding
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: default       # or your service account
+roleRef:
+  kind: Role
+  name: dapr-secrets-reader
+  apiGroup: rbac.authorization.k8s.io
+
