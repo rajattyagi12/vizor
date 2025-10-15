@@ -1,0 +1,13 @@
+apiVersion: dapr.io/v1alpha1
+kind: Configuration
+metadata:
+  name: tracing
+  namespace: dapr-system
+spec:
+  tracing:
+    samplingRate: "1"
+    zipkin:
+      # Use the Zipkin service in observability namespace
+      endpointAddress: "http://zipkin.observability.svc.cluster.local:9411/api/v2/spans"
+
+
