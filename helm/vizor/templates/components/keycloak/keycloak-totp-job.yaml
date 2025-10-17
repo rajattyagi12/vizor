@@ -3,13 +3,11 @@ kind: Job
 metadata:
   name: keycloak-totp-init
   namespace: vizor
-  # annotations:
-  #   "helm.sh/hook": post-install,post-upgrade  # Run after install/upgrade
-  #   "helm.sh/hook-delete-policy": hook-succeeded  # Delete after success
-
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade  # Run after install/upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded  # Delete after success
 spec:
-  ttlSecondsAfterFinished: 30 # Allow Job to exist for ArgoCD to discover completion
-  # backoffLimit: 3
+  ttlSecondsAfterFinished: 30
   template:
     spec:
       restartPolicy: OnFailure
@@ -40,10 +38,8 @@ spec:
                 exit 1
               fi
 
-              echo "Setting CONFIGURE_TOTP as required action for all users in realm: $REALM_NAME"
+              echo "Setting CONFIGURE_TOTP as required action for users in realm: $REALM_NAME"
 
-              # Get all users in the realm
-              echo "Fetching all users from realm..."
               USERS=$(curl -s \
                 -H "Authorization: Bearer $TOKEN" \
                 "http://keycloak:8080/auth/admin/realms/$REALM_NAME/users")
@@ -56,7 +52,6 @@ spec:
               USER_COUNT=$(echo "$USERS" | jq length)
               echo "Found $USER_COUNT users in realm"
 
-              # Process each user
               for i in $(seq 0 $((USER_COUNT - 1))); do
                 USER_JSON=$(echo "$USERS" | jq ".[$i]")
                 USER_ID=$(echo "$USER_JSON" | jq -r '.id')
@@ -64,7 +59,17 @@ spec:
 
                 echo "Processing user: $USERNAME (ID: $USER_ID)"
 
-                # Get current user representation
+                # --- NEW: check if user already has OTP configured ---
+                CREDENTIALS=$(curl -s \
+                  -H "Authorization: Bearer $TOKEN" \
+                  "http://keycloak:8080/auth/admin/realms/$REALM_NAME/users/$USER_ID/credentials")
+
+                if echo "$CREDENTIALS" | jq -e '.[] | select(.type=="otp")' > /dev/null; then
+                  echo "User $USERNAME already has OTP configured. Skipping..."
+                  continue
+                fi
+                # ------------------------------------------------------
+
                 CURRENT_USER=$(curl -s \
                   -H "Authorization: Bearer $TOKEN" \
                   "http://keycloak:8080/auth/admin/realms/$REALM_NAME/users/$USER_ID")
@@ -74,12 +79,10 @@ spec:
                   continue
                 fi
 
-                # Ensure requiredActions contains CONFIGURE_TOTP (idempotent)
                 UPDATED_USER=$(echo "$CURRENT_USER" | jq '
                   .requiredActions = ((.requiredActions // []) + ["CONFIGURE_TOTP"] | unique)
                 ')
 
-                # Update the user with CONFIGURE_TOTP as required action
                 echo "Setting CONFIGURE_TOTP as required action for user: $USERNAME"
                 PUT_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
                   -H "Authorization: Bearer $TOKEN" \
@@ -100,7 +103,7 @@ spec:
                 fi
               done
 
-              echo "Successfully set CONFIGURE_TOTP as required action for all $USER_COUNT users in realm $REALM_NAME"
+              echo "Successfully processed all $USER_COUNT users in realm $REALM_NAME"
           env:
             - name: REALM_NAME
               value: {{ .Values.keycloakRealmConfiguration.realmName | quote }}
