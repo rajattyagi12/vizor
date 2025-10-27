@@ -5,6 +5,15 @@ kind: Ingress
 metadata:
   name: {{ .Chart.Name }}-ingress-rules
   annotations:
+    nginx.ingress.kubernetes.io/enable-websocket: "true"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/session-cookie-name: "route"
+    nginx.ingress.kubernetes.io/session-cookie-hash: "sha1"
+
     {{ if .Values.ingress.certIssuer }}
     cert-manager.io/cluster-issuer: {{ .Values.ingress.certIssuer }}
     {{ end }}
@@ -34,6 +43,15 @@ spec:
     - http:
     {{ end }}
         paths:
+           # NEW — route SignalR traffic to your interaction-service
+          - path: /chathub
+            pathType: Prefix
+            backend:
+             service:
+               name: interaction-service
+               port:
+                 number: 80
+
         #Keycloak ingress path
           - path: /auth
             pathType: Prefix
