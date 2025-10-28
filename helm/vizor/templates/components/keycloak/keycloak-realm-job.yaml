@@ -180,7 +180,7 @@ spec:
               fi
 
               echo "Creating user ljacoby@roundtables.us ...Make the firstname dynamic"
-              curl -s -X POST \
+              CREATE_OUTPUT=$(curl -s -X POST \
                 -H "Authorization: Bearer $TOKEN" \
                 -H "Content-Type: application/json" \
                 -d "{
@@ -194,7 +194,7 @@ spec:
                     \"clientID\": [\"$ADMIN_USER_ATTRIBUTES_CLIENTID\"]
                   }
                 }" \
-                http://keycloak:8080/auth/admin/realms/$REALM_NAME/users || echo "User may already exist"
+                "http://keycloak:8080/auth/admin/realms/$REALM_NAME/users" 2>&1)
 
               #Get the created user's ID
               USER_ID=$(curl -s \
@@ -214,49 +214,53 @@ spec:
                   }" \
                   http://keycloak:8080/auth/admin/realms/$REALM_NAME/users/$USER_ID/reset-password || echo "Failed to set password"
               fi
+              if echo "$CREATE_OUTPUT" | grep -qi "User exists with same email"; then
+                echo "User may already exist — skipping creation and update steps."
+              else
+                echo "User created successfully or proceeding with setup..."
 
-              # Fetch current user representation (show and save)
-              echo "Fetching user JSON..."
-              USER_JSON=$(curl -s -H "Authorization: Bearer $TOKEN" \
-                "http://keycloak:8080/auth/admin/realms/$REALM_NAME/users/$USER_ID")
+                # Fetch current user representation (show and save)
+                echo "Fetching user JSON..."
+                USER_JSON=$(curl -s -H "Authorization: Bearer $TOKEN" \
+                  "http://keycloak:8080/auth/admin/realms/$REALM_NAME/users/$USER_ID")
 
-              if [ -z "$USER_JSON" ] || [ "$USER_JSON" = "null" ]; then
-                echo "ERROR: failed to fetch user JSON (empty)."
-                exit 1
-              fi
+                if [ -z "$USER_JSON" ] || [ "$USER_JSON" = "null" ]; then
+                  echo "ERROR: failed to fetch user JSON (empty)."
+                  exit 1
+                fi
 
-              echo "Current requiredActions:"
-              echo "$USER_JSON" | jq -r '.requiredActions // [] | @json'
+                echo "Current requiredActions:"
+                echo "$USER_JSON" | jq -r '.requiredActions // [] | @json'
 
-              # Ensure requiredActions contains CONFIGURE_TOTP (idempotent)
-              UPDATED_USER_JSON=$(echo "$USER_JSON" | jq '
-                .requiredActions = ((.requiredActions // []) + ["CONFIGURE_TOTP"] | unique)
-              ')
+                # Ensure requiredActions contains CONFIGURE_TOTP (idempotent)
+                UPDATED_USER_JSON=$(echo "$USER_JSON" | jq '
+                  .requiredActions = ((.requiredActions // []) + ["CONFIGURE_TOTP"] | unique)
+                ')
 
-              # Preview diff-ish info
-              echo "Preview - requiredActions after update:"
-              echo "$UPDATED_USER_JSON" | jq -r '.requiredActions | @json'
+                # Preview diff-ish info
+                echo "Preview - requiredActions after update:"
+                echo "$UPDATED_USER_JSON" | jq -r '.requiredActions | @json'
 
-              # PUT updated user representation back and capture HTTP status
-              echo "Putting updated user representation (this will update requiredActions)..."
-              PUT_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
-                -H "Authorization: Bearer $TOKEN" \
-                -H "Content-Type: application/json" \
-                -d "$UPDATED_USER_JSON" \
-                "http://keycloak:8080/auth/admin/realms/$REALM_NAME/users/$USER_ID" || echo "000")
-
-              echo "PUT HTTP status: $PUT_STATUS"
-
-              if [ "$PUT_STATUS" != "204" ] && [ "$PUT_STATUS" != "200" ]; then
-                echo "PUT failed (non-2xx). Attempting fallback: execute-actions-email (will trigger email if SMTP configured)."
-                SEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
+                # PUT updated user representation back and capture HTTP status
+                echo "Putting updated user representation (this will update requiredActions)..."
+                PUT_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
                   -H "Authorization: Bearer $TOKEN" \
                   -H "Content-Type: application/json" \
-                  -d '["CONFIGURE_TOTP"]' \
-                  "http://keycloak:8080/auth/admin/realms/$REALM_NAME/users/$USER_ID/execute-actions-email" || echo "000")
-                echo "execute-actions-email HTTP status: $SEND_STATUS"
-              fi
+                  -d "$UPDATED_USER_JSON" \
+                  "http://keycloak:8080/auth/admin/realms/$REALM_NAME/users/$USER_ID" || echo "000")
 
+                echo "PUT HTTP status: $PUT_STATUS"
+
+                if [ "$PUT_STATUS" != "204" ] && [ "$PUT_STATUS" != "200" ]; then
+                  echo "PUT failed (non-2xx). Attempting fallback: execute-actions-email (will trigger email if SMTP configured)."
+                  SEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
+                    -H "Authorization: Bearer $TOKEN" \
+                    -H "Content-Type: application/json" \
+                    -d '["CONFIGURE_TOTP"]' \
+                    "http://keycloak:8080/auth/admin/realms/$REALM_NAME/users/$USER_ID/execute-actions-email" || echo "000")
+                  echo "execute-actions-email HTTP status: $SEND_STATUS"
+                fi
+              fi
 
               ## Update frontend URL for this realm
               echo "Setting frontend URL for realm $REALM_NAME..."
