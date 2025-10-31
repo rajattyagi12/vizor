@@ -48,7 +48,7 @@ spec:
             pathType: Prefix
             backend:
              service:
-               name: interaction-service
+               name: interaction-service-dapr
                port:
                  number: 80
 
