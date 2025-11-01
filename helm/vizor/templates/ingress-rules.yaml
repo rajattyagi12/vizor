@@ -43,14 +43,7 @@ spec:
     - http:
     {{ end }}
         paths:
-           # NEW — route SignalR traffic to your interaction-service
-          - path: /chathub
-            pathType: Prefix
-            backend:
-             service:
-               name: interaction-service-dapr
-               port:
-                 number: 80
+         
 
         #Keycloak ingress path
           - path: /auth
@@ -69,7 +62,15 @@ spec:
                 name: api-proxy-dapr
                 port:
                   number: 80
-
+           # NEW — route SignalR traffic to your interaction-service
+          - path: /chathub
+            pathType: Prefix
+            backend:
+              service:
+                # Route SignalR traffic to Dapr sidecar service for interaction-service
+                name: interaction-service-dapr
+                port:
+                  number: 80
           # Everything else falls through to the frontend-host for serving the SPA
           - path: /
             pathType: Prefix
@@ -78,3 +79,4 @@ spec:
                 name: vizor-frontend
                 port:
                   number: 8000
+
