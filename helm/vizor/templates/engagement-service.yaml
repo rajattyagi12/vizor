@@ -21,6 +21,7 @@ spec:
         dapr.io/app-id: "engagement-service"
         dapr.io/app-port: "8080"
         dapr.io/log-as-json: "true"
+        dapr.io/http-max-request-size: "100"
       {{- with .Values.engagementService.annotations }}
           {{- toYaml . | nindent 8 }}
       {{- end }}
