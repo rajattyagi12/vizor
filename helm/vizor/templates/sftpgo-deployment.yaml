@@ -15,40 +15,6 @@ spec:
       labels:
         app: sftpgo
     spec:
-      initContainers:
-        - name: init-directories
-          image: busybox:latest
-          securityContext:
-            runAsUser: 0
-            runAsGroup: 0
-            fsGroup: 0
-          command: ['sh', '-c']
-          args:
-            - |
-              echo "Creating required directories..."
-              # Create parent directory first
-              mkdir -p /srv/sftpgo/data/vizor
-              # Create all required subdirectories
-              mkdir -p /srv/sftpgo/data/vizor/Content-File
-              mkdir -p /srv/sftpgo/data/vizor/Content-ImageFile
-              mkdir -p /srv/sftpgo/data/vizor/meeting-report
-              mkdir -p /srv/sftpgo/data/vizor/meeting-agenda
-              # Set permissions on parent directory (read/write/execute for owner, read/execute for group/others)
-              chmod 755 /srv/sftpgo/data/vizor || true
-              # Set permissions on all subdirectories (read/write/execute for all)
-              chmod -R 777 /srv/sftpgo/data/vizor/Content-File || true
-              chmod -R 777 /srv/sftpgo/data/vizor/Content-ImageFile || true
-              chmod -R 777 /srv/sftpgo/data/vizor/meeting-report || true
-              chmod -R 777 /srv/sftpgo/data/vizor/meeting-agenda || true
-              # Set ownership (SFTPGo runs as UID 1000)
-              chown -R 1000:1000 /srv/sftpgo/data/vizor || true
-              # Verify permissions
-              echo "Directory structure:"
-              ls -la /srv/sftpgo/data/vizor/
-              echo "Directories created successfully with proper permissions"
-          volumeMounts:
-            - name: sftpgo-data
-              mountPath: /srv/sftpgo
       containers:
         - name: sftpgo
           image: "{{ .Values.sftpgo.image.repository }}:{{ .Values.sftpgo.image.tag }}"
