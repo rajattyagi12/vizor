@@ -16,6 +16,14 @@ spec:
       secretKeyRef:
         name: vizor-secrets
         key: sftpPassword
+    - name: startupDelaySeconds
+      value: "10"
+    - name: timeout
+      value: "60s"
+    - name: maxConnections
+      value: "10"
+    - name: keepAliveInterval
+      value: "30s"
 {{- if .Values.daprComponents.sftp.insecureIgnoreHostKey }}
     - name: insecureIgnoreHostKey
       value: "true"
