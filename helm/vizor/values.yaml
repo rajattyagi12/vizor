@@ -104,7 +104,7 @@ daprComponents:
   sftp:
     name: sftpgo-binding
     componentType: bindings.sftp
-    rootPath: "." # The home directory for the 'vizor' user
+    rootPath: "/srv/sftpgo/data/vizor" # The home directory for the 'vizor' user
     address: "vizor-sftpgo:2022" # Your SFTPGo service address
     username: "vizor" # SFTPGo user
     password: "Vizor@123" # The key in the secret that contains the password
