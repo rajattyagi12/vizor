@@ -33,8 +33,13 @@ spec:
 
       containers:
       - name: engagement-service
+        {{- if .Values.engagementService.image }}
+        image: {{ .Values.engagementService.image }}
+        imagePullPolicy: {{ .Values.engagementService.imagePullPolicy | default "Always" }}
+        {{- else }}
         image: {{ .Values.image.registry }}/{{ .Values.image.repo }}/engagement-service:{{ .Values.image.tag }}
         imagePullPolicy: Always
+        {{- end }}
 
         {{- if .Values.auth.clientId }}
         env:

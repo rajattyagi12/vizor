@@ -32,8 +32,13 @@ spec:
 
       containers:
       - name: server
+        {{- if .Values.coreService.image }}
+        image: {{ .Values.coreService.image }}
+        imagePullPolicy: {{ .Values.coreService.imagePullPolicy | default "Always" }}
+        {{- else }}
         image: {{ .Values.image.registry }}/{{ .Values.image.repo }}/core-service:{{ .Values.image.tag }}
         imagePullPolicy: Always
+        {{- end }}
 
         {{- if .Values.auth.clientId }}
         env:
