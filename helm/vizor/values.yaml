@@ -106,8 +106,8 @@ daprComponents:
     componentType: bindings.sftp
     rootPath: "." # The home directory for the 'vizor' user
     address: "vizor-sftpgo:2022" # Your SFTPGo service address
-    username: "ftpuser" # SFTPGo user
-    password: "P@55w0rd" # The key in the secret that contains the password
+    username: "vizor" # SFTPGo user
+    password: "Vizor@123" # The key in the secret that contains the password
     insecureIgnoreHostKey: true # Caution: Use only for testing. Set to "false" in production.
 
 sqlServer:

@@ -32,6 +32,20 @@ data:
           "permissions": {
             "/": ["list", "download", "upload", "delete", "rename", "chmod", "create_dirs"]
           }
+        },
+        {
+          "username": "vizor",
+          "password": "Vizor@123",
+          "home_dir": "/srv/sftpgo/data/vizor",
+          "uid": 1000,
+          "gid": 1000,
+          "max_sessions": 10,
+          "quota_size": 0,
+          "quota_files": 0,
+          "status": 1,
+          "permissions": {
+            "/": ["list", "download", "upload", "delete", "rename", "chmod", "create_dirs"]
+          }
         }
       ]
     }
