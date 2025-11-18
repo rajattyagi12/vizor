@@ -1,3 +1,4 @@
+{{- if and .Values.daprComponents.deploy .Values.sftpgo.enabled }}
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
@@ -17,7 +18,7 @@ spec:
         name: vizor-secrets
         key: sftpPassword
     - name: startupDelaySeconds
-      value: "10"
+      value: "30"
     - name: timeout
       value: "60s"
     - name: maxConnections
@@ -27,4 +28,8 @@ spec:
 {{- if .Values.daprComponents.sftp.insecureIgnoreHostKey }}
     - name: insecureIgnoreHostKey
       value: "true"
+{{- end }}
+  scopes:
+    - core-service
+    - engagement-service
 {{- end }}
