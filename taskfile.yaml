@@ -40,7 +40,7 @@ tasks:
     status:
       - helm list -n dapr-system | grep -q "^dapr"
     cmds:
-      - helm upgrade --install dapr dapr/dapr --namespace dapr-system --version 1.16.1-rc.1 --create-namespace --wait
+      - helm upgrade --install dapr dapr/dapr --namespace dapr-system --version 1.16.2 --create-namespace --wait
       - kubectl wait --for=condition=Ready pods --all -n dapr-system --timeout=300s
 
   dapr-dashboard:
