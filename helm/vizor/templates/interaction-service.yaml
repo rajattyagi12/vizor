@@ -21,6 +21,7 @@ spec:
         dapr.io/app-id: "interaction-service"
         dapr.io/app-port: "8080"
         dapr.io/log-as-json: "true"
+        dapr.io/sidecar-listen-addresses: "0.0.0.0"
       {{- with .Values.interactionService.annotations }}
           {{- toYaml . | nindent 8 }}
       {{- end }}
