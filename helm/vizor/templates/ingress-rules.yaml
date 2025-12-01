@@ -4,15 +4,15 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ .Chart.Name }}-ingress-rules
+  namespace: vizor
   annotations:
-    # Using Caddy-compatible ingress (no nginx-specific annotations)
-    # All service connections are defined below for visibility in ArgoCD
+    # Caddy-based ingress gateway - routes all traffic to Caddy service
+    # Caddy handles internal routing to all services and Dapr services
     {{ if .Values.ingress.certIssuer }}
     cert-manager.io/cluster-issuer: {{ .Values.ingress.certIssuer }}
     {{ end }}
 spec:
   # Ingress class can be specified if using a Caddy ingress controller
-  # Otherwise, this ingress routes to the Caddy service directly
   {{ if .Values.ingress.className }}
   ingressClassName: {{ .Values.ingress.className }}
   {{ end }}
@@ -27,6 +27,8 @@ spec:
     {{ end }}
   {{ end }}
   rules:
+    # Main application gateway - connects to host URL/IP
+    # Similar to mailhog-ingress which connects to mailhog.k8s.nbt.local
     {{ if .Values.ingress.host }}
     - host: "{{ .Values.ingress.host }}"
       http:
@@ -34,36 +36,17 @@ spec:
     - http:
     {{ end }}
         paths:
-          # Keycloak ingress path
-          - path: /auth
-            pathType: Prefix
-            backend:
-              service:
-                name: keycloak
-                port:
-                  number: 8080
-          # Dapr service invocation API - routes to api-proxy-dapr
-          - path: /v1.0/invoke
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: api-proxy-dapr
-                port:
-                  number: 80
-          # SignalR traffic to interaction-service
-          - path: /chathub
-            pathType: Prefix
-            backend:
-              service:
-                name: interaction-service-dapr
-                port:
-                  number: 80
-          # Everything else falls through to the frontend-host for serving the SPA
+          # All traffic routes to Caddy gateway (api-proxy service)
+          # Caddy acts as the application gateway and routes to:
+          #   /auth* -> keycloak:8080 (Keycloak service)
+          #   /v1.0/invoke* -> api-proxy-dapr:80 (Dapr service invocations)
+          #   /chathub* -> interaction-service-dapr:80 (SignalR via Dapr)
+          #   / -> vizor-frontend:8000 (Frontend SPA)
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: vizor-frontend
+                name: api-proxy
                 port:
-                  number: 8000
+                  number: 80
 
