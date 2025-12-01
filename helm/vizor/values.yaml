@@ -35,6 +35,19 @@ ingress:
 
   certIssuer:
 
+# API Proxy Service Configuration (used when ingress is disabled)
+apiProxy:
+  # -- Service type for api-proxy service (when ingress.enabled=false)
+  # Options: NodePort, LoadBalancer, ClusterIP
+  # Default: LoadBalancer (recommended for production/ArgoCD)
+  serviceType: LoadBalancer
+  # -- NodePort for api-proxy service (only used when serviceType=NodePort)
+  # Default: 30080
+  nodePort: 30080
+  # -- LoadBalancer IP (optional, only used when serviceType=LoadBalancer)
+  # Set this if you have a static IP reserved for the load balancer
+  loadBalancerIP:
+
 resources:
   limits:
     # -- CPU limit for the containers, leave alone mostly

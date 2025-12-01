@@ -17,8 +17,19 @@ data:
     # 3. SignalR ChatHub WebSocket connections (with session affinity)
     # 4. Frontend static assets
     # ============================================================================
-    
+    {{- if .Values.ingress.enabled }}
+    {{- if .Values.ingress.host }}
+    {{ .Values.ingress.host }} {
+    {{- else }}
     :80 {
+    {{- end }}
+    {{- else }}
+    {{- if .Values.ingress.host }}
+    {{ .Values.ingress.host }} {
+    {{- else }}
+    :80 {
+    {{- end }}
+    {{- end }}
       # --------------------------------------------------------------------------
       # Logging Configuration
       # --------------------------------------------------------------------------

@@ -1,0 +1,64 @@
+#
+# ArgoCD Values for Vizor Deployment using Caddy's Built-in Ingress
+# This configuration uses Caddy as the API Gateway without nginx ingress controller
+#
+# Usage in ArgoCD Application:
+#   spec:
+#     source:
+#       helm:
+#         valueFiles:
+#         - config/argocd-caddy-values.yaml
+
+# Image configuration
+image:
+  registry: harbor.nbt.local
+  repo: vizor
+  tag: latest
+  pullPolicy: Always
+
+# Disable nginx ingress - Caddy will handle routing directly
+ingress:
+  enabled: false
+  # Hostname that Caddy will use for routing
+  host: vizor.k8s.nbt.local
+  className: nginx
+  certName:
+  certIssuer:
+
+# API Proxy Service Configuration
+# Caddy API Gateway will be exposed via LoadBalancer
+apiProxy:
+  # Use LoadBalancer for production/ArgoCD deployments
+  serviceType: LoadBalancer
+  # Optional: Set a static IP if you have one reserved
+  # loadBalancerIP: "20.254.189.197"
+  # NodePort is only used if serviceType=NodePort
+  nodePort: 30080
+
+# Authentication (if needed)
+auth:
+  clientId:
+
+# Service replicas
+coreService:
+  replicas: 2
+
+engagementService:
+  replicas: 2
+
+interactionService:
+  replicas: 2
+
+frontend:
+  replicas: 1
+
+# Dapr components
+daprComponents:
+  deploy: true
+  state:
+    name: statestore
+    redisHost: vizor-redis-master:6379
+  pubsub:
+    name: pubsub
+    redisHost: vizor-redis-master:6379
+
