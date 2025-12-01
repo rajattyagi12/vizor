@@ -35,12 +35,18 @@ spec:
       containers:
       - name: server
         image: {{ .Values.image.registry }}/{{ .Values.image.repo }}/interaction-service:{{ .Values.image.tag }}
-        imagePullPolicy: Always
+        imagePullPolicy: {{ .Values.image.pullPolicy | default "Always" }}
 
-        {{- if .Values.auth.clientId }}
         env:
+        {{- if .Values.auth.clientId }}
           - name: AUTH_CLIENT_ID
             value: {{ .Values.auth.clientId }}
+        {{- end }}
+        {{- if .Values.interactionService.redisConnectionString }}
+          # Redis connection string for SignalR backplane
+          # Used to share connection state across multiple pods for WebSocket support
+          - name: Redis__ConnectionString
+            value: {{ .Values.interactionService.redisConnectionString | quote }}
         {{- end }}
 
         resources:
