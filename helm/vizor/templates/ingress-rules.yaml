@@ -5,8 +5,8 @@ kind: Ingress
 metadata:
   name: {{ .Chart.Name }}-ingress-rules
   annotations:
-    # Caddy handles all routing internally, so we just route all traffic to Caddy
-    # Remove nginx-specific annotations as we're using Caddy now
+    # Using Caddy-compatible ingress (no nginx-specific annotations)
+    # All service connections are defined below for visibility in ArgoCD
     {{ if .Values.ingress.certIssuer }}
     cert-manager.io/cluster-issuer: {{ .Values.ingress.certIssuer }}
     {{ end }}
@@ -34,17 +34,36 @@ spec:
     - http:
     {{ end }}
         paths:
-          # All traffic routes to Caddy, which handles internal routing
-          # Caddy routes:
-          #   /auth* -> keycloak:8080
-          #   /v1.0/invoke/{service}/method/* -> {service}-dapr:3500
-          #   /chathub* -> interaction-service-dapr:80
-          #   / -> vizor-frontend:8000
+          # Keycloak ingress path
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8080
+          # Dapr service invocation API - routes to api-proxy-dapr
+          - path: /v1.0/invoke
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: api-proxy-dapr
+                port:
+                  number: 80
+          # SignalR traffic to interaction-service
+          - path: /chathub
+            pathType: Prefix
+            backend:
+              service:
+                name: interaction-service-dapr
+                port:
+                  number: 80
+          # Everything else falls through to the frontend-host for serving the SPA
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: api-proxy
+                name: vizor-frontend
                 port:
-                  number: 80
+                  number: 8000
 
