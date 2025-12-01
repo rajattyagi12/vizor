@@ -31,7 +31,7 @@ data:
       # The Dapr sidecar will then route to the target service's Dapr sidecar
       # This is required because api-proxy is Dapr-enabled and can make service-to-service calls
       handle /v1.0/invoke* {
-        reverse_proxy api-proxy-dapr:80 {
+        reverse_proxy api-proxy-dapr:3500 {
           header_up Host 127.0.0.1
           header_up X-Forwarded-For {remote}
           header_up X-Real-IP {remote}
