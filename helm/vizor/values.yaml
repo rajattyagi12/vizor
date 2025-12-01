@@ -348,7 +348,7 @@ keycloakRealmConfiguration:
     verifyEmail: true
     loginTheme: VizorTheme
     resetPasswordAllowed: true
-    passwordPolicy: "length(8) and digits(1) and upperCase(1) and lowerCase(1) and specialChars(1) and passwordHistory(1)"
+    passwordPolicy: "length(8) and digits(1) and upperCase(1) and lowerCase(1) and specialChars(1)"
     bruteForceProtected: true
     permanentLockout: true
     failureFactor: 5

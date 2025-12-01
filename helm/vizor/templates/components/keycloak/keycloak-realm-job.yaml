@@ -336,32 +336,7 @@ spec:
                 http://keycloak:8080/auth/admin/realms/$REALM_NAME/authentication/flows/browser/executions
 
               echo "Browser flow updated successfully."
-   
-              # Enable admin events and configure email notifications
-              echo "Enabling admin events and configuring email notifications..."
-              curl -s -X PUT \
-                -H "Authorization: Bearer $TOKEN" \
-                -H "Content-Type: application/json" \
-                -d '{
-                  "adminEventsEnabled": true,
-                  "adminEventsDetailsEnabled": true,
-                  "eventsEnabled": true,
-                  "eventsListeners": ["email", "jboss-logging"],
-                  "enabledEventTypes": [
-                    "UPDATE_CREDENTIAL",
-                    "UPDATE_PASSWORD", 
-                    "VERIFY_EMAIL", 
-                    "SEND_VERIFY_EMAIL", 
-                    "SEND_RESET_PASSWORD", 
-                    "RESET_PASSWORD", 
-                    "USER_DISABLED_BY_PERMANENT_LOCKOUT", 
-                    "USER_DISABLED_BY_TEMPORARY_LOCKOUT"
-                  ],
-                  "eventsExpiration": 86400
-                }' \
-                http://keycloak:8080/auth/admin/realms/$REALM_NAME || echo "Admin events configuration may already be set"
-
-              echo "Realm, client, roles, user attribute, client scope, mapper, authentication flow, and admin event listener setup complete."
+              echo "Realm, client, roles, user attribute, client scope, mapper, and authentication flow setup complete."
           env:
             - name: REALM_NAME
               value: {{ .Values.keycloakRealmConfiguration.realmName | quote }}
