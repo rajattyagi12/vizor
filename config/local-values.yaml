@@ -1,0 +1,44 @@
+#
+# Local development values for vizor Helm chart
+# Use this file when deploying with locally built images (e.g., with kind)
+#
+# Usage: helm upgrade --install vizor ./helm/vizor -f config/local-values.yaml
+
+# Use localhost registry for kind clusters
+image:
+  # -- Use localhost for kind clusters (images loaded via kind load image-archive)
+  registry: localhost
+  # -- Image repository
+  repo: vizor
+  # -- Image tag (should match TAG used in build-local-images.sh)
+  tag: test
+  # -- Use IfNotPresent for local development (images are already loaded in kind)
+  pullPolicy: IfNotPresent
+  # -- No pull secrets needed for local images
+  pullSecrets: []
+
+# Leave blank to disable authentication for local development
+auth:
+  clientId:
+
+# Leave blank to disable ingress for local development
+ingress:
+  enabled: false
+  host:
+  certName:
+  certIssuer:
+
+# Override service-specific image settings if needed
+coreService:
+  # Use default image settings from image.* above
+  image: ""
+  imagePullPolicy: "IfNotPresent"
+
+engagementService:
+  # Use default image settings from image.* above
+  image: ""
+  imagePullPolicy: "IfNotPresent"
+
+# Note: After building images with build-local-images.sh, deploy with:
+# helm upgrade --install vizor ./helm/vizor -f config/local-values.yaml
+
