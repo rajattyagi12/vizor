@@ -5,30 +5,17 @@ kind: Ingress
 metadata:
   name: {{ .Chart.Name }}-ingress-rules
   annotations:
-    nginx.ingress.kubernetes.io/enable-websocket: "true"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
-    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
-    nginx.ingress.kubernetes.io/proxy-buffering: "off"
-    nginx.ingress.kubernetes.io/affinity: "cookie"
-    nginx.ingress.kubernetes.io/session-cookie-name: "route"
-    nginx.ingress.kubernetes.io/session-cookie-hash: "sha1"
-    nginx.ingress.kubernetes.io/client-max-body-size: "100m"
-    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
-    nginx.ingress.kubernetes.io/client-body-buffer-size: "100m"
-    nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
-
+    # Caddy handles all routing internally, so we just route all traffic to Caddy
+    # Remove nginx-specific annotations as we're using Caddy now
     {{ if .Values.ingress.certIssuer }}
     cert-manager.io/cluster-issuer: {{ .Values.ingress.certIssuer }}
     {{ end }}
-    {{ if $tlsEnabled }}
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    {{ else }}
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    {{ end }}
 spec:
-  # Let Ingress class be specified
-  # ingressClassName: {{ .Values.ingress.className }}
+  # Ingress class can be specified if using a Caddy ingress controller
+  # Otherwise, this ingress routes to the Caddy service directly
+  {{ if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{ end }}
   {{ if $tlsEnabled }}
   tls:
   - hosts:
@@ -47,40 +34,17 @@ spec:
     - http:
     {{ end }}
         paths:
-         
-
-        #Keycloak ingress path
-          - path: /auth
-            pathType: Prefix
-            backend:
-              service:
-                name: keycloak
-                port:
-                  number: 8080
-          # Only expose the Dapr invoke API, lets us call our services and nothing more
-          - path: /v1.0/invoke
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                # Send to the Dapr sidecar, which exposes the Dapr invoke API
-                name: api-proxy-dapr
-                port:
-                  number: 80
-           # NEW — route SignalR traffic to your interaction-service
-          - path: /chathub
-            pathType: Prefix
-            backend:
-              service:
-                # Route SignalR traffic to Dapr sidecar service for interaction-service
-                name: interaction-service-dapr
-                port:
-                  number: 80
-          # Everything else falls through to the frontend-host for serving the SPA
+          # All traffic routes to Caddy, which handles internal routing
+          # Caddy routes:
+          #   /auth* -> keycloak:8080
+          #   /v1.0/invoke/{service}/method/* -> {service}-dapr:3500
+          #   /chathub* -> interaction-service-dapr:80
+          #   / -> vizor-frontend:8000
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: vizor-frontend
+                name: api-proxy
                 port:
-                  number: 8000
+                  number: 80
 
