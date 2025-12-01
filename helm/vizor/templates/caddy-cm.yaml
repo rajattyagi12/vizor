@@ -26,11 +26,12 @@ data:
       }
 
       # Dapr service invocation API
-      # All Dapr invocations must go through api-proxy-dapr sidecar (port 3500)
+      # All Dapr invocations must go through api-proxy-dapr sidecar (port 80)
+      # The api-proxy-dapr service exposes port 80 which forwards to Dapr sidecar port 3500
       # The Dapr sidecar will then route to the target service's Dapr sidecar
       # This is required because api-proxy is Dapr-enabled and can make service-to-service calls
       handle /v1.0/invoke* {
-        reverse_proxy api-proxy-dapr:8080 {
+        reverse_proxy api-proxy-dapr:80 {
           header_up Host 127.0.0.1
           header_up X-Forwarded-For {remote}
           header_up X-Real-IP {remote}
