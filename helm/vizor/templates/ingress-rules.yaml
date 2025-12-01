@@ -12,10 +12,6 @@ metadata:
     cert-manager.io/cluster-issuer: {{ .Values.ingress.certIssuer }}
     {{ end }}
 spec:
-  # Ingress class can be specified if using a Caddy ingress controller
-  {{ if .Values.ingress.className }}
-  ingressClassName: {{ .Values.ingress.className }}
-  {{ end }}
   {{ if $tlsEnabled }}
   tls:
   - hosts:
@@ -27,8 +23,9 @@ spec:
     {{ end }}
   {{ end }}
   rules:
-    # Main application gateway - connects to host URL/IP
+    # Main application gateway - connects directly to host URL/IP
     # Similar to mailhog-ingress which connects to mailhog.k8s.nbt.local
+    # Flow: External Traffic (URL/IP) → Ingress → Caddy Gateway (api-proxy) → Services
     {{ if .Values.ingress.host }}
     - host: "{{ .Values.ingress.host }}"
       http:
