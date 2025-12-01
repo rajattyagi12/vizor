@@ -1,4 +1,3 @@
-{{- if .Values.ingress.enabled }}
 {{- $tlsEnabled := (or .Values.ingress.certIssuer .Values.ingress.certName) -}}
 
 apiVersion: networking.k8s.io/v1
@@ -6,30 +5,17 @@ kind: Ingress
 metadata:
   name: {{ .Chart.Name }}-ingress-rules
   annotations:
-    nginx.ingress.kubernetes.io/enable-websocket: "true"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
-    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
-    nginx.ingress.kubernetes.io/proxy-buffering: "off"
-    nginx.ingress.kubernetes.io/affinity: "cookie"
-    nginx.ingress.kubernetes.io/session-cookie-name: "route"
-    nginx.ingress.kubernetes.io/session-cookie-hash: "sha1"
-    nginx.ingress.kubernetes.io/client-max-body-size: "100m"
-    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
-    nginx.ingress.kubernetes.io/client-body-buffer-size: "100m"
-    nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
-
+    # Caddy handles all routing internally, so we just route all traffic to Caddy
+    # Remove nginx-specific annotations as we're using Caddy now
     {{ if .Values.ingress.certIssuer }}
     cert-manager.io/cluster-issuer: {{ .Values.ingress.certIssuer }}
     {{ end }}
-    {{ if $tlsEnabled }}
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    {{ else }}
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    {{ end }}
 spec:
-  # Let Ingress class be specified
+  # Ingress class can be specified if using a Caddy ingress controller
+  # Otherwise, this ingress routes to the Caddy service directly
+  {{ if .Values.ingress.className }}
   ingressClassName: {{ .Values.ingress.className }}
+  {{ end }}
   {{ if $tlsEnabled }}
   tls:
   - hosts:
@@ -48,17 +34,17 @@ spec:
     - http:
     {{ end }}
         paths:
-          # Route ALL traffic through the API Gateway (Caddy via Dapr)
-          # The Caddy API Gateway handles all routing internally:
-          # - /auth* -> keycloak:8080
-          # - /v1.0/invoke/* -> Dapr sidecar (localhost:3500)
-          # - /chathub* -> interaction-service:8080
-          # - /* -> frontend:8000
+          # All traffic routes to Caddy, which handles internal routing
+          # Caddy routes:
+          #   /auth* -> keycloak:8080
+          #   /v1.0/invoke/{service}/method/* -> {service}-dapr:3500
+          #   /chathub* -> interaction-service-dapr:80
+          #   / -> vizor-frontend:8000
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: api-proxy-dapr
+                name: api-proxy
                 port:
                   number: 80
-{{- end }}
+
