@@ -48,40 +48,17 @@ spec:
     - http:
     {{ end }}
         paths:
-         
-
-        #Keycloak ingress path
-          - path: /auth
-            pathType: Prefix
-            backend:
-              service:
-                name: keycloak
-                port:
-                  number: 8080
-          # Only expose the Dapr invoke API, lets us call our services and nothing more
-          - path: /v1.0/invoke
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                # Send to the Dapr sidecar, which exposes the Dapr invoke API
-                name: api-proxy-dapr
-                port:
-                  number: 80
-           # NEW — route SignalR traffic to your interaction-service
-          - path: /chathub
-            pathType: Prefix
-            backend:
-              service:
-                # Route SignalR traffic through the API gateway (Caddy via Dapr)
-                name: api-proxy-dapr
-                port:
-                  number: 80
-          # Everything else falls through to the frontend-host for serving the SPA
+          # Route ALL traffic through the API Gateway (Caddy via Dapr)
+          # The Caddy API Gateway handles all routing internally:
+          # - /auth* -> keycloak:8080
+          # - /v1.0/invoke/* -> Dapr sidecar (localhost:3500)
+          # - /chathub* -> interaction-service:8080
+          # - /* -> frontend:8000
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: vizor-frontend
+                name: api-proxy-dapr
                 port:
-                  number: 8000
+                  number: 80
 {{- end }}
