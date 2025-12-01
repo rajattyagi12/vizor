@@ -43,7 +43,7 @@ data:
       # SignalR traffic to interaction-service - preserve /chathub prefix
       # Use 127.0.0.1 for Host header to avoid DNS resolution issues
       handle /chathub* {
-        reverse_proxy interaction-service-dapr:80 {
+        reverse_proxy vizor-interaction-service:8080 {
           header_up Host 127.0.0.1
           header_up X-Forwarded-For {remote}
           header_up X-Real-IP {remote}
