@@ -29,7 +29,7 @@ ingress:
   className: nginx
   # -- Ingress host DNS name
   # Set this to your domain name (e.g., "vizor.k8s.nbt.local") or leave empty to use load balancer IP
-  host: # -- Set this to enable TLS, leave unset to run in insecure mode
+  host: vizor.k8s.nbt.local  # -- Set this to enable TLS, leave unset to run in insecure mode
 
   certName: # -- Cert manager issuer, leave unset to run in insecure mode
 
