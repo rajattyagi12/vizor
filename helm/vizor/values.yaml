@@ -62,9 +62,10 @@ interactionService:
   replicas: 2
   # -- Redis connection string for SignalR backplane
   # This is used by SignalR to share connection state across multiple pods
-  # Format: "host:port" (e.g., "vizor-redis-master:6379")
+  # Format: "host:port" (e.g., "vizor-redis-master.vizor.svc.cluster.local:6379" or "vizor-redis-master:6379")
+  # Use FQDN format for better DNS resolution: "vizor-redis-master.vizor.svc.cluster.local:6379"
   # If not set, defaults to "vizor-redis-master:6379" in Program.cs
-  redisConnectionString: "vizor-redis-master:6379"
+  redisConnectionString: "vizor-redis-master.vizor.svc.cluster.local:6379"
 
 useMigrationSql: false
 
