@@ -16,9 +16,10 @@ data:
       }
 
       # Keycloak ingress path - preserve /auth prefix
+      # Use localhost for Host header to avoid DNS resolution issues
       handle /auth* {
         reverse_proxy keycloak:8080 {
-          header_up Host {host}
+          header_up Host localhost
           header_up X-Forwarded-For {remote}
           header_up X-Real-IP {remote}
         }
@@ -26,9 +27,10 @@ data:
 
       # Dapr service invocation API - preserve full path
       # Routes /v1.0/invoke/* to api-proxy-dapr which handles Dapr invocations
+      # Use localhost for Host header to avoid DNS resolution issues
       handle /v1.0/invoke* {
         reverse_proxy api-proxy-dapr:80 {
-          header_up Host {host}
+          header_up Host localhost
           header_up X-Forwarded-For {remote}
           header_up X-Real-IP {remote}
         }
@@ -37,9 +39,10 @@ data:
       }
 
       # SignalR traffic to interaction-service - preserve /chathub prefix
+      # Use localhost for Host header to avoid DNS resolution issues
       handle /chathub* {
         reverse_proxy interaction-service-dapr:80 {
-          header_up Host {host}
+          header_up Host localhost
           header_up X-Forwarded-For {remote}
           header_up X-Real-IP {remote}
           # WebSocket support
@@ -54,9 +57,10 @@ data:
       }
 
       # Everything else falls through to the frontend-host for serving the SPA
+      # Use localhost for Host header to avoid DNS resolution issues
       handle {
         reverse_proxy vizor-frontend:8000 {
-          header_up Host {host}
+          header_up Host localhost
           header_up X-Forwarded-For {remote}
           header_up X-Real-IP {remote}
         }
