@@ -24,7 +24,7 @@ auth:
   clientId:
 
 ingress:
-  enabled: false
+  enabled: true
   # -- Ingress class for ingress-rules
   className: nginx
   # -- Ingress host DNS name
