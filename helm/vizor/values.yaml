@@ -8,11 +8,14 @@ global:
 
 image:
   # -- Image registry, only change if you're using your own images
+  # For kind clusters, use 'localhost' or leave empty
   registry: harbor.nbt.local
   # -- Image repository
   repo: vizor
   # -- Image tag
   tag: latest
+  # -- Image pull policy. Use 'IfNotPresent' for local development with kind
+  pullPolicy: Always
   # -- Any pullsecrets that are required to pull the image
   pullSecrets: []
 
@@ -21,6 +24,7 @@ auth:
   clientId:
 
 ingress:
+  enabled: false
   # -- Ingress class for ingress-rules
   className: nginx
   # -- Ingress host DNS name
@@ -57,8 +61,14 @@ engagementService:
 interactionService:
   # -- Dapr store interaction annotations
   annotations: # -- Dapr store interaction replica count
-
+  # Multiple replicas supported with ClientIP session affinity configured in service
+  # Session affinity ensures all SignalR requests from same client hit the same pod
   replicas: 2
+  # -- Redis connection string for SignalR backplane
+  # This is used by SignalR to share connection state across multiple pods
+  # Format: "host:port" (e.g., "vizor-redis-master:6379")
+  # If not set, defaults to "vizor-redis-master:6379" in Program.cs
+  redisConnectionString: "vizor-redis-master:6379"
 
 useMigrationSql: false
 
@@ -80,12 +90,12 @@ daprComponents:
   state:
     # -- Dapr state store component name
     name: statestore
-    # -- Hostname of redis, fullnameOverride should be used when deploying redis helm chart
+    # -- Hostname of redis (for local kind cluster: vizor-redis-master, for k8s: dapr-redis-master.dapr-system.svc.k8s.nbt)
     redisHost: vizor-redis-master:6379
   pubsub:
     # -- Dapr pubsub component name
     name: pubsub
-    # -- Hostname of redis, fullnameOverride should be used when deploying redis helm chart
+    # -- Hostname of redis (for local kind cluster: vizor-redis-master, for k8s: dapr-redis-master.dapr-system.svc.k8s.nbt)
     redisHost: vizor-redis-master:6379
 
   secrets:
@@ -355,6 +365,15 @@ keycloakRealmConfiguration:
     rememberMe: false
     clientSessionIdleTimeout: 3600
     clientSessionMaxLifespan: 7200
+    # Configure security headers to allow iframes for 3rd party cookie checks
+    browserSecurityHeaders:
+      contentSecurityPolicy: "frame-src 'self' http://127.0.0.1:8080 http://127.0.0.1; frame-ancestors 'self'; object-src 'none';"
+      xContentTypeOptions: "nosniff"
+      xRobotsTag: "none"
+      xFrameOptions: "SAMEORIGIN"
+      contentSecurityPolicyReportOnly: ""
+      xXSSProtection: "1; mode=block"
+      strictTransportSecurity: "max-age=31536000; includeSubDomains"
 
     roles:
       realm:

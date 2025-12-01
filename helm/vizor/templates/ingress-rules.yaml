@@ -1,3 +1,4 @@
+{{- if .Values.ingress.enabled }}
 {{- $tlsEnabled := (or .Values.ingress.certIssuer .Values.ingress.certName) -}}
 
 apiVersion: networking.k8s.io/v1
@@ -28,7 +29,7 @@ metadata:
     {{ end }}
 spec:
   # Let Ingress class be specified
-  # ingressClassName: {{ .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
   {{ if $tlsEnabled }}
   tls:
   - hosts:
@@ -71,8 +72,8 @@ spec:
             pathType: Prefix
             backend:
               service:
-                # Route SignalR traffic to Dapr sidecar service for interaction-service
-                name: interaction-service-dapr
+                # Route SignalR traffic through the API gateway (Caddy via Dapr)
+                name: api-proxy-dapr
                 port:
                   number: 80
           # Everything else falls through to the frontend-host for serving the SPA
@@ -83,4 +84,4 @@ spec:
                 name: vizor-frontend
                 port:
                   number: 8000
-
+{{- end }}
