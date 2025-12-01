@@ -40,18 +40,20 @@ data:
         }
       }
 
-      # SignalR traffic to interaction-service - preserve /chathub prefix
-      # Route directly to service (bypassing Dapr) for session affinity support
-      # The service is configured with sessionAffinity for WebSocket connections
-      # Use 127.0.0.1 for Host header to avoid DNS resolution issues
+      # SignalR ChatHub Routing (WebSocket Support)
+      # Routes all SignalR ChatHub traffic directly to the interaction-service
+      # with ClientIP session affinity. This is critical for WebSocket connections.
+      # Caddy automatically handles WebSocket upgrades when reverse_proxy is used
+      # Extended timeouts for WebSocket connections to prevent premature closure
       handle /chathub* {
-        reverse_proxy vizor-interaction-service:8080 {
-          header_up Host 127.0.0.1
+        reverse_proxy {{ .Chart.Name }}-interaction-service:8080 {
+          header_up Host {host}
           header_up X-Forwarded-For {remote}
-          header_up X-Real-IP {remote}
-          # WebSocket support
-          header_up Connection {>Connection}
-          header_up Upgrade {>Upgrade}
+          # Extended timeouts for WebSocket connections
+          transport http {
+            read_timeout 5m
+            write_timeout 5m
+          }
         }
       }
 
