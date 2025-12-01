@@ -26,12 +26,12 @@ data:
       }
 
       # Dapr service invocation API
-      # All Dapr invocations must go through api-proxy-dapr sidecar (port 80)
-      # The api-proxy-dapr service exposes port 80 which forwards to Dapr sidecar port 3500
-      # The Dapr sidecar will then route to the target service's Dapr sidecar
+      # All Dapr invocations must go through api-proxy-dapr sidecar
+      # Dapr sidecars listen on port 3500 for HTTP API calls
+      # The api-proxy-dapr service is created by Dapr and routes to the sidecar
       # This is required because api-proxy is Dapr-enabled and can make service-to-service calls
       handle /v1.0/invoke* {
-        reverse_proxy api-proxy-dapr:80 {
+        reverse_proxy api-proxy-dapr:3500 {
           header_up Host 127.0.0.1
           header_up X-Forwarded-For {remote}
           header_up X-Real-IP {remote}
@@ -41,9 +41,11 @@ data:
       }
 
       # SignalR traffic to interaction-service - preserve /chathub prefix
+      # Route directly to service (bypassing Dapr) for session affinity support
+      # The service is configured with sessionAffinity for WebSocket connections
       # Use 127.0.0.1 for Host header to avoid DNS resolution issues
       handle /chathub* {
-        reverse_proxy interaction-service-dapr:80 {
+        reverse_proxy vizor-interaction-service:8080 {
           header_up Host 127.0.0.1
           header_up X-Forwarded-For {remote}
           header_up X-Real-IP {remote}
