@@ -7,189 +7,24 @@ metadata:
     app: api-proxy
 data:
   Caddyfile: |
-    # ============================================================================
-    # Caddy API Gateway Configuration for Vizor Application
-    # ============================================================================
-    # This Caddyfile configures the API Gateway to route traffic to various
-    # Vizor services. The gateway handles:
-    # 1. Dapr service invocations (via Dapr sidecar)
-    # 2. Keycloak authentication requests
-    # 3. SignalR ChatHub WebSocket connections (with session affinity)
-    # 4. Frontend static assets
-    # ============================================================================
-    {{- if .Values.apiProxy.enableTLS }}
-      {{- if .Values.apiProxy.tlsIP }}
-      # Configure TLS for IP-based access (self-signed certificate)
-      {{ .Values.apiProxy.tlsIP }}:443 {
-        tls internal
-      }
-      # Also listen on HTTP and redirect to HTTPS
-      {{ .Values.apiProxy.tlsIP }}:80 {
-        redir https://{{ .Values.apiProxy.tlsIP }}{uri} permanent
-      }
-      {{- else if .Values.ingress.host }}
-      # Configure TLS for hostname-based access (Let's Encrypt)
-      {{ .Values.ingress.host }} {
-        tls {
-          {{- if .Values.apiProxy.tlsEmail }}
-          email {{ .Values.apiProxy.tlsEmail }}
-          {{- end }}
-        }
-      }
-      {{- else }}
-      # Configure TLS for default port (self-signed)
-      :443 {
-        tls internal
-      }
-      :80 {
-        redir https://{host}{uri} permanent
-      }
-      {{- end }}
-    {{- else }}
-      {{- if .Values.ingress.host }}
-      {{ .Values.ingress.host }} {
-        # TLS disabled - using HTTP only
-      {{- else }}
-      :80 {
-      {{- end }}
-    {{- end }}
-      # --------------------------------------------------------------------------
-      # Logging Configuration
-      # --------------------------------------------------------------------------
-      # Enable detailed access logs for debugging and monitoring
-      # Logs are output to stdout and can be viewed via kubectl logs
+    :80 {
+      # Enable access logs
       log {
         level DEBUG
         output stdout
         format console
       }
 
-      # --------------------------------------------------------------------------
-      # Dapr Service Invocation Routing
-      # --------------------------------------------------------------------------
-      # Routes all Dapr service invocation calls through the API Gateway's
-      # own Dapr sidecar (localhost:3500). This allows Dapr to handle:
-      # - Service discovery
-      # - Service-to-service communication
-      # - Load balancing across service instances
-      #
-      # Example: http://127.0.0.1:8080/v1.0/invoke/core-service/method/User/userLogin
-      # Routes to: localhost:3500 (Dapr sidecar in same pod)
-      @api_preflight {
-        method OPTIONS
-        path /v1.0/invoke/*
-      }
-
-      handle @api_preflight {
-        header {
-          Access-Control-Allow-Origin {http.request.header.Origin}
-          Access-Control-Allow-Methods "GET,POST,PUT,PATCH,DELETE,OPTIONS"
-          Access-Control-Allow-Headers "{http.request.header.Access-Control-Request-Headers}"
-          Access-Control-Allow-Credentials true
-        }
-        respond "" 204
-      }
-
-      handle /v1.0/invoke/* {
-        header {
-          Access-Control-Allow-Origin {http.request.header.Origin}
-          Access-Control-Allow-Credentials true
-        }
-        reverse_proxy localhost:3500 {
+      # Proxy all Dapr service invocation calls
+      handle_path /v1.0/invoke/{service}/method/* {
+        reverse_proxy {service}-dapr:3500 {
           header_up Host {host}
           header_up X-Forwarded-For {remote}
         }
-      }
-
-      # --------------------------------------------------------------------------
-      # Keycloak Authentication Routing
-      # --------------------------------------------------------------------------
-      # Routes all Keycloak authentication requests to the Keycloak service.
-      # Important: Uses 'handle' (not 'handle_path') to preserve the /auth prefix.
-      #
-      # Host header configuration:
-      # - Explicitly sets Host to 127.0.0.1:8080 to ensure Keycloak generates
-      #   correct redirect URLs with the port number included
-      # - This prevents redirect issues where Keycloak generates URLs without port
-      #
-      # Example: http://127.0.0.1:8080/auth/realms/vizor/protocol/openid-connect/auth
-      # Routes to: keycloak:8080
-      handle /auth* {
-        reverse_proxy keycloak:8080 {
-          header_up Host 127.0.0.1:8080
-          header_up X-Forwarded-For {remote}
-          header_up X-Forwarded-Proto {scheme}
-          header_up X-Forwarded-Port 8080
-          header_up X-Forwarded-Host 127.0.0.1:8080
+        tracing {
         }
       }
 
-      # --------------------------------------------------------------------------
-      # SignalR ChatHub Routing (WebSocket Support)
-      # --------------------------------------------------------------------------
-      # Routes all SignalR ChatHub traffic directly to the interaction-service
-      # with ClientIP session affinity. This is critical for WebSocket connections.
-      #
-      # Why direct routing (bypassing Dapr)?
-      # - Dapr headless services don't support session affinity
-      # - WebSocket connections require sticky sessions to maintain connection state
-      # - SignalR negotiation and WebSocket upgrade must hit the same pod
-      #
-      # Session Affinity:
-      # - Configured in interaction-service-svc.yaml with ClientIP affinity
-      # - Timeout: 10800 seconds (3 hours) to match SignalR connection lifetime
-      # - Ensures all requests from the same client IP hit the same pod
-      #
-      # WebSocket Support:
-      # - Preserves Connection and Upgrade headers for WebSocket handshake
-      # - Supports Server-Sent Events (SSE) and Long Polling fallbacks
-      #
-      # Redis Backplane:
-      # - SignalR is configured with Redis backplane for multi-pod support
-      # - Connection state is shared across pods via Redis
-      # - Messages are broadcast to all pods via Redis pub/sub
-      #
-      # Example endpoints:
-      # - Negotiation: http://127.0.0.1:8080/chathub/negotiate?negotiateVersion=1
-      # - WebSocket: ws://127.0.0.1:8080/chathub?id={connectionId}&access_token={token}
-      # - SSE: http://127.0.0.1:8080/chathub?id={connectionId}&access_token={token}
-      #
-      # Routes to: vizor-interaction-service:8080 (with ClientIP session affinity)
-      handle /chathub* {
-        reverse_proxy {{ .Chart.Name }}-interaction-service:8080 {
-          header_up Host {host}
-          header_up X-Forwarded-For {remote}
-          # Caddy automatically handles WebSocket upgrades when reverse_proxy is used
-          # No need to explicitly set Connection/Upgrade headers - Caddy handles this
-          # Extended timeouts for WebSocket connections
-          # Prevents premature connection closure during idle periods
-          transport http {
-            read_timeout 5m
-            write_timeout 5m
-          }
-        }
-      }
-
-      # --------------------------------------------------------------------------
-      # Health Check Endpoint
-      # --------------------------------------------------------------------------
-      # Simple health check endpoint for monitoring and load balancer checks
-      handle /health {
-        respond "OK"
-      }
-
-      # --------------------------------------------------------------------------
-      # Frontend Static Assets (Catch-All)
-      # --------------------------------------------------------------------------
-      # Routes all unmatched requests to the frontend service.
-      # This handles all Angular application routes and static assets.
-      #
-      # Example: http://127.0.0.1:8080/vizor/community-main/community
-      # Routes to: vizor-frontend:8000
-      handle {
-        reverse_proxy vizor-frontend:8000 {
-          header_up Host {host}
-          header_up X-Forwarded-For {remote}
-        }
-      }
+      # Optional health check
+      respond /health "OK"
     }
