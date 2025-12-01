@@ -17,18 +17,41 @@ data:
     # 3. SignalR ChatHub WebSocket connections (with session affinity)
     # 4. Frontend static assets
     # ============================================================================
-    {{- if .Values.ingress.enabled }}
-    {{- if .Values.ingress.host }}
-    {{ .Values.ingress.host }} {
+    {{- if .Values.apiProxy.enableTLS }}
+      {{- if .Values.apiProxy.tlsIP }}
+      # Configure TLS for IP-based access (self-signed certificate)
+      {{ .Values.apiProxy.tlsIP }}:443 {
+        tls internal
+      }
+      # Also listen on HTTP and redirect to HTTPS
+      {{ .Values.apiProxy.tlsIP }}:80 {
+        redir https://{{ .Values.apiProxy.tlsIP }}{uri} permanent
+      }
+      {{- else if .Values.ingress.host }}
+      # Configure TLS for hostname-based access (Let's Encrypt)
+      {{ .Values.ingress.host }} {
+        tls {
+          {{- if .Values.apiProxy.tlsEmail }}
+          email {{ .Values.apiProxy.tlsEmail }}
+          {{- end }}
+        }
+      }
+      {{- else }}
+      # Configure TLS for default port (self-signed)
+      :443 {
+        tls internal
+      }
+      :80 {
+        redir https://{host}{uri} permanent
+      }
+      {{- end }}
     {{- else }}
-    :80 {
-    {{- end }}
-    {{- else }}
-    {{- if .Values.ingress.host }}
-    {{ .Values.ingress.host }} {
-    {{- else }}
-    :80 {
-    {{- end }}
+      {{- if .Values.ingress.host }}
+      {{ .Values.ingress.host }} {
+        # TLS disabled - using HTTP only
+      {{- else }}
+      :80 {
+      {{- end }}
     {{- end }}
       # --------------------------------------------------------------------------
       # Logging Configuration
