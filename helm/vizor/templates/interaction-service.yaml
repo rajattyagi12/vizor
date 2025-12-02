@@ -34,20 +34,21 @@ spec:
 
       containers:
       - name: server
+        {{- if .Values.interactionService.image }}
+        image: {{ .Values.interactionService.image }}
+        imagePullPolicy: {{ .Values.interactionService.imagePullPolicy | default "IfNotPresent" }}
+        {{- else }}
         image: {{ .Values.image.registry }}/{{ .Values.image.repo }}/interaction-service:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy | default "Always" }}
+        {{- end }}
 
         env:
         {{- if .Values.auth.clientId }}
           - name: AUTH_CLIENT_ID
             value: {{ .Values.auth.clientId }}
         {{- end }}
-        {{- if .Values.interactionService.redisConnectionString }}
-          # Redis connection string for SignalR backplane
-          # Used to share connection state across multiple pods for WebSocket support
-          - name: Redis__ConnectionString
-            value: {{ .Values.interactionService.redisConnectionString | quote }}
-        {{- end }}
+        # Note: Redis connection for SignalR is now read from Dapr PubSub component metadata
+        # No environment variable needed - application reads directly from Dapr component configuration
 
         resources:
         {{- with .Values.resources }}

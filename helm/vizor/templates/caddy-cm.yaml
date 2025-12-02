@@ -41,17 +41,14 @@ data:
       }
 
       # SignalR ChatHub Routing (WebSocket Support)
-      # Routes all SignalR ChatHub traffic directly to the interaction-service
-      # with ClientIP session affinity. This is critical for WebSocket connections.
-      # Caddy automatically handles WebSocket upgrades when reverse_proxy is used
-      # No need to explicitly set Connection/Upgrade headers - Caddy handles this
-      # Extended timeouts for WebSocket connections
-      # Prevents premature connection closure during idle periods
+      # Route all SignalR HTTP + WebSocket traffic directly to interaction-service
+      # Dapr is still used by the service for state + pub/sub via DaprClient
+      # Extended timeouts prevent premature WebSocket closure
       handle /chathub* {
         reverse_proxy {{ .Chart.Name }}-interaction-service:8080 {
           header_up Host {host}
           header_up X-Forwarded-For {remote}
-          # Extended timeouts for WebSocket connections
+          header_up X-Real-IP {remote}
           transport http {
             read_timeout 5m
             write_timeout 5m
