@@ -60,9 +60,11 @@ interactionService:
   # Multiple replicas supported with ClientIP session affinity configured in service
   # Session affinity ensures all SignalR requests from same client hit the same pod
   replicas: 2
-  # Note: Redis connection for SignalR backplane is automatically configured from Dapr component
-  # (daprComponents.state.redisHost or daprComponents.pubsub.redisHost)
-  # This ensures SignalR uses the same Redis instance as Dapr components
+  # -- Redis connection string for SignalR backplane
+  # This is used by SignalR to share connection state across multiple pods
+  # Format: "host:port" (e.g., "vizor-redis-master:6379")
+  # If not set, defaults to "vizor-redis-master:6379" in Program.cs
+  redisConnectionString: "vizor-redis-master:6379"
 
 useMigrationSql: false
 
