@@ -28,13 +28,8 @@ spec:
 
       containers:
       - name: server
-        {{- if .Values.frontend.image }}
-        image: {{ .Values.frontend.image }}
-        imagePullPolicy: {{ .Values.frontend.imagePullPolicy | default "IfNotPresent" }}
-        {{- else }}
         image: {{ .Values.image.registry }}/{{ .Values.image.repo }}/frontend:{{ .Values.image.tag }}
-        imagePullPolicy: {{ .Values.image.pullPolicy | default "Always" }}
-        {{- end }}
+        imagePullPolicy: Always
         ports:
         - containerPort: 8000
 
