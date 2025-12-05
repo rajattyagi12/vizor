@@ -69,6 +69,8 @@ data:
           header_up X-Forwarded-For {remote}
           header_up X-Real-IP {remote}
         }
+        tracing {
+        }
       }
 
       # SignalR ChatHub Routing (WebSocket Support)
