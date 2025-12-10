@@ -21,7 +21,7 @@ data:
         # Handle CORS preflight requests
         @cors_preflight method OPTIONS
         handle @cors_preflight {
-          header Access-Control-Allow-Origin {host}
+          header Access-Control-Allow-Origin {http.request.header.Origin}
           header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
           header Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
           header Access-Control-Allow-Credentials "true"
@@ -35,12 +35,10 @@ data:
           header_up X-Real-IP {remote}
           
           # Add CORS headers to proxied responses
-          header_down {
-            Access-Control-Allow-Origin {host}
-            Access-Control-Allow-Credentials "true"
-            Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-            Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, X-Forwarded-For, X-Real-IP"
-          }
+          header_down Access-Control-Allow-Origin {http.request.header.Origin}
+          header_down Access-Control-Allow-Credentials "true"
+          header_down Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+          header_down Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, X-Forwarded-For, X-Real-IP"
         }
       }
 
