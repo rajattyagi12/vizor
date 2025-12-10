@@ -19,7 +19,7 @@ data:
       # Use 127.0.0.1 for Host header to avoid DNS resolution issues
       handle /auth* {
         reverse_proxy keycloak:8080 {
-          header_up Host 127.0.0.1
+          header_up Host {host}
           header_up X-Forwarded-For {remote}
           header_up X-Real-IP {remote}
         }
@@ -32,7 +32,7 @@ data:
       # This is required because api-proxy is Dapr-enabled and can make service-to-service calls
       handle /v1.0/invoke* {
         reverse_proxy api-proxy-dapr:3500 {
-          header_up Host 127.0.0.1
+          header_up Host {host}
           header_up X-Forwarded-For {remote}
           header_up X-Real-IP {remote}
         }
@@ -65,7 +65,7 @@ data:
       # Use 127.0.0.1 for Host header to avoid DNS resolution issues
       handle {
         reverse_proxy vizor-frontend:8000 {
-          header_up Host 127.0.0.1
+          header_up Host {host}
           header_up X-Forwarded-For {remote}
           header_up X-Real-IP {remote}
         }
