@@ -307,6 +307,8 @@ sftpgo:
 keycloakRealmConfiguration:
   realmName: "vizor"
   clientId: "vizor-client"
+  clientPrivateId: "vizor-client-private"
+  clientPrivateSecret: "ADD-YOUR-SECRET"  # Replace with actual secret, also change in the client config below
   roleName: "Superuser"
   clientScope: "User-Client-ID"
   #any smtp related email is the admin email
@@ -389,6 +391,13 @@ keycloakRealmConfiguration:
           - "{{ .Values.keycloakRealmConfiguration.serverUrl }}/*"
         attributes:
           post.logout.redirect.uris: "{{ .Values.keycloakRealmConfiguration.serverUrl }}/*"
+        enabled: true
+      - clientId: vizor-client-private
+        name: Vizor Client Private
+        secret: "ADD-YOUR-SECRET"  # Placeholder - replace with actual secret
+        publicClient: false
+        standardFlowEnabled: true
+        directAccessGrantsEnabled: false
         enabled: true
 
 observability:
