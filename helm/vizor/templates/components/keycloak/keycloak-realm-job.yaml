@@ -26,6 +26,8 @@ spec:
               until curl -s http://keycloak:8080/auth/realms/master > /dev/null; do
                 sleep 5
               done
+              echo "Sleeping 120 seconds to allow Keycloak to fully configure..."
+              sleep 300
               echo "Debug: raw token response:"
               curl -s \
                 -d "client_id=admin-cli" \
