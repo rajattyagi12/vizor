@@ -26,8 +26,8 @@ spec:
               until curl -s http://keycloak:8080/auth/realms/master > /dev/null; do
                 sleep 5
               done
-              echo "Sleeping 120 seconds to allow Keycloak to fully configure..."
-              sleep 300
+              echo "Sleeping 180 seconds to allow Keycloak to fully configure..."
+              sleep 180
               echo "Debug: raw token response:"
               curl -s \
                 -d "client_id=admin-cli" \
@@ -151,6 +151,34 @@ spec:
                   \"optional\": false
                 }" \
                 http://keycloak:8080/auth/admin/realms/$REALM_NAME/clients/$CLIENT_UUID/default-client-scopes/$CLIENT_SCOPE_ID || echo "Scope may already be assigned"
+
+              echo "Checking if private client: $CLIENT_PRIVATE_ID already exists"
+              # Check if client already exists
+              EXISTING_CLIENT=$(curl -s \
+                -H "Authorization: Bearer $TOKEN" \
+                -H "Content-Type: application/json" \
+                "http://keycloak:8080/auth/admin/realms/$REALM_NAME/clients?clientId=$CLIENT_PRIVATE_ID" | jq '.[0]')
+
+              if [ "$EXISTING_CLIENT" != "null" ]; then
+                echo "Client $CLIENT_PRIVATE_ID already exists - doing nothing"
+              else
+                echo "Creating new client $CLIENT_PRIVATE_ID..."
+                curl -s -X POST \
+                  -H "Authorization: Bearer $TOKEN" \
+                  -H "Content-Type: application/json" \
+                  -d "{
+                    \"clientId\": \"$CLIENT_PRIVATE_ID\",
+                    \"name\": \"$CLIENT_PRIVATE_NAME\",
+                    \"secret\": \"$CLIENT_PRIVATE_SECRET\",
+                    \"publicClient\": false,
+                    \"standardFlowEnabled\": true,
+                    \"directAccessGrantsEnabled\": false,
+                    \"enabled\": true
+                  }" \
+                  "http://keycloak:8080/auth/admin/realms/$REALM_NAME/clients"
+
+                echo "Client $CLIENT_PRIVATE_ID created successfully"
+              fi
 
               # echo "Configuring SMTP settings for realm..."
               curl -s -X PUT \
@@ -392,3 +420,9 @@ spec:
               value: {{ .Values.keycloakRealmConfiguration.adminUser.attributes_clientID | quote }}
             - name: ADMIN_USER_PASSWORD_REALM
               value: {{ .Values.keycloakRealmConfiguration.adminUser.password | quote }}
+            - name: CLIENT_PRIVATE_ID
+              value: {{ .Values.keycloakRealmConfiguration.clientPrivateId | quote }}
+            - name: CLIENT_PRIVATE_NAME
+              value: "Vizor Client Private"
+            - name: CLIENT_PRIVATE_SECRET
+              value: {{ .Values.keycloakRealmConfiguration.clientPrivateSecret | quote }}
