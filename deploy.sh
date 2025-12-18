@@ -219,42 +219,27 @@ deploy_dapr() {
     if [ "$DRY_RUN" = true ]; then
         print_info "DRY RUN: Would deploy Dapr control plane:"
         print_info "  helm upgrade --install dapr dapr/dapr --version $DAPR_VERSION --namespace dapr-system --create-namespace --wait"
+        print_info "  kubectl get pod --namespace dapr-system"
         return 0
     fi
     
-    # Check if already deployed
-    local dapr_exists=false
-    if helm list -n dapr-system 2>/dev/null | grep -q "^dapr"; then
-        print_info "Dapr release found, upgrading..."
-        dapr_exists=true
-    else
-        print_info "Dapr release not found, installing..."
-        dapr_exists=false
-    fi
+    # Deploy Dapr with --wait flag as specified
+    print_info "Installing/upgrading Dapr control plane..."
+    helm upgrade --install dapr dapr/dapr \
+        --version "$DAPR_VERSION" \
+        --namespace dapr-system \
+        --create-namespace \
+        --wait \
+        --timeout 10m || {
+        print_warning "Helm install/upgrade had issues, but continuing to check pod status..."
+    }
     
-    # For fresh installs, skip --wait to avoid hanging, then wait manually
-    if [ "$dapr_exists" = false ]; then
-        print_info "Fresh Dapr install - deploying without --wait (will wait for pods manually)..."
-        helm upgrade --install dapr dapr/dapr \
-            --version "$DAPR_VERSION" \
-            --namespace dapr-system \
-            --create-namespace \
-            --timeout 10m || {
-            print_warning "Helm install had issues, but continuing to check pod status..."
-        }
-    else
-        # For upgrades, use --wait
-        helm upgrade --install dapr dapr/dapr \
-            --version "$DAPR_VERSION" \
-            --namespace dapr-system \
-            --create-namespace \
-            --wait \
-            --timeout 10m || {
-            print_warning "Helm upgrade with --wait timed out, but continuing to check pod status..."
-        }
-    fi
-        
-        echo "⏳ Waiting for Dapr pods to be ready..."
+    # Check Dapr pods status
+    print_step "Checking Dapr pods status..."
+    kubectl get pod --namespace dapr-system
+    
+    # Wait for Dapr pods to be ready
+    echo "⏳ Waiting for Dapr pods to be ready..."
     kubectl wait --for=condition=Ready pods --all -n dapr-system --timeout=300s 2>/dev/null || {
         print_warning "Some Dapr pods may still be starting..."
         print_info "Current Dapr pod status:"
@@ -387,7 +372,7 @@ deploy_vizor() {
         return 0
     fi
     
-    print_step "Deploying Vizor applications..."
+    print_step "Deploying Vizor applications (includes SQL Server and all services)..."
     
     if [ "$DRY_RUN" = true ]; then
         print_info "DRY RUN: Would deploy Vizor applications:"
@@ -574,12 +559,27 @@ EOF
     fi
     
     # CRITICAL: Check if SQL Server was created by Helm chart
-    print_step "Checking if SQL Server was created by Helm chart..."
+    print_step "Checking if SQL Server was created successfully..."
     print_info "SQL Server is created by Helm chart - checking if it exists..."
     
-    # Check if SQL Server service exists
-    if ! kubectl get svc "$SQL_SERVER" -n "$NAMESPACE" &> /dev/null; then
-        print_error "SQL Server service '$SQL_SERVER' was not created by Helm chart"
+    # Wait for SQL Server service to be created (with retries)
+    local max_sql_wait=60  # 2 minutes
+    local sql_wait_count=0
+    local sql_service_exists=false
+    
+    while [ $sql_wait_count -lt $max_sql_wait ]; do
+        if kubectl get svc "$SQL_SERVER" -n "$NAMESPACE" &> /dev/null; then
+            sql_service_exists=true
+            print_success "SQL Server service exists"
+            break
+        fi
+        print_info "Waiting for SQL Server service to be created... (${sql_wait_count}s/${max_sql_wait}s)"
+        sleep 2
+        sql_wait_count=$((sql_wait_count + 2))
+    done
+    
+    if [ "$sql_service_exists" = false ]; then
+        print_error "SQL Server service '$SQL_SERVER' was not created by Helm chart after ${max_sql_wait}s"
         print_error "Cannot proceed with database operations without SQL Server"
         print_info "Check Helm chart deployment status:"
         print_info "  kubectl get pods -n $NAMESPACE -l app=sqlserver"
@@ -587,18 +587,32 @@ EOF
         return 1
     fi
     
-    print_success "SQL Server service exists"
+    # Wait for SQL Server to be ready and accepting connections
+    print_step "Waiting for SQL Server to be ready and accepting connections..."
+    print_info "This may take a few minutes..."
     
-    # Wait for SQL Server to be ready
-    print_info "Waiting for SQL Server to be ready and accepting connections..."
-    if ! wait_for_sql_server; then
-        print_error "SQL Server service is not ready - cannot proceed with database operations"
+    local max_ready_wait=300  # 5 minutes
+    local ready_wait_count=0
+    local sql_ready=false
+    
+    while [ $ready_wait_count -lt $max_ready_wait ]; do
+        if wait_for_sql_server 2>/dev/null; then
+            sql_ready=true
+            print_success "SQL Server is ready and accepting connections"
+            break
+        fi
+        print_info "Waiting for SQL Server to be ready... (${ready_wait_count}s/${max_ready_wait}s)"
+        sleep 5
+        ready_wait_count=$((ready_wait_count + 5))
+    done
+    
+    if [ "$sql_ready" = false ]; then
+        print_error "SQL Server service is not ready after ${max_ready_wait}s - cannot proceed with database operations"
         print_error "SQL Server should be created by Helm chart. Check pod status:"
         print_info "  kubectl get pods -n $NAMESPACE -l app=sqlserver"
         print_info "  kubectl logs -n $NAMESPACE -l app=sqlserver --tail=50"
         return 1
     fi
-    print_success "SQL Server service is ready and accepting connections"
     
     # Wait for Keycloak to be ready (required before PowerBI jobs)
     print_step "Ensuring Keycloak service is ready..."
@@ -627,45 +641,51 @@ EOF
     if [ "$is_fresh_install" = true ]; then
         # ============================================================
         # FRESH INSTALL SEQUENCE:
-        # 1. SQL Server is already verified as ready (above)
-        # 2. Keycloak is verified as ready (above)
-        # 3. Port forward SQL Server
-        # 4. Run PowerBI job
+        # SQL Server is already verified as ready (above)
+        # Now proceed with PowerBI database creation and scripts
         # ============================================================
         print_info "=== FRESH INSTALL SEQUENCE ==="
         
-        # Step 1: Port forward SQL Server immediately (SQL Server is already verified ready)
-        print_step "Step 1: Setting up SQL Server port forwarding..."
+        # Create PowerBI database (SQL Server is already verified ready)
+        print_step "Creating PowerBI database (SQL Server is ready)..."
+        
+        # Port forward SQL Server if enabled (for local access)
         if [ "$ENABLE_PORT_FORWARD" = true ]; then
+            print_info "Setting up SQL Server port forwarding..."
             setup_sql_port_forward
         else
             print_info "Port forwarding disabled (use --port-forward to enable)"
         fi
         
-        # Step 2: Check if PowerBI database exists, then run PowerBI setup job if needed
-        print_step "Step 2: Checking PowerBI database and running setup job if needed..."
-        
-        # First, check if PowerBI database already exists
+        # Check if PowerBI database already exists
         local powerbi_exists=false
         if check_powerbi_database_exists; then
             powerbi_exists=true
-            print_success "PowerBI database already exists - skipping PowerBI setup job"
+            print_success "PowerBI database already exists - skipping creation"
         else
-            print_info "PowerBI database does not exist - will run setup job"
+            print_info "PowerBI database does not exist - will create it now"
         fi
         
-        # Only run PowerBI job if database doesn't exist
+        # Create PowerBI database if it doesn't exist
         local powerbi_success=false
         if [ "$powerbi_exists" = false ]; then
-            print_info "Running PowerBI setup job..."
+            print_info "Creating PowerBI database..."
             if trigger_powerbi_setup_job; then
                 # Verify database was created after job completion
                 if check_powerbi_database_exists; then
                     powerbi_success=true
-                    print_success "PowerBI setup job completed and database verified"
+                    print_success "PowerBI database created successfully"
                 else
-                    print_warning "PowerBI setup job completed but database not found"
-                    powerbi_success=true
+                    print_warning "PowerBI setup job completed but database not found - will retry check"
+                    # Retry check once more
+                    sleep 5
+                    if check_powerbi_database_exists; then
+                        powerbi_success=true
+                        print_success "PowerBI database verified after retry"
+                    else
+                        print_error "PowerBI database was not created"
+                        return 1
+                    fi
                 fi
             else
                 # Job failed or timed out - check if database exists anyway
@@ -682,19 +702,24 @@ EOF
                 fi
             fi
         else
-            # Database already exists, skip job
+            # Database already exists, skip creation
             powerbi_success=true
         fi
         
-        # Step 3: Run powerbi-init.sql script
-        print_step "Step 3: Running powerbi-init.sql script against PowerBI database..."
-        if ! run_powerbi_init_script; then
-            print_error "powerbi-init.sql script failed - cannot proceed"
+        # Run powerbi-init.sql script after PowerBI DB is created
+        if [ "$powerbi_success" = true ]; then
+            print_step "Running PowerBI script (powerbi-init.sql) against PowerBI database..."
+            if ! run_powerbi_init_script; then
+                print_error "powerbi-init.sql script failed - cannot proceed"
+                return 1
+            fi
+        else
+            print_error "Cannot run PowerBI script - database creation failed"
             return 1
         fi
         
-        # Step 4: Run scripts from Scripts directory
-        print_step "Step 4: Running scripts from Scripts directory..."
+        # Run scripts from Scripts directory (after PowerBI script)
+        print_step "Running scripts from Scripts directory..."
         if ! run_scripts_from_directory; then
             print_warning "Some scripts from Scripts directory failed, but continuing..."
         fi
