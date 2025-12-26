@@ -56,6 +56,20 @@ data:
         }
       }
 
+      handle /alerthub* {
+        reverse_proxy {{ .Chart.Name }}-interaction-service:8080 {
+          header_up Host {host}
+          header_up X-Forwarded-For {remote}
+          header_up X-Real-IP {remote}
+          transport http {
+            read_timeout 5m
+            write_timeout 5m
+          }
+        }
+      }
+
+      
+
       # Health check endpoint
       handle /health {
         respond "OK"
