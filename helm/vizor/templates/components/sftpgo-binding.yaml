@@ -1,3 +1,4 @@
+{{- if .Values.sftpgo.enabled }}
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
@@ -27,4 +28,5 @@ spec:
 {{- if .Values.daprComponents.sftp.insecureIgnoreHostKey }}
     - name: insecureIgnoreHostKey
       value: "true"
+{{- end }}
 {{- end }}
