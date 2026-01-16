@@ -314,6 +314,7 @@ keycloakRealmConfiguration:
   #any smtp related email is the admin email
   adminEmail: "no-reply@vizoruat.roundtables.us"
   serverUrl: "http://127.0.0.1:8080"
+  vizorEntityId: "urn:vizor:saml"
   keycloakApiBaseUrl: "http://vizor-keycloak-api-service:4567/"
   keycloakServiceUrl: "http://keycloak:8080/auth"
   smtp:
