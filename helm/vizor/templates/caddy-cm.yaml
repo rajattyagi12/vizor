@@ -15,8 +15,6 @@ data:
         format console
       }
 
-      # Keycloak ingress path - preserve /auth prefix
-      # Use 127.0.0.1 for Host header to avoid DNS resolution issues
       handle /auth* {
         reverse_proxy keycloak:8080 {
           header_up Host {host}
@@ -68,7 +66,21 @@ data:
         }
       }
 
-      
+      # SAML Authentication Routing (Bypass Dapr)
+      # Route all SAML traffic directly to core-service
+      # This is necessary because:
+      # - SAML ACS endpoint requires maintaining session state
+      # - Dapr routing can cause session affinity issues
+      # - Direct routing ensures SAML callbacks hit the same pod
+      # HTTPS is terminated at Ingress level, internal communication uses HTTP
+      handle /Saml2* {
+        reverse_proxy {{ .Chart.Name }}-core-service:8080 {
+          header_up Host {host}
+          header_up X-Forwarded-For {remote}
+          header_up X-Real-IP {remote}
+          header_up X-Forwarded-Proto https
+        }
+      }
 
       # Health check endpoint
       handle /health {
