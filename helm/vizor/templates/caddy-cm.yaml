@@ -14,7 +14,21 @@ data:
         output stdout
         format console
       }
+      # SAML Callback Routing (Bypass Dapr and Keycloak)
+      # Route SAML callback directly to core-service
+      # This is necessary because SAML callback is handled by core-service AuthController
+      # Must be before the general /auth* route to take precedence
+      handle /auth/saml/callback {
+        reverse_proxy {{ .Chart.Name }}-core-service:8080 {
+          header_up Host {host}
+          header_up X-Forwarded-For {remote}
+          header_up X-Real-IP {remote}
+          header_up X-Forwarded-Proto https
+        }
+      }
 
+      # Keycloak Authentication Routing
+      # All other /auth* routes go to Keycloak
       handle /auth* {
         reverse_proxy keycloak:8080 {
           header_up Host {host}
@@ -66,7 +80,7 @@ data:
         }
       }
 
-      # SAML Authentication Routing (Bypass Dapr)
+     # SAML Authentication Routing (Bypass Dapr)
       # Route all SAML traffic directly to core-service
       # This is necessary because:
       # - SAML ACS endpoint requires maintaining session state
@@ -81,6 +95,7 @@ data:
           header_up X-Forwarded-Proto https
         }
       }
+
 
       # Health check endpoint
       handle /health {
