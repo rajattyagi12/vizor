@@ -23,6 +23,11 @@ spec:
         dapr.io/log-as-json: "true"
         # Enable HTTP proxying so Dapr forwards requests directly to the app
         dapr.io/sidecar-listen-addresses: "0.0.0.0"
+        # Dapr sidecar resource requests/limits required for HPA CPU metrics
+        dapr.io/sidecar-cpu-request: "100m"
+        dapr.io/sidecar-memory-request: "128Mi"
+        dapr.io/sidecar-cpu-limit: "500m"
+        dapr.io/sidecar-memory-limit: "512Mi"
       {{- with .Values.interactionService.annotations }}
           {{- toYaml . | nindent 8 }}
       {{- end }}

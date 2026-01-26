@@ -22,6 +22,11 @@ spec:
         dapr.io/app-port: "8080"
         dapr.io/log-as-json: "true"
         dapr.io/http-max-request-size: "100"
+        # Dapr sidecar resource requests/limits required for HPA CPU metrics
+        dapr.io/sidecar-cpu-request: "100m"
+        dapr.io/sidecar-memory-request: "128Mi"
+        dapr.io/sidecar-cpu-limit: "500m"
+        dapr.io/sidecar-memory-limit: "512Mi"
       {{- with .Values.engagementService.annotations }}
           {{- toYaml . | nindent 8 }}
       {{- end }}
