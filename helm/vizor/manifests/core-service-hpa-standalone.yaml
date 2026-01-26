@@ -1,0 +1,37 @@
+# Standalone HPA manifest for core-service
+# Apply manually with: kubectl apply -f core-service-hpa-standalone.yaml -n <namespace>
+# This HPA is protected from Helm/ArgoCD overwrites via helm.sh/resource-policy: keep annotation
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: vizor-core-service
+  namespace: <NAMESPACE>  # Replace with your namespace (e.g., vizor-prod)
+  annotations:
+    # Protection: Resource policy prevents Helm/ArgoCD from updating/deleting
+    helm.sh/resource-policy: keep
+    # Additional sync option (defense in depth)
+    argocd.argoproj.io/sync-options: Replace=false
+  labels:
+    app.kubernetes.io/name: vizor
+    app.kubernetes.io/instance: vizor
+    vizor: core-service
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: vizor-core-service
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 75
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
