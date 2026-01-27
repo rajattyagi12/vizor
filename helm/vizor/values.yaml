@@ -401,11 +401,5 @@ keycloakRealmConfiguration:
         directAccessGrantsEnabled: false
         enabled: true
 
-userSyncDb:
-  server: "sql-server-service"
-  user: "sa"
-  password: "P@55w0rd"
-  database: "vizor"
-
 observability:
   enabled: false
