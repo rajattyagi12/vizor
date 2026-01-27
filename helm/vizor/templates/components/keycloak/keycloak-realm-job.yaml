@@ -378,7 +378,49 @@ spec:
                 http://keycloak:8080/auth/admin/realms/$REALM_NAME/authentication/flows/browser/executions
 
               echo "Browser flow updated successfully."
-              echo "Realm, client, roles, user attribute, client scope, mapper, and authentication flow setup complete."
+
+              echo "Updating reset credentials flow to DISABLE OTP..."
+
+              # Get all executions under the Reset Credentials flow
+              EXECUTIONS_RESET=$(curl -s \
+                -H "Authorization: Bearer $TOKEN" \
+                http://keycloak:8080/admin/realms/$REALM_NAME/authentication/flows/reset%20credentials/executions)
+
+              # Debug: print all execution names
+              echo "Available executions in Reset Credentials flow:"
+              echo "$EXECUTIONS_RESET" | jq -r '.[].displayName'
+
+              # Find the Reset OTP execution
+              OTP_ID_RESET=$(echo "$EXECUTIONS_RESET" | jq -r '.[] | select(.displayName=="Reset OTP") | .id')
+
+              if [ -z "$OTP_ID_RESET" ] || [ "$OTP_ID_RESET" = "null" ]; then
+                echo "Failed to find Reset OTP execution in reset credentials flow"
+                exit 1
+              fi
+
+              echo "Setting Reset OTP requirement to DISABLED in reset credentials flow..."
+              curl -s -X PUT \
+                -H "Authorization: Bearer $TOKEN" \
+                -H "Content-Type: application/json" \
+                -d '{"id":"'"$OTP_ID_RESET"'","requirement":"DISABLED"}' \
+                http://keycloak:8080/admin/realms/$REALM_NAME/authentication/flows/reset%20credentials/executions
+
+              # Find the Reset - Conditional OTP execution
+              CONDITIONAL_OTP_ID=$(echo "$EXECUTIONS_RESET" | jq -r '.[] | select(.displayName=="Reset - Conditional OTP") | .id')
+
+              if [ -n "$CONDITIONAL_OTP_ID" ] && [ "$CONDITIONAL_OTP_ID" != "null" ]; then
+                echo "Setting Reset - Conditional OTP requirement to DISABLED in reset credentials flow..."
+                curl -s -X PUT \
+                  -H "Authorization: Bearer $TOKEN" \
+                  -H "Content-Type: application/json" \
+                  -d '{"id":"'"$CONDITIONAL_OTP_ID"'","requirement":"DISABLED"}' \
+                  http://keycloak:8080/admin/realms/$REALM_NAME/authentication/flows/reset%20credentials/executions
+              else
+                echo "Reset - Conditional OTP execution not found, skipping disable."
+              fi
+
+              echo "Reset credentials flow updated successfully."
+              echo "Realm, client, roles, user attribute, client scope, mapper, and authentication flows setup complete."
           env:
             - name: REALM_NAME
               value: {{ .Values.keycloakRealmConfiguration.realmName | quote }}
