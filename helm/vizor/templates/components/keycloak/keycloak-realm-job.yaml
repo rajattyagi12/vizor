@@ -354,9 +354,17 @@ spec:
               echo "Updating authentication flow to require OTP..."
 
               # Get all executions under the Browser flow
+              echo "Getting browser flow executions..."
               EXECUTIONS=$(curl -s \
                 -H "Authorization: Bearer $TOKEN" \
                 http://keycloak:8080/auth/admin/realms/$REALM_NAME/authentication/flows/browser/executions)
+
+              # Check if we got valid JSON response
+              if ! echo "$EXECUTIONS" | jq -e . > /dev/null 2>&1; then
+                echo "ERROR: Invalid JSON response from browser flow API:"
+                echo "Response: $EXECUTIONS"
+                exit 1
+              fi
 
               # Debug: print all execution names
               echo "Available executions in Browser flow:"
@@ -367,6 +375,8 @@ spec:
 
               if [ -z "$OTP_ID" ] || [ "$OTP_ID" = "null" ]; then
                 echo "Failed to find OTP Form execution"
+                echo "Available display names:"
+                echo "$EXECUTIONS" | jq -r '.[].displayName // "unnamed"'
                 exit 1
               fi
 
@@ -382,9 +392,17 @@ spec:
               echo "Updating reset credentials flow to DISABLE OTP..."
 
               # Get all executions under the Reset Credentials flow
+              echo "Getting reset credentials flow executions..."
               EXECUTIONS_RESET=$(curl -s \
                 -H "Authorization: Bearer $TOKEN" \
-                http://keycloak:8080/admin/realms/$REALM_NAME/authentication/flows/reset%20credentials/executions)
+                http://keycloak:8080/auth/admin/realms/$REALM_NAME/authentication/flows/reset%20credentials/executions)
+
+              # Check if we got valid JSON response
+              if ! echo "$EXECUTIONS_RESET" | jq -e . > /dev/null 2>&1; then
+                echo "ERROR: Invalid JSON response from reset credentials flow API:"
+                echo "Response: $EXECUTIONS_RESET"
+                exit 1
+              fi
 
               # Debug: print all execution names
               echo "Available executions in Reset Credentials flow:"
@@ -395,6 +413,8 @@ spec:
 
               if [ -z "$OTP_ID_RESET" ] || [ "$OTP_ID_RESET" = "null" ]; then
                 echo "Failed to find Reset OTP execution in reset credentials flow"
+                echo "Available display names:"
+                echo "$EXECUTIONS_RESET" | jq -r '.[].displayName // "unnamed"'
                 exit 1
               fi
 
@@ -403,7 +423,7 @@ spec:
                 -H "Authorization: Bearer $TOKEN" \
                 -H "Content-Type: application/json" \
                 -d '{"id":"'"$OTP_ID_RESET"'","requirement":"DISABLED"}' \
-                http://keycloak:8080/admin/realms/$REALM_NAME/authentication/flows/reset%20credentials/executions
+                http://keycloak:8080/auth/admin/realms/$REALM_NAME/authentication/flows/reset%20credentials/executions
 
               # Find the Reset - Conditional OTP execution
               CONDITIONAL_OTP_ID=$(echo "$EXECUTIONS_RESET" | jq -r '.[] | select(.displayName=="Reset - Conditional OTP") | .id')
@@ -414,7 +434,7 @@ spec:
                   -H "Authorization: Bearer $TOKEN" \
                   -H "Content-Type: application/json" \
                   -d '{"id":"'"$CONDITIONAL_OTP_ID"'","requirement":"DISABLED"}' \
-                  http://keycloak:8080/admin/realms/$REALM_NAME/authentication/flows/reset%20credentials/executions
+                  http://keycloak:8080/auth/admin/realms/$REALM_NAME/authentication/flows/reset%20credentials/executions
               else
                 echo "Reset - Conditional OTP execution not found, skipping disable."
               fi
@@ -465,6 +485,6 @@ spec:
             - name: CLIENT_PRIVATE_ID
               value: {{ .Values.keycloakRealmConfiguration.clientPrivateId | quote }}
             - name: CLIENT_PRIVATE_NAME
-              value: "Vizor Client Private"
+              value: {{ .Values.keycloakRealmConfiguration.clientPrivateId | quote }}
             - name: CLIENT_PRIVATE_SECRET
               value: {{ .Values.keycloakRealmConfiguration.clientPrivateSecret | quote }}
