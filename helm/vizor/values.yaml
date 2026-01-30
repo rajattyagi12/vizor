@@ -346,7 +346,7 @@ keycloakRealmConfiguration:
     password: "Vizor@123"
 
   userSyncJob:
-    enabled: true
+    enabled: false
 
   userSyncDatabase:
     server: "172.16.16.76"
