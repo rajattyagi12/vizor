@@ -18,7 +18,7 @@ data:
       # Route SAML callback directly to core-service
       # This is necessary because SAML callback is handled by core-service AuthController
       # Must be before the general /auth* route to take precedence
-      handle /auth/saml/callback {
+      handle /api/auth/saml/callback {
         reverse_proxy {{ .Chart.Name }}-core-service:8080 {
           header_up Host {host}
           header_up X-Forwarded-For {remote}
@@ -37,6 +37,11 @@ data:
         }
       }
 
+      handle /v1.0/invoke/core-service/method/api/auth/clientinfo {
+        reverse_proxy api-proxy-dapr:3500 {
+          header_down -Set-Cookie
+        }
+      }
       # Dapr service invocation API
       # All Dapr invocations must go through api-proxy-dapr sidecar
       # Dapr sidecars listen on port 3500 for HTTP API calls
