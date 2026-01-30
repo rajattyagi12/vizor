@@ -345,6 +345,16 @@ keycloakRealmConfiguration:
     attributes_clientID: "1"
     password: "Vizor@123"
 
+  userSyncJob:
+    enabled: true
+
+  userSyncDatabase:
+    server: "172.16.16.76"
+    user: "sa"
+    password: "YourStrongPassw0rd"
+    name: "BenchmarkV2"
+
+
   realmJson:
     realm: vizor
     enabled: true
