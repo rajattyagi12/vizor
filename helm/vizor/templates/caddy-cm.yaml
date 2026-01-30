@@ -37,11 +37,7 @@ data:
         }
       }
 
-      handle /v1.0/invoke/core-service/method/api/auth/clientinfo {
-        reverse_proxy api-proxy-dapr:3500 {
-          header_down -Set-Cookie
-        }
-      }
+      
       # Dapr service invocation API
       # All Dapr invocations must go through api-proxy-dapr sidecar
       # Dapr sidecars listen on port 3500 for HTTP API calls
