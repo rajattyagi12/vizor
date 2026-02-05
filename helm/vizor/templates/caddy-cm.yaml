@@ -88,7 +88,7 @@ data:
       # - Dapr routing can cause session affinity issues
       # - Direct routing ensures SAML callbacks hit the same pod
       # HTTPS is terminated at Ingress level, internal communication uses HTTP
-      handle /Saml2* {
+      handle /api/auth/acs {
         reverse_proxy {{ .Chart.Name }}-core-service:8080 {
           header_up Host {host}
           header_up X-Forwarded-For {remote}

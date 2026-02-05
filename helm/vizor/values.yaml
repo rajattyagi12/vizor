@@ -102,6 +102,10 @@ daprComponents:
     smtp-mail-display-name: "Vizor"
     smtpusername: "AKIAVWE2WCVHKTCNHJEE"
     smtppassword: "BIqlgWKuB3MhaFYTxaAXCeglcjLL7mzHYGR1G54OqHLM"
+    SsrsUsername: "DESKTOP-OC31DDE\\ASUS"
+    SsrsPassword: "9582"
+    SsrsBaseUrl: "http://172.16.16.102/ReportServer"
+    SsrsTimeoutSeconds: "300"
   secretStore:
     name: vizor-secretstore
     componentType: secretstores.kubernetes
