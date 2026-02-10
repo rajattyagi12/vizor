@@ -6,7 +6,7 @@ kind: Job
 metadata:
   name: mssql-init-job
 spec:
-  ttlSecondsAfterFinished: 30 # Allow Job to exist for ArgoCD to discover completion
+  ttlSecondsAfterFinished: 600 # Allow Job to exist for ArgoCD to discover completion
   # backoffLimit: 3
   template:
     spec:
