@@ -3,6 +3,9 @@ kind: Job
 metadata:
   name: keycloak-realm-init
   namespace: {{ .Release.Namespace }}
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
 spec:
   ttlSecondsAfterFinished: 600 # Allow Job to exist for ArgoCD to discover completion
   # backoffLimit: 3
