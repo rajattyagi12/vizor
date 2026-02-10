@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keycloak-realm-init
+  name: keycloak-realm-init-{{ now | unixEpoch }}
   namespace: {{ .Release.Namespace }}
   annotations:
     argocd.argoproj.io/hook: PostSync
