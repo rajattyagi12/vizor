@@ -11,6 +11,7 @@ metadata:
     {{ if .Values.ingress.certIssuer }}
     cert-manager.io/cluster-issuer: {{ .Values.ingress.certIssuer }}
     {{ end }}
+    argocd.argoproj.io/ignore-healthcheck: "true"
 spec:
   {{ if $tlsEnabled }}
   tls:
