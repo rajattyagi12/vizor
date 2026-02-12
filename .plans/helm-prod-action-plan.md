@@ -20,7 +20,7 @@
 | T-15 | Migrations ordering unclear across resources | /Users/pritam/x/Vizor/deploy/helm/vizor/templates/components/migrations-job.yaml | Jobs may run before config or after dependents | Use ArgoCD sync-waves for migrations and dependent services | Phase 2 | Done |
 | T-16 | No HPA for frontend/api-proxy/core/interaction/engagement | /Users/pritam/x/Vizor/deploy/helm/vizor/templates/hpa.yaml | Static scaling may under/over-provision | Add HPA templates and autoscaling values | Phase 4 | Done |
 | T-17 | No scheduling constraints for stateless workloads | /Users/pritam/x/Vizor/deploy/helm/vizor/templates | Co-location risk across nodes | Add affinity/topology spread settings and wire into deployments | Phase 4 | Done |
-| T-11 | Misnamed file with leading space | /Users/pritam/x/Vizor/deploy/helm/vizor/templates/components/keycloak/ keycloak-user-sync-job.yaml | Tooling errors, hidden changes | Rename file to remove leading space | Phase 5 | Planned |
+| T-11 | Misnamed file with leading space | /Users/pritam/x/Vizor/deploy/helm/vizor/templates/components/keycloak/keycloak-user-sync-job.yaml | Tooling errors, hidden changes | Rename file to remove leading space | Phase 5 | Done |
 
 ## High Availability Audit Findings
 
