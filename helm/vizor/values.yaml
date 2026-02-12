@@ -42,6 +42,12 @@ resources:
     # -- Memory limit for the containers, leave alone mostly
     memory: 128Mi
 
+scheduling:
+  # -- Optional pod affinity/anti-affinity for stateless workloads
+  affinity: {}
+  # -- Optional topology spread constraints for stateless workloads
+  topologySpreadConstraints: []
+
 coreService:
   # -- Dapr store core annotations
   annotations: # -- Dapr store core replica count
@@ -79,6 +85,37 @@ frontend:
   annotations: # -- Dapr store frontend host replica count
 
   replicas: 1
+
+apiProxy:
+  replicas: 1
+
+autoscaling:
+  enabled: false
+  coreService:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+  interactionService:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+  engagementService:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+  frontend:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+  apiProxy:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
 
 daprComponents:
   # -- Enable to deploy the Dapr components

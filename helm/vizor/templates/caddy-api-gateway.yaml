@@ -6,7 +6,7 @@ metadata:
   labels:
     purpose: "vizor-api-gateway"
 spec:
-  replicas: 1
+  replicas: {{ .Values.apiProxy.replicas }}
   selector:
     matchLabels:
       app: api-proxy
@@ -22,6 +22,14 @@ spec:
         dapr.io/http-max-request-size: "100"
     spec:
       serviceAccountName: {{ include "vizor.serviceAccountName" . }}
+      {{- with .Values.scheduling.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.scheduling.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: caddy
           image: caddy:latest

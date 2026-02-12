@@ -1,0 +1,21 @@
+{{- if .Values.autoscaling.enabled }}
+{{- if .Values.autoscaling.coreService.enabled }}
+{{ include "vizor.hpa" (dict "name" (printf "%s-core-service" .Chart.Name) "minReplicas" .Values.autoscaling.coreService.minReplicas "maxReplicas" .Values.autoscaling.coreService.maxReplicas "targetCPUUtilizationPercentage" .Values.autoscaling.coreService.targetCPUUtilizationPercentage "Release" .Release) }}
+---
+{{- end }}
+{{- if .Values.autoscaling.interactionService.enabled }}
+{{ include "vizor.hpa" (dict "name" (printf "%s-interaction-service" .Chart.Name) "minReplicas" .Values.autoscaling.interactionService.minReplicas "maxReplicas" .Values.autoscaling.interactionService.maxReplicas "targetCPUUtilizationPercentage" .Values.autoscaling.interactionService.targetCPUUtilizationPercentage "Release" .Release) }}
+---
+{{- end }}
+{{- if .Values.autoscaling.engagementService.enabled }}
+{{ include "vizor.hpa" (dict "name" (printf "%s-engagement-service" .Chart.Name) "minReplicas" .Values.autoscaling.engagementService.minReplicas "maxReplicas" .Values.autoscaling.engagementService.maxReplicas "targetCPUUtilizationPercentage" .Values.autoscaling.engagementService.targetCPUUtilizationPercentage "Release" .Release) }}
+---
+{{- end }}
+{{- if .Values.autoscaling.frontend.enabled }}
+{{ include "vizor.hpa" (dict "name" (printf "%s-frontend" .Chart.Name) "minReplicas" .Values.autoscaling.frontend.minReplicas "maxReplicas" .Values.autoscaling.frontend.maxReplicas "targetCPUUtilizationPercentage" .Values.autoscaling.frontend.targetCPUUtilizationPercentage "Release" .Release) }}
+---
+{{- end }}
+{{- if .Values.autoscaling.apiProxy.enabled }}
+{{ include "vizor.hpa" (dict "name" "api-proxy" "minReplicas" .Values.autoscaling.apiProxy.minReplicas "maxReplicas" .Values.autoscaling.apiProxy.maxReplicas "targetCPUUtilizationPercentage" .Values.autoscaling.apiProxy.targetCPUUtilizationPercentage "Release" .Release) }}
+{{- end }}
+{{- end }}

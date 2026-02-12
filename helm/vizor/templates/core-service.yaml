@@ -38,6 +38,15 @@ spec:
         {{- toYaml . | nindent 8 }}
     {{- end }}
 
+      {{- with .Values.scheduling.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.scheduling.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
       containers:
       - name: server
         {{- if .Values.coreService.image }}

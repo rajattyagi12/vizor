@@ -18,6 +18,8 @@
 | T-13 | No anti-affinity/topology spread/priority for HA | /Users/pritam/x/Vizor/deploy/helm/vizor/templates | Pod co-location risk across 4 worker nodes | Add anti-affinity/topology spread and priority class options | Phase 4 | Planned |
 | T-14 | Several critical components are singleton replicas | /Users/pritam/x/Vizor/deploy/helm/vizor/templates | Single point of failure | Raise replica counts where possible and add PDBs | Phase 4 | Planned |
 | T-15 | Migrations ordering unclear across resources | /Users/pritam/x/Vizor/deploy/helm/vizor/templates/components/migrations-job.yaml | Jobs may run before config or after dependents | Use ArgoCD sync-waves for migrations and dependent services | Phase 2 | Done |
+| T-16 | No HPA for frontend/api-proxy/core/interaction/engagement | /Users/pritam/x/Vizor/deploy/helm/vizor/templates/hpa.yaml | Static scaling may under/over-provision | Add HPA templates and autoscaling values | Phase 4 | Done |
+| T-17 | No scheduling constraints for stateless workloads | /Users/pritam/x/Vizor/deploy/helm/vizor/templates | Co-location risk across nodes | Add affinity/topology spread settings and wire into deployments | Phase 4 | Done |
 | T-11 | Misnamed file with leading space | /Users/pritam/x/Vizor/deploy/helm/vizor/templates/components/keycloak/ keycloak-user-sync-job.yaml | Tooling errors, hidden changes | Rename file to remove leading space | Phase 5 | Planned |
 
 ## High Availability Audit Findings
@@ -123,9 +125,9 @@
    1. `frontend.replicas` based on expected traffic.
    1. `api-proxy` replicas based on expected traffic.
    1. `keycloak.replicas: 2` and enable HPA for Keycloak.
-1. Add pod anti‑affinity and topology spread constraints for critical stateless workloads (4 worker nodes).
+1. Add pod anti‑affinity and topology spread constraints for critical stateless workloads (4 worker nodes). (Done)
 1. Add `priorityClassName` values and wire into critical deployments.
-1. Add HPA templates and `autoscaling` values, including Keycloak.
+1. Add HPA templates and `autoscaling` values for core/interaction/engagement/frontend/api-proxy. (Done)
 1. Add PDBs with `minAvailable: 1` for critical services.
 1. Ensure Kubernetes Metrics Server is installed and resource requests are set.
 
