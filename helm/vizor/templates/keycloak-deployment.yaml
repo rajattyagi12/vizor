@@ -68,9 +68,10 @@ spec:
             - "--import-realm"
             - --hostname={{ .Values.keycloak.hostname }}
             - --hostname-strict={{ .Values.keycloak.hostnameStrict }}
+            - --http-enabled={{ .Values.keycloak.httpEnabled }}
+            - --proxy-headers={{ .Values.keycloak.proxyHeaders }}
             - "--spi-events-listener-jboss-logging-success-level=info"
             - "--spi-events-listener-jboss-logging-error-level=warn"
-
           env:
             - name: KC_BOOTSTRAP_ADMIN_USERNAME
               value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KEYCLOAK_ADMIN }}
@@ -88,8 +89,6 @@ spec:
               value: "jdbc:sqlserver://{{ .Values.sqlServer.service.name }}:{{ .Values.sqlServer.service.port }};databaseName={{ .Values.keycloakRealmConfiguration.keycloakEnv.AUTH_DATABASE_NAME }};encrypt=true;trustServerCertificate=true"
             - name: KC_HTTP_RELATIVE_PATH
               value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_HTTP_RELATIVE_PATH }}
-            - name: KC_PROXY
-              value: "edge"
             - name: KC_DB_POOL_MIN_SIZE
               value: "5"
             - name: KC_DB_POOL_INITIAL_SIZE

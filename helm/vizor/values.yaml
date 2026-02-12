@@ -289,3 +289,7 @@ keycloak:
   hostname: ""
   # -- Set to false to allow requests via any hostname (useful behind a reverse proxy)
   hostnameStrict: false
+  # -- Enable HTTP listener when TLS is terminated at the ingress
+  httpEnabled: true
+  # -- Proxy headers mode (xforwarded or forwarded)
+  proxyHeaders: "xforwarded"
