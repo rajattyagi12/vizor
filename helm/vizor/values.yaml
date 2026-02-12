@@ -281,3 +281,11 @@ observability:
 # -- MailHog fake SMTP server (dev/test only)
 mailhog:
   enabled: false
+
+keycloak:
+  # -- Keycloak start mode: "start" (prod) or "start-dev" (dev)
+  startMode: "start"
+  # -- Keycloak hostname passed to --hostname flag (required for production mode)
+  hostname: ""
+  # -- Set to false to allow requests via any hostname (useful behind a reverse proxy)
+  hostnameStrict: false

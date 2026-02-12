@@ -6,10 +6,10 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | T-02 | Dev components enabled in prod (MailHog, local SQL, local-path) | /Users/pritam/x/Vizor/deploy/helm/vizor/templates/mailhog-deployment.yaml | Production exposure and instability | Add enable flags and disable in prod values | Phase 1 | Planned |
 | T-10 | Local SQL Server exposed via NodePort | /Users/pritam/x/Vizor/deploy/helm/vizor/templates/sqlserver.yaml | Production exposure | Disable in prod and use external DB; keep internal DB for dev only | Phase 1 | Planned |
-| T-01 | Plaintext secrets in values and ConfigMaps/Secrets | /Users/pritam/x/Vizor/deploy/helm/vizor/values.yaml | Credential exposure in git, Helm values, and runtime | Remove plaintext secrets; rely on Helm parameter overrides | Phase 2 | Planned |
+| T-01 | Plaintext secrets in values and ConfigMaps/Secrets | /Users/pritam/x/Vizor/deploy/helm/vizor/values.yaml | Credential exposure in git, Helm values, and runtime | Replace with placeholders; rely on Helm parameter overrides | Phase 2 | Done |
 | T-03 | Hardcoded namespaces in templates | /Users/pritam/x/Vizor/deploy/helm/vizor/templates/ingress-rules.yaml | Cross-namespace drift, ArgoCD app mismatch | Replace with .Release.Namespace | Phase 2 | Planned |
-| T-05 | Ingress TLS config fallback invalid | /Users/pritam/x/Vizor/deploy/helm/vizor/templates/ingress-rules.yaml | TLS failure, insecure ingress | Require certName or certIssuer and fix secretName | Phase 2 | Planned |
-| T-06 | Service account and RBAC use default SA | /Users/pritam/x/Vizor/deploy/helm/vizor/templates/components/secret.yaml | Over-privileged workloads | Add chart SA and restrict RBAC | Phase 2 | Planned |
+| T-05 | Ingress TLS config fallback invalid | /Users/pritam/x/Vizor/deploy/helm/vizor/templates/ingress-rules.yaml | TLS failure, insecure ingress | Require certName and remove fallback | Phase 2 | Done |
+| T-06 | Service account and RBAC use default SA | /Users/pritam/x/Vizor/deploy/helm/vizor/templates/components/secret.yaml | Over-privileged workloads | Add chart SA and restrict RBAC | Phase 2 | Done |
 | T-04 | Keycloak uses start-dev and inline admin creds | /Users/pritam/x/Vizor/deploy/helm/vizor/templates/keycloak-deployment.yaml | Insecure production auth | Use prod start options; rely on Helm parameter overrides for creds | Phase 3 | Planned |
 | T-07 | Missing securityContext hardening | /Users/pritam/x/Vizor/deploy/helm/vizor/templates/core-service.yaml | Privilege escalation risk | Add pod/container security contexts | Phase 3 | Planned |
 | T-08 | Missing probes on core services | /Users/pritam/x/Vizor/deploy/helm/vizor/templates/interaction-service.yaml | Unreliable rollouts and recovery | Add liveness/readiness/startup probes | Phase 3 | Planned |
@@ -17,6 +17,7 @@
 | T-09 | No HPA/PDB | /Users/pritam/x/Vizor/deploy/helm/vizor/templates | Reduced HA and scaling, unclear autoscaling requirements | Audit HPA need and add autoscaling + PDB templates if required | Phase 4 | Planned |
 | T-13 | No anti-affinity/topology spread/priority for HA | /Users/pritam/x/Vizor/deploy/helm/vizor/templates | Pod co-location risk across 4 worker nodes | Add anti-affinity/topology spread and priority class options | Phase 4 | Planned |
 | T-14 | Several critical components are singleton replicas | /Users/pritam/x/Vizor/deploy/helm/vizor/templates | Single point of failure | Raise replica counts where possible and add PDBs | Phase 4 | Planned |
+| T-15 | Migrations ordering unclear across resources | /Users/pritam/x/Vizor/deploy/helm/vizor/templates/components/migrations-job.yaml | Jobs may run before config or after dependents | Use ArgoCD sync-waves for migrations and dependent services | Phase 2 | Done |
 | T-11 | Misnamed file with leading space | /Users/pritam/x/Vizor/deploy/helm/vizor/templates/components/keycloak/ keycloak-user-sync-job.yaml | Tooling errors, hidden changes | Rename file to remove leading space | Phase 5 | Planned |
 
 ## High Availability Audit Findings
@@ -52,10 +53,11 @@
 2. Ensure ArgoCD Application references `values-prod.yaml` for prod and `values-dev.yaml` for dev.
 
 **Phase 2: Security and Correctness**
-1. Remove plaintext secrets from `values.yaml` and rely on Helm parameter overrides in ArgoCD.
+1. Replace plaintext secrets in `values.yaml` with `#CHANGEME` placeholders and move real values to `values-dev.yaml`.
 2. Add service account and tighten RBAC for secrets.
 3. Fix ingress correctness (Traefik class, TLS secret naming).
-4. Remove hardcoded namespaces.
+4. Remove hardcoded namespaces where applicable (observability remains separate for now).
+5. Use ArgoCD sync-waves to enforce migration ordering (migrations wave 5, user-sync wave 6, dependent services wave 10).
 
 **Phase 3: Production Hardening**
 1. Keycloak production mode (non‑dev start flags) and Helm‑configurable hostname.
@@ -100,12 +102,18 @@
 1. Ensure ArgoCD Application uses Helm parameters or value files to inject secret values at sync time.
 
 ### Phase 3: Production Hardening
+**Task 3.1 — Keycloak Production Mode**
 1. Replace `start-dev` with production start flags in `/Users/pritam/x/Vizor/deploy/helm/vizor/templates/keycloak-deployment.yaml`.
 1. Add Helm‑configurable Keycloak hostname values (`keycloak.hostname`, `keycloak.hostnameStrict`) and wire into Keycloak args.
 1. Set `keycloak.hostnameStrict` default to `false` in `/Users/pritam/x/Vizor/deploy/helm/vizor/values.yaml`.
+
+**Task 3.2 — Runtime Hardening**
 1. Add pod and container security contexts to critical workloads.
 1. Add readiness/liveness/startup probes to core services and enable Dapr app health checks.
-1. Pin image tags and set pull policy in `values-prod.yaml`.
+
+**Task 3.3 — Image Hygiene**
+1. Pin image tags in `values-prod.yaml`.
+1. Set pull policy in `values-prod.yaml`.
 
 ### Phase 4: High Availability
 1. Set replica targets in `values-prod.yaml`:

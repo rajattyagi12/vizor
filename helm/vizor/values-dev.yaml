@@ -182,6 +182,9 @@ keycloakRealmConfiguration:
         standardFlowEnabled: true
         directAccessGrantsEnabled: false
         enabled: true
+
+keycloak:
+  startMode: "start-dev"
   smtp:
     host: "mailhog"
     port: "1025"

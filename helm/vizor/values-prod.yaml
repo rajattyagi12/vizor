@@ -23,6 +23,10 @@ ingress:
   certName: "CHANGE-ME"
   certIssuer: "CHANGE-ME"
 
+keycloak:
+  hostname: "#CHANGEME"
+  hostnameStrict: false
+
 daprComponents:
   sftp:
     name: sftpgo-binding
