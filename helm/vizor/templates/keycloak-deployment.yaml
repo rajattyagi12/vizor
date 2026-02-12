@@ -70,6 +70,7 @@ spec:
             - --hostname-strict={{ .Values.keycloak.hostnameStrict }}
             - --http-enabled={{ .Values.keycloak.httpEnabled }}
             - --proxy-headers={{ .Values.keycloak.proxyHeaders }}
+            - --http-management-port={{ .Values.keycloak.managementPort }}
             - "--spi-events-listener-jboss-logging-success-level=info"
             - "--spi-events-listener-jboss-logging-error-level=warn"
           env:
@@ -97,6 +98,11 @@ spec:
               value: "true"
             - name: KC_METRICS_ENABLED
               value: "true"
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: mgmt
+              containerPort: {{ .Values.keycloak.managementPort }}
           resources:
             requests:
               memory: {{ .Values.keycloakRealmConfiguration.resources.requested_memory }}
@@ -120,6 +126,11 @@ metadata:
     app: keycloak
 spec:
   ports:
-    - port: 8080
+    - name: http
+      port: 8080
+      targetPort: 8080
+    - name: mgmt
+      port: {{ .Values.keycloak.managementPort }}
+      targetPort: {{ .Values.keycloak.managementPort }}
   selector:
     app: keycloak

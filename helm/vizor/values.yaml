@@ -330,3 +330,5 @@ keycloak:
   httpEnabled: true
   # -- Proxy headers mode (xforwarded or forwarded)
   proxyHeaders: "xforwarded"
+  # -- Management port for health/metrics endpoints
+  managementPort: 9000
