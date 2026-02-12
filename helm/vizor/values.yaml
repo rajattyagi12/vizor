@@ -22,7 +22,7 @@ auth:
 
 ingress:
   # -- Ingress class for ingress-rules
-  className: nginx
+  className: traefik
   # -- Ingress host DNS name
   host: # -- Set this to enable TLS, leave unset to run in insecure mode
 
@@ -95,7 +95,7 @@ daprComponents:
     redisHost: vizor-redis-master:6379
 
   secrets:
-    smtp-host: "email-smtp.us-east-1.amazonaws.com"
+    smtp-host: "#CHANGEME"
     smtp-port: "587"
     smtp-starttls: "true"
     smtp-auth: "true"
