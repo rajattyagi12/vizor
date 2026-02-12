@@ -100,25 +100,17 @@ daprComponents:
     smtp-starttls: "true"
     smtp-auth: "true"
     smtp-mail-display-name: "Vizor"
-    smtpusername: "AKIAVWE2WCVHKTCNHJEE"
-    smtppassword: "BIqlgWKuB3MhaFYTxaAXCeglcjLL7mzHYGR1G54OqHLM"
-    SsrsUsername: "DESKTOP-OC31DDE\\ASUS"
-    SsrsPassword: "9582"
-    SsrsBaseUrl: "http://172.16.16.102/ReportServer"
+    smtpusername: "#CHANGEME"
+    smtppassword: "#CHANGEME"
+    SsrsUsername: "#CHANGEME"
+    SsrsPassword: "#CHANGEME"
+    SsrsBaseUrl: "#CHANGEME"
     SsrsTimeoutSeconds: "300"
   secretStore:
     name: vizor-secretstore
     componentType: secretstores.kubernetes
     secretName: vizor-secrets
 
-  sftp:
-    name: sftpgo-binding
-    componentType: bindings.sftp
-    rootPath: "." # The home directory for the 'vizor' user
-    address: "vizor-sftpgo:2022" # Your SFTPGo service address
-    username: "vizor" # SFTPGo user
-    password: "Vizor@123" # The key in the secret that contains the password
-    insecureIgnoreHostKey: true # Caution: Use only for testing. Set to "false" in production.
 
 sqlServer:
   enabled: true
@@ -127,7 +119,7 @@ sqlServer:
   releaseName: sqlserver
   username: "sa"
   database: "vizor"
-  dbPassword: "P@55w0rd"
+  dbPassword: "#CHANGEME"
   service:
     name: sql-server-service
     port: 1433
@@ -164,169 +156,58 @@ local-path-provisioner:
       paths:
         - /opt/local-path-provisioner
 
-# -- SFTPGo Configuration
+# -- SFTPGo Configuration (dev only; full config in values-dev.yaml)
 sftpgo:
-  enabled: true
-  image:
-    repository: drakkan/sftpgo
-    tag: v2.6.6
-    pullPolicy: IfNotPresent
+  enabled: false
 
-  persistence:
-    enabled: true
-    storageClass: "local-path"
-    accessModes:
-      - ReadWriteOnce
-    size: 1Gi
-
-  service:
-    type: ClusterIP
-    ports:
-      - name: sftp
-        port: 2022
-        targetPort: 2022
-        protocol: TCP
-      - name: http
-        port: 8080
-        targetPort: 8080
-        protocol: TCP
-
-  env:
-    - name: SFTPGO_DATA_PROVIDER__DRIVER
-      value: "sqlite"
-    - name: SFTPGO_DATA_PROVIDER__NAME
-      value: "/srv/sftpgo/sftpgo.db"
-    - name: SFTPGO_PRE_CREATE_USERS_FILE
-      value: /etc/sftpgo/description.json
-    - name: SFTPGO_LOADDATA_FROM
-      value: /etc/sftpgo/description.json
-    - name: SFTPGO_CONFIG_FILE # 👈 NEW
-      value: /etc/sftpgo/config.yml
-    - name: SFTPGO_DEFAULT_ADMIN_ENABLED
-      value: "false" # because we load from json instead
-  # Write config.yml into a ConfigMap
-  config: |
-    data_provider:
-      driver: sqlite
-      name: "/srv/sftpgo/sftpgo.db"
-
-    httpd:
-      bindings:
-        - port: 8080
-          enable_web_admin: true
-          enable_web_client: true
-          enable_rest_api: true
-          enable_https: false
-
-    sftpd:
-      bindings:
-        - port: 2022
-
-    common:
-      max_total_connections: 1000
-      max_per_host_connections: 50
-      max_login_attempts: 5
-      log_level: info
-      log_file: "/srv/sftpgo/log/sftpgo.log"
-
-    telemetry:
-      enabled: false
-
-    create_default_admin: false
-
-  extraConfigmapMounts:
-    - name: vizor-sftpgo-description # 👈 use the existing ConfigMap name
-      mountPath: /etc/sftpgo/description.json
-      subPath: description.json
-      readOnly: true
-  # Write description.json into a ConfigMap
-  description: |
-    {
-      "admin": [
-        {
-          "username": "admin",
-          "password": "Admin@123",
-          "email": "admin@example.com",
-          "status": 1
-        }
-      ],
-      "users": [
-        {
-          "username": "vizor",
-          "password": "Vizor@123",
-          "home_dir": "/srv/sftpgo/data/vizor",
-          "uid": 1000,
-          "gid": 1000,
-          "max_sessions": 10,
-          "quota_size": 0,
-          "quota_files": 0,
-          "permissions": ["*"]
-        }
-      ]
-    }
-
-  extraVolumeMounts:
-    - name: sftpgo-config
-      mountPath: /etc/sftpgo/config.yml
-      subPath: config.yml
-    - name: sftpgo-description
-      mountPath: /etc/sftpgo/description.json
-      subPath: description.json
-
-  extraVolumes:
-    - name: sftpgo-config
-      configMap:
-        name: vizor-sftpgo-config
-        items:
-          - key: config.yml
-            path: config.yml
-    - name: sftpgo-description
-      configMap:
-        name: vizor-sftpgo-description
-        items:
-          - key: description.json
-            path: description.json
+serviceAccount:
+  # -- Create a dedicated ServiceAccount for Vizor workloads
+  create: true
+  # -- Name override; if empty the chart fullname is used
+  name: ""
+  # -- Annotations to add to the ServiceAccount (e.g. for IRSA)
+  annotations: {}
 
 keycloakRealmConfiguration:
   realmName: "vizor"
   clientId: "vizor-client"
   clientPrivateId: "vizor-client-private"
-  clientPrivateSecret: "ADD-YOUR-SECRET"  # Replace with actual secret, also change in the client config below
+  clientPrivateSecret: "#CHANGEME"  # Replace with actual secret, also change in the client config below
   roleName: "Superuser"
   clientScope: "User-Client-ID"
   #any smtp related email is the admin email
-  adminEmail: "no-reply@vizoruat.roundtables.us"
+  adminEmail: "#CHANGEME"
   serverUrl: "http://127.0.0.1:8080"
   vizorEntityId: "urn:vizor:saml"
   keycloakApiBaseUrl: "http://vizor-keycloak-api-service:4567/"
   keycloakServiceUrl: "http://keycloak:8080/auth"
   smtp:
-    host: "mailhog"
+    host: "#CHANGEME"
     port: "1025"
     starttls: "false"
     auth: "false"
     mailDisplayName: "Vizor Auth"
-    smtpusername: "set the username"
-    smtppassword: "set the password"
+    smtpusername: "#CHANGEME"
+    smtppassword: "#CHANGEME"
 
   keycloakEnv:
     AUTH_DATABASE_NAME: "vizor_auth"
     KEYCLOAK_ADMIN: "admin"
-    KEYCLOAK_ADMIN_PASSWORD: "password"
+    KEYCLOAK_ADMIN_PASSWORD: "#CHANGEME"
     KC_DB: "mssql"
     KC_DB_USERNAME: "sa"
-    KC_DB_PASSWORD: "P@55w0rd"
+    KC_DB_PASSWORD: "#CHANGEME"
     KC_HTTP_RELATIVE_PATH: "/auth"
   resources:
     requested_memory: "512Mi"
     requested_cpu: "512m"
   #FirstUser
   adminUser:
-    email: "ljacoby@roundtables.us"
+    email: "#CHANGEME"
     firstName: "Admin"
     lastName: "User"
     attributes_clientID: "1"
-    password: "Vizor@123"
+    password: "#CHANGEME"
 
   userSyncJob:
     enabled: false
@@ -334,7 +215,7 @@ keycloakRealmConfiguration:
   userSyncDatabase:
     server: "172.16.16.76"
     user: "sa"
-    password: "YourStrongPassw0rd"
+    password: "#CHANGEME"
     name: "BenchmarkV2"
 
 
@@ -388,7 +269,7 @@ keycloakRealmConfiguration:
         enabled: true
       - clientId: vizor-client-private
         name: Vizor Client Private
-        secret: "ADD-YOUR-SECRET"  # Placeholder - replace with actual secret
+        secret: "#CHANGEME"  # Replace with actual secret
         publicClient: false
         standardFlowEnabled: true
         directAccessGrantsEnabled: false

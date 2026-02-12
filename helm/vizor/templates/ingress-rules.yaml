@@ -4,7 +4,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ .Chart.Name }}-ingress-rules
-  namespace: vizor
+  namespace: {{ .Release.Namespace }}
   annotations:
     # Caddy-based ingress gateway - routes all traffic to Caddy service
     # Caddy handles internal routing to all services and Dapr services
@@ -13,15 +13,12 @@ metadata:
     {{ end }}
     argocd.argoproj.io/ignore-healthcheck: "true"
 spec:
+  ingressClassName: {{ .Values.ingress.className }}
   {{ if $tlsEnabled }}
   tls:
   - hosts:
     - "{{ .Values.ingress.host }}"
-    {{ if .Values.ingress.certName }}
-    secretName: {{ .Values.ingress.certName }}
-    {{ else }}
-    secretName: {{ include "daprstore.fullname" . }}
-    {{ end }}
+    secretName: {{ required "ingress.certName is required when TLS is enabled" .Values.ingress.certName }}
   {{ end }}
   rules:
     # Main application gateway - connects directly to host URL/IP
@@ -47,4 +44,3 @@ spec:
                 name: api-proxy
                 port:
                   number: 80
-

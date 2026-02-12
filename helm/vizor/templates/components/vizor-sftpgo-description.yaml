@@ -3,51 +3,9 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: vizor-sftpgo-description
-  namespace: vizor
+  namespace: {{ .Release.Namespace }}
 data:
   description.json: |
-    {
-      "users": [
-        {
-          "username": "admin",
-          "password": "Admin@123",
-          "email": "admin@example.com",
-          "status": 1,
-          "is_admin": true,
-          "home_dir": "/srv/sftpgo/data/admin_home",
-          "permissions": {
-            "/": ["list", "download", "upload", "delete", "rename", "chmod"]
-          }
-        },
-        {
-          "username": "vizor",
-          "password": "Vizor@123",
-          "home_dir": "/srv/sftpgo/data/vizor",
-          "uid": 1000,
-          "gid": 1000,
-          "max_sessions": 10,
-          "quota_size": 0,
-          "quota_files": 0,
-          "status": 1,
-          "permissions": {
-            "/": ["list", "download", "upload", "delete", "rename", "chmod", "create_dirs"]
-          }
-        },
-        {
-          "username": "vizor",
-          "password": "Vizor@123",
-          "home_dir": "/srv/sftpgo/data/vizor",
-          "uid": 1000,
-          "gid": 1000,
-          "max_sessions": 10,
-          "quota_size": 0,
-          "quota_files": 0,
-          "status": 1,
-          "permissions": {
-            "/": ["list", "download", "upload", "delete", "rename", "chmod", "create_dirs"]
-          }
-        }
-      ]
-    }
+    {{- .Values.sftpgo.description | nindent 4 }}
 
 {{- end }}

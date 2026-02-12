@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: vizor-realm
-  namespace: vizor
+  namespace: {{ .Release.Namespace }}
 data:
   vizor-realm.json: |
     {{- $cfg := .Values.keycloakRealmConfiguration }}
@@ -22,7 +22,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: keycloak
-  namespace: vizor
+  namespace: {{ .Release.Namespace }}
   labels:
     app: keycloak
 spec:
@@ -35,6 +35,7 @@ spec:
       labels:
         app: keycloak
     spec:
+      serviceAccountName: {{ include "vizor.serviceAccountName" . }}
       initContainers:
         - name: wait-for-mssql
           image: mcr.microsoft.com/mssql-tools
@@ -103,7 +104,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: keycloak
-  namespace: vizor
+  namespace: {{ .Release.Namespace }}
   labels:
     app: keycloak
 spec:

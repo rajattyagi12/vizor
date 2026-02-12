@@ -17,3 +17,47 @@ local-path-provisioner:
 
 observability:
   enabled: false          # Not yet ready for prod
+
+ingress:
+  className: traefik
+  certName: "CHANGE-ME"
+  certIssuer: "CHANGE-ME"
+
+daprComponents:
+  sftp:
+    name: sftpgo-binding
+    componentType: bindings.sftp
+    rootPath: "."
+    address: "#CHANGEME"
+    username: "#CHANGEME"
+    password: "#CHANGEME"
+    insecureIgnoreHostKey: false
+
+keycloakRealmConfiguration:
+  adminUser:
+    email: "ljacoby@roundtables.us"
+
+  adminEmail: "no-reply@vizoruat.roundtables.us"
+  clientPrivateSecret: "ADD-YOUR-SECRET"
+  keycloakEnv:
+    KC_DB_PASSWORD: "P@55w0rd"
+    KEYCLOAK_ADMIN_PASSWORD: "password"
+  realmJson:
+    clients:
+      - clientId: vizor-client
+        name: Vizor Client
+        rootUrl: "{{ .Values.keycloakRealmConfiguration.serverUrl }}"
+        publicClient: true
+        directAccessGrantsEnabled: true
+        redirectUris:
+          - "{{ .Values.keycloakRealmConfiguration.serverUrl }}/*"
+        attributes:
+          post.logout.redirect.uris: "{{ .Values.keycloakRealmConfiguration.serverUrl }}/*"
+        enabled: true
+      - clientId: vizor-client-private
+        name: Vizor Client Private
+        secret: "ADD-YOUR-SECRET"
+        publicClient: false
+        standardFlowEnabled: true
+        directAccessGrantsEnabled: false
+        enabled: true

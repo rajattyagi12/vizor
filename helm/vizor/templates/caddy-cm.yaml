@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: caddy-config
-  namespace: vizor
+  namespace: {{ .Release.Namespace }}
   labels:
     app: api-proxy
 data:

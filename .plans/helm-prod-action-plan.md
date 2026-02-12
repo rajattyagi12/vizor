@@ -88,7 +88,8 @@
 1. Ensure ArgoCD Application references `values-prod.yaml` for prod and `values-dev.yaml` for dev.
 
 ### Phase 2: Security and Correctness
-1. Remove plaintext secrets from `/Users/pritam/x/Vizor/deploy/helm/vizor/values.yaml` and rely on Helm parameter overrides in ArgoCD.
+1. Replace plaintext secrets in `/Users/pritam/x/Vizor/deploy/helm/vizor/values.yaml` with `#CHANGEME` placeholders and rely on Helm parameter overrides in ArgoCD.
+2. Move the replaced secret values into `/Users/pritam/x/Vizor/deploy/helm/vizor/values-dev.yaml` for dev only.
 1. Add `serviceAccount` values and a ServiceAccount template; bind workloads to it.
 1. Tighten RBAC in `/Users/pritam/x/Vizor/deploy/helm/vizor/templates/components/secret.yaml` to `get` only and bind to the chart service account.
 1. Fix ingress correctness in `/Users/pritam/x/Vizor/deploy/helm/vizor/templates/ingress-rules.yaml`:

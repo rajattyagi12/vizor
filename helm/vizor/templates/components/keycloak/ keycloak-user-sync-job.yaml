@@ -12,6 +12,7 @@ spec:
   ttlSecondsAfterFinished: 600 # Allow Job to exist for ArgoCD to discover completion
   template:
     spec:
+      serviceAccountName: {{ include "vizor.serviceAccountName" . }}
       restartPolicy: OnFailure
       containers:
         - name: user-sync

@@ -21,6 +21,7 @@ spec:
         vizor: migrations
         {{- include "vizor.selectorLabels" . | nindent 8 }}
     spec:
+      serviceAccountName: {{ include "vizor.serviceAccountName" . }}
       restartPolicy: Never
       containers:
         - name: migrations

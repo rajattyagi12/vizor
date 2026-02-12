@@ -15,6 +15,7 @@ spec:
       labels:
         app: sqlserver
     spec:
+      serviceAccountName: {{ include "vizor.serviceAccountName" . }}
       containers:
         - name: mssql-server
           image: "{{ .Values.sqlServer.image }}:{{ .Values.sqlServer.version }}"

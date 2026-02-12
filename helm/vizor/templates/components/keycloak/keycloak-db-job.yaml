@@ -10,6 +10,7 @@ spec:
   # backoffLimit: 3
   template:
     spec:
+      serviceAccountName: {{ include "vizor.serviceAccountName" . }}
       restartPolicy: OnFailure
       containers:
         - name: init-mssql

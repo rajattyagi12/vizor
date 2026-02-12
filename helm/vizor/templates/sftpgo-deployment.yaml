@@ -15,6 +15,7 @@ spec:
       labels:
         app: sftpgo
     spec:
+      serviceAccountName: {{ include "vizor.serviceAccountName" . }}
       containers:
         - name: sftpgo
           image: "{{ .Values.sftpgo.image.repository }}:{{ .Values.sftpgo.image.tag }}"

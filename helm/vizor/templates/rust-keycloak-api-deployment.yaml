@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: vizor-keycloak-api-deployment
-  namespace: vizor
+  namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1
   selector:
@@ -13,6 +13,7 @@ spec:
       labels:
         app: vizor-keycloak
     spec:
+      serviceAccountName: {{ include "vizor.serviceAccountName" . }}
       containers:
         - name: vizor-keycloak
           image: {{ .Values.image.registry }}/{{ .Values.image.repo }}/keycloak-rust-service:{{ .Values.image.tag }}
@@ -31,7 +32,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: vizor-keycloak-api-service
-  namespace: vizor
+  namespace: {{ .Release.Namespace }}
 spec:
   selector:
     app: vizor-keycloak
