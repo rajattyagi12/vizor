@@ -5,6 +5,8 @@ metadata:
   labels:
     {{- include "vizor.labels" . | nindent 4 }}
     vizor: interaction-service
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
 
 spec:
   replicas: {{ .Values.interactionService.replicas }}

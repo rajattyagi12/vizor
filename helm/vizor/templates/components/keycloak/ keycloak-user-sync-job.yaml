@@ -4,9 +4,7 @@ kind: Job
 metadata:
   name: keycloak-user-sync
   annotations:
-    "helm.sh/hook": post-install,post-upgrade  # Run after install/upgrade
-    "helm.sh/hook-weight": "1"  # Run after realm job
-    "helm.sh/hook-delete-policy": hook-succeeded  # Delete after success
+    argocd.argoproj.io/sync-wave: "6"
 
 spec:
   ttlSecondsAfterFinished: 600 # Allow Job to exist for ArgoCD to discover completion
