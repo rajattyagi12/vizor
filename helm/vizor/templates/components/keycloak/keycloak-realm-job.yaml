@@ -22,8 +22,8 @@ spec:
               set -e
               apk add --no-cache curl jq
 
-              echo "Waiting for Keycloak to be ready..."
               until curl -sf http://keycloak:8080/health/ready; do
+                echo "Waiting for Keycloak to be ready..."
                 sleep 5
               done
               echo "Debug: raw token response:"
