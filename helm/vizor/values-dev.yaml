@@ -1,0 +1,19 @@
+#
+# Development environment overrides
+# Merge with: helm upgrade ... -f values.yaml -f values-dev.yaml
+#
+
+mailhog:
+  enabled: true           # Fake SMTP for local dev
+
+sftpgo:
+  enabled: true           # Local SFTP for dev
+
+sqlServer:
+  enabled: true           # Local SQL Server for dev
+
+local-path-provisioner:
+  enabled: true           # Local storage provisioner for dev
+
+observability:
+  enabled: false          # Observability off by default in dev

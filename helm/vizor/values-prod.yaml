@@ -1,0 +1,19 @@
+#
+# Production environment overrides
+# Merge with: helm upgrade ... -f values.yaml -f values-prod.yaml
+#
+
+mailhog:
+  enabled: false          # No fake SMTP in prod
+
+sftpgo:
+  enabled: false          # External SFTP in prod
+
+sqlServer:
+  enabled: false          # External DB in prod
+
+local-path-provisioner:
+  enabled: false          # Provisioner pre-installed on prod cluster
+
+observability:
+  enabled: false          # Not yet ready for prod

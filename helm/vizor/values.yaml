@@ -417,3 +417,7 @@ keycloakRealmConfiguration:
 
 observability:
   enabled: false
+
+# -- MailHog fake SMTP server (dev/test only)
+mailhog:
+  enabled: false
