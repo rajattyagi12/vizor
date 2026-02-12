@@ -22,7 +22,7 @@ spec:
               set -e
               apk add --no-cache curl jq
 
-              until curl -sf http://keycloak:{{ .Values.keycloak.managementPort }}/health/ready; do
+              until curl -sf http://keycloak:8080/auth/realms/master; do
                 echo "Waiting for Keycloak to be ready..."
                 sleep 5
               done
