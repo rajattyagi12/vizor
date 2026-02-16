@@ -198,6 +198,14 @@ spec:
                 }" \
                 http://keycloak:8080/auth/admin/realms/$REALM_NAME || echo "SMTP may already be set"
 
+              echo "Updating password policy for realm..."
+              curl -s -X PUT \
+                -H "Authorization: Bearer $TOKEN" \
+                -H "Content-Type: application/json" \
+                -d "{
+                  \"passwordPolicy\": \"length(8) and digits(1) and upperCase(1) and lowerCase(1) and specialChars(1) and passwordHistory(3)\"
+                }" \
+                http://keycloak:8080/auth/admin/realms/$REALM_NAME || echo "Password policy may already be set"
 
               #Update master realm "admin" user's email
               echo "Updating master realm admin user's email..."
