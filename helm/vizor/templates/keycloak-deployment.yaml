@@ -1,3 +1,4 @@
+{{- if .Values.components.identity.enabled }}
 # Keycloak Realm Configuration
 apiVersion: v1
 kind: ConfigMap
@@ -134,3 +135,4 @@ spec:
       targetPort: {{ .Values.keycloak.managementPort }}
   selector:
     app: keycloak
+{{- end }}

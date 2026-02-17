@@ -1,0 +1,11 @@
+components:
+  foundation:
+    enabled: true
+  dataInit:
+    enabled: false
+  identity:
+    enabled: false
+  apps:
+    enabled: false
+  trafficAutoscale:
+    enabled: false

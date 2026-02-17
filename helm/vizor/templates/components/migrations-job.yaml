@@ -1,3 +1,4 @@
+{{- if .Values.components.dataInit.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -91,3 +92,4 @@ spec:
               dotnet tool run dotnet-ef database update --project DotNetScaffolding.csproj --configuration Release --no-build
               
               # fi
+{{- end }}

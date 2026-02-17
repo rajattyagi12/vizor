@@ -1,4 +1,4 @@
-{{- if .Values.keycloakRealmConfiguration.userSyncJob.enabled }}
+{{- if and .Values.components.identity.enabled .Values.keycloakRealmConfiguration.userSyncJob.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:

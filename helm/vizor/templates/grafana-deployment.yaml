@@ -1,4 +1,4 @@
-{{- if .Values.observability.enabled }}
+{{- if and .Values.components.trafficAutoscale.enabled .Values.observability.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

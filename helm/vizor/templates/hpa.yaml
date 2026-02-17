@@ -1,4 +1,4 @@
-{{- if .Values.autoscaling.enabled }}
+{{- if and .Values.components.trafficAutoscale.enabled .Values.autoscaling.enabled }}
 {{- if .Values.autoscaling.coreService.enabled }}
 {{ include "vizor.hpa" (dict "name" (printf "%s-core-service" .Chart.Name) "minReplicas" .Values.autoscaling.coreService.minReplicas "maxReplicas" .Values.autoscaling.coreService.maxReplicas "targetCPUUtilizationPercentage" .Values.autoscaling.coreService.targetCPUUtilizationPercentage "Release" .Release) }}
 ---

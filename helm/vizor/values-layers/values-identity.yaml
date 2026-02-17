@@ -1,0 +1,14 @@
+components:
+  foundation:
+    enabled: false
+  dataInit:
+    enabled: false
+  identity:
+    enabled: true
+  apps:
+    enabled: false
+  trafficAutoscale:
+    enabled: false
+
+local-path-provisioner:
+  enabled: false

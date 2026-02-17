@@ -1,3 +1,4 @@
+{{- if .Values.components.identity.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -38,3 +39,4 @@ spec:
     app: vizor-keycloak
   ports:
     - port: 4567
+{{- end }}

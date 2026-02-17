@@ -1,3 +1,4 @@
+{{- if .Values.components.trafficAutoscale.enabled }}
 {{- $tlsEnabled := (or .Values.ingress.certIssuer .Values.ingress.certName) -}}
 
 apiVersion: networking.k8s.io/v1
@@ -44,3 +45,4 @@ spec:
                 name: api-proxy
                 port:
                   number: 80
+{{- end }}

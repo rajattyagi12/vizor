@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vizor-traffic-autoscale
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: vizor
+  source:
+    repoURL: git@git.nbt.local:vizor/deploy.git
+    targetRevision: HEAD
+    path: helm/vizor
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-dev.yaml
+        - values-layers/values-traffic-autoscale.yaml
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

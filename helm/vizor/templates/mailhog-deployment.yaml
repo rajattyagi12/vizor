@@ -1,4 +1,4 @@
-{{- if .Values.mailhog.enabled }}
+{{- if and .Values.components.apps.enabled .Values.mailhog.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -39,6 +39,8 @@ spec:
   type: NodePort
 
 ---
+{{- end }}
+{{- if and .Values.components.trafficAutoscale.enabled .Values.mailhog.enabled }}
 kind: Ingress
 apiVersion: networking.k8s.io/v1
 metadata:

@@ -1,4 +1,4 @@
-{{- if .Values.sqlServer.enabled }}
+{{- if and .Values.components.dataInit.enabled .Values.sqlServer.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

@@ -1,4 +1,4 @@
-{{- if .Values.observability.enabled }}
+{{- if and .Values.components.trafficAutoscale.enabled .Values.observability.enabled }}
 apiVersion: v1
 kind: Namespace
 metadata:

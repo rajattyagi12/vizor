@@ -1,4 +1,4 @@
-{{- if .Values.daprComponents.deploy }}
+{{- if and .Values.components.foundation.enabled .Values.daprComponents.deploy }}
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:

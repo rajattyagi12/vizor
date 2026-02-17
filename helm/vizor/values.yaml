@@ -6,6 +6,18 @@
 global:
   namespace: vizor # Your target namespace. All resources will be deployed here.
 
+components:
+  foundation:
+    enabled: true
+  dataInit:
+    enabled: true
+  identity:
+    enabled: true
+  apps:
+    enabled: true
+  trafficAutoscale:
+    enabled: true
+
 image:
   # -- Image registry, only change if you're using your own images
   registry: harbor.nbt.local

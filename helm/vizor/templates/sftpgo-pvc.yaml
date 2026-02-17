@@ -1,4 +1,4 @@
-{{- if .Values.sftpgo.enabled }}
+{{- if and .Values.components.apps.enabled .Values.sftpgo.enabled }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
