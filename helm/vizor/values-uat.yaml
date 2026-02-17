@@ -1,0 +1,61 @@
+#
+# UAT environment overrides
+# Merge with: helm upgrade ... -f values.yaml -f values-uat.yaml
+#
+
+mailhog:
+  enabled: false
+
+sftpgo:
+  enabled: false
+
+sqlServer:
+  enabled: false
+
+local-path-provisioner:
+  enabled: false
+
+observability:
+  enabled: false
+
+keycloak:
+  startMode: "start"
+  hostname: "#CHANGEME"
+  hostnameStrict: false
+
+autoscaling:
+  enabled: true
+  coreService:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 4
+    targetCPUUtilizationPercentage: 70
+  interactionService:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 4
+    targetCPUUtilizationPercentage: 70
+  engagementService:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 4
+    targetCPUUtilizationPercentage: 70
+  frontend:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+  apiProxy:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+
+keycloakRealmConfiguration:
+  adminUser:
+    email: "#CHANGEME"
+  adminEmail: "#CHANGEME"
+  clientPrivateSecret: "#CHANGEME"
+  keycloakEnv:
+    KC_DB_PASSWORD: "#CHANGEME"
+    KEYCLOAK_ADMIN_PASSWORD: "#CHANGEME"

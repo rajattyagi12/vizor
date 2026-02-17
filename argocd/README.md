@@ -1,18 +1,16 @@
-# Vizor ArgoCD App-of-Apps
+# Vizor ArgoCD App-of-Apps (Multi-Environment)
 
-This directory contains the in-place app-of-apps conversion for Vizor.
+This repo now supports environment-specific App-of-Apps roots using `ApplicationSet`.
 
-## Root app
+## Root Paths
 
-Update the existing ArgoCD `vizor-deploy` application source path to:
+Point each environment's existing ArgoCD root Application to exactly one path:
 
-- `argocd/root`
+- Dev: `argocd/root/dev`
+- UAT: `argocd/root/uat`
+- Prod: `argocd/root/prod`
 
-The root path renders only child `Application` resources.
-
-## Child applications and order
-
-Application sync-wave order:
+Each root path contains one `ApplicationSet` that generates the same five child apps with fixed ordering:
 
 1. `vizor-foundation` (`-2`)
 2. `vizor-data-init` (`-1`)
@@ -20,9 +18,31 @@ Application sync-wave order:
 4. `vizor-apps` (`1`)
 5. `vizor-traffic-autoscale` (`2`)
 
-## Layered Helm values
+## Environment Parameters
 
-Each child app deploys the same chart (`helm/vizor`) with a layer file under `helm/vizor/values-layers/`:
+Per environment, the `ApplicationSet` defines:
+
+- `repoURL`
+- `targetRevision`
+- `namespace`
+- environment values file (`values-dev.yaml` / `values-uat.yaml` / `values-prod.yaml`)
+- ingress Helm parameters:
+  - `ingress.className`
+  - `ingress.host`
+  - `ingress.certName`
+  - `ingress.certIssuer`
+
+Ingress values are injected via ArgoCD Helm parameters (not secrets and not chart defaults).
+
+## Helm Layering
+
+All child apps deploy `helm/vizor` with:
+
+- `values.yaml`
+- one environment file
+- one layer file from `helm/vizor/values-layers/`
+
+Layer files:
 
 - `values-foundation.yaml`
 - `values-data-init.yaml`
@@ -30,15 +50,12 @@ Each child app deploys the same chart (`helm/vizor`) with a layer file under `he
 - `values-apps.yaml`
 - `values-traffic-autoscale.yaml`
 
-Current child manifests use `values-dev.yaml` as the environment override to match the current deployment behavior.
-For production, replace `values-dev.yaml` with `values-prod.yaml` in the child app manifests.
+## Transition Notes
 
-## Dependency contract
+- `argocd/root/applications.yaml` is retained temporarily as deprecated fallback for transition.
+- Static child app manifests under `argocd/apps/` were removed to avoid drift with ApplicationSet generation.
 
-- Foundation deploys ServiceAccount, RBAC, secret material, secret-store components, and shared prerequisites.
-- Data init deploys SQL init and migrations.
-- Identity deploys Keycloak, realm initialization, and user sync.
-- Apps deploy runtime services (`core`, `interaction`, `engagement`, `frontend`, `api-proxy`) and dev-only optional apps.
-- Traffic/autoscale deploys ingress, HPA, and optional observability stack.
+## Non-Secret Policy
 
-This ordering prevents HPA-before-deployment and migrations-before-service race conditions.
+- Keep environment config files non-secret.
+- Continue injecting real secrets via Helm parameter overrides or your external secret flow.

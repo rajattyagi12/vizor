@@ -1,3 +1,8 @@
+# DEPRECATED: transition fallback only.
+# Use environment-specific ApplicationSet roots instead:
+# - argocd/root/dev/applicationset.yaml
+# - argocd/root/uat/applicationset.yaml
+# - argocd/root/prod/applicationset.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -13,8 +18,8 @@ spec:
     server: https://kubernetes.default.svc
     namespace: vizor
   source:
-    repoURL: git@git.nbt.local:vizor/deploy.git
-    targetRevision: HEAD
+    repoURL: git@CHANGE-ME:vizor/deploy.git
+    targetRevision: CHANGE-ME
     path: helm/vizor
     helm:
       valueFiles:
@@ -41,8 +46,8 @@ spec:
     server: https://kubernetes.default.svc
     namespace: vizor
   source:
-    repoURL: git@git.nbt.local:vizor/deploy.git
-    targetRevision: HEAD
+    repoURL: git@CHANGE-ME:vizor/deploy.git
+    targetRevision: CHANGE-ME
     path: helm/vizor
     helm:
       valueFiles:
@@ -69,8 +74,8 @@ spec:
     server: https://kubernetes.default.svc
     namespace: vizor
   source:
-    repoURL: git@git.nbt.local:vizor/deploy.git
-    targetRevision: HEAD
+    repoURL: git@CHANGE-ME:vizor/deploy.git
+    targetRevision: CHANGE-ME
     path: helm/vizor
     helm:
       valueFiles:
@@ -97,8 +102,8 @@ spec:
     server: https://kubernetes.default.svc
     namespace: vizor
   source:
-    repoURL: git@git.nbt.local:vizor/deploy.git
-    targetRevision: HEAD
+    repoURL: git@CHANGE-ME:vizor/deploy.git
+    targetRevision: CHANGE-ME
     path: helm/vizor
     helm:
       valueFiles:
@@ -125,8 +130,8 @@ spec:
     server: https://kubernetes.default.svc
     namespace: vizor
   source:
-    repoURL: git@git.nbt.local:vizor/deploy.git
-    targetRevision: HEAD
+    repoURL: git@CHANGE-ME:vizor/deploy.git
+    targetRevision: CHANGE-ME
     path: helm/vizor
     helm:
       valueFiles:
