@@ -20,6 +20,9 @@ spec:
         dapr.io/app-port: "80"
         dapr.io/sidecar-listen-addresses: "0.0.0.0"
         dapr.io/http-max-request-size: "100"
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "2019"
+        prometheus.io/path: "/metrics"
     spec:
       serviceAccountName: {{ include "vizor.serviceAccountName" . }}
       {{- with .Values.scheduling.affinity }}
@@ -40,6 +43,7 @@ spec:
               value: "true"
           ports:
             - containerPort: 80
+            - containerPort: 2019
           volumeMounts:
             - name: caddyfile
               mountPath: /etc/caddy/Caddyfile
@@ -72,5 +76,9 @@ spec:
       targetPort: 80
       protocol: TCP
       name: http
+    - port: 2019
+      targetPort: 2019
+      protocol: TCP
+      name: metrics
   selector:
     app: api-proxy

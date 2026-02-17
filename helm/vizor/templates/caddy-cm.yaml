@@ -7,6 +7,12 @@ metadata:
     app: api-proxy
 data:
   Caddyfile: |
+    {
+      # Expose Caddy admin API and metrics endpoint for scraping.
+      admin :2019
+      metrics
+    }
+
     :80 {
       # Enable access logs
       log {
