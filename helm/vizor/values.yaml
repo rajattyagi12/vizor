@@ -148,6 +148,11 @@ daprComponents:
     componentType: secretstores.kubernetes
     secretName: vizor-secrets
 
+  sftp:
+    address: "#CHANGEME" # Your SFTPGo service address
+    username: "#CHANGEME" # SFTPGo user
+    password: "#CHANGEME" # The key in the secret that contains the password
+
 
 sqlServer:
   enabled: true
