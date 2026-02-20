@@ -13,6 +13,7 @@ spec:
                   repoURL: {{ .Values.env.repoURL | quote }}
                   targetRevision: {{ .Values.env.targetRevision | quote }}
                   destinationNamespace: {{ .Values.env.destinationNamespace | quote }}
+                  derivedServiceAccountName: {{ printf "%s-runtime" .Values.env.destinationNamespace | quote }}
                   baseValuesFile: {{ .Values.env.baseValuesFile | quote }}
                   envValuesFile: {{ .Values.env.envValuesFile | quote }}
                   ingressClassName: {{ .Values.env.ingress.className | quote }}
@@ -67,6 +68,8 @@ spec:
               value: {{ "{{ingressCertName}}" | quote }}
             - name: ingress.certIssuer
               value: {{ "{{ingressCertIssuer}}" | quote }}
+            - name: serviceAccount.name
+              value: {{ "{{derivedServiceAccountName}}" | quote }}
       syncPolicy:
         automated:
           prune: true

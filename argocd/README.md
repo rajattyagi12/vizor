@@ -33,6 +33,12 @@ Set these through root app Helm values (file or ArgoCD Helm parameters):
 
 This allows branch-based testing without changing repo files (for example `env.targetRevision=codex/<branch>`).
 
+ServiceAccount naming is derived automatically for all child apps as:
+
+- `<env.destinationNamespace>-runtime`
+
+Example: destination namespace `vizor-apps` => service account `vizor-apps-runtime`.
+
 Example files you can copy from:
 
 - `/Users/pritam/x/Vizor/deploy/argocd/root/dev/values.example.yaml`
