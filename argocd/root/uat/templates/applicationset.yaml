@@ -4,6 +4,9 @@ metadata:
   name: {{ .Values.applicationSet.name | quote }}
   namespace: {{ .Values.argocdNamespace | quote }}
 spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
   generators:
     - matrix:
         generators:
@@ -39,40 +42,49 @@ spec:
                   layerValuesFile: values-layers/values-traffic-autoscale.yaml
   template:
     metadata:
-      name: {{ "{{appName}}" | quote }}
+      name: {{ "{{ .appName }}" | quote }}
       namespace: {{ .Values.argocdNamespace | quote }}
       annotations:
-        argocd.argoproj.io/sync-wave: {{ "{{wave}}" | quote }}
+        argocd.argoproj.io/sync-wave: {{ "{{ .wave }}" | quote }}
       finalizers:
         - resources-finalizer.argocd.argoproj.io
     spec:
       project: {{ .Values.project | quote }}
       destination:
         server: https://kubernetes.default.svc
-        namespace: {{ "{{destinationNamespace}}" | quote }}
+        namespace: {{ "{{ .destinationNamespace }}" | quote }}
       source:
-        repoURL: {{ "{{repoURL}}" | quote }}
-        targetRevision: {{ "{{targetRevision}}" | quote }}
+        repoURL: {{ "{{ .repoURL }}" | quote }}
+        targetRevision: {{ "{{ .targetRevision }}" | quote }}
         path: helm/vizor
         helm:
           valueFiles:
-            - {{ "{{baseValuesFile}}" | quote }}
-            - {{ "{{envValuesFile}}" | quote }}
-            - {{ "{{layerValuesFile}}" | quote }}
+            - {{ "{{ .baseValuesFile }}" | quote }}
+            - {{ "{{ .envValuesFile }}" | quote }}
+            - {{ "{{ .layerValuesFile }}" | quote }}
           parameters:
-            - name: ingress.className
-              value: {{ "{{ingressClassName}}" | quote }}
-            - name: ingress.host
-              value: {{ "{{ingressHost}}" | quote }}
-            - name: ingress.certName
-              value: {{ "{{ingressCertName}}" | quote }}
-            - name: ingress.certIssuer
-              value: {{ "{{ingressCertIssuer}}" | quote }}
             - name: serviceAccount.name
-              value: {{ "{{derivedServiceAccountName}}" | quote }}
+              value: {{ "{{ .derivedServiceAccountName }}" | quote }}
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
+  templatePatch: |
+    {{ "{{- if eq .appName \"vizor-traffic-autoscale\" }}" }}
+    spec:
+      source:
+        helm:
+          parameters:
+            - name: ingress.className
+              value: '{{ "{{ .ingressClassName }}" }}'
+            - name: ingress.host
+              value: '{{ "{{ .ingressHost }}" }}'
+            - name: ingress.certName
+              value: '{{ "{{ .ingressCertName }}" }}'
+            - name: ingress.certIssuer
+              value: '{{ "{{ .ingressCertIssuer }}" }}'
+            - name: serviceAccount.name
+              value: '{{ "{{ .derivedServiceAccountName }}" }}'
+    {{ "{{- end }}" }}

@@ -50,11 +50,19 @@ Example files you can copy from:
 Generated child apps deploy `helm/vizor` with:
 
 - `values.yaml`
-- one env file:
-  - dev: `values-dev.yaml`
-  - uat: `values-uat.yaml`
-  - prod: `values-prod.yaml`
+- one environment file
 - one layer file from `helm/vizor/values-layers/`
+
+Current mapping:
+
+- dev: split per child app under `/Users/pritam/x/Vizor/deploy/helm/vizor/values-env/dev/`
+  - `foundation.yaml`
+  - `data-init.yaml`
+  - `identity.yaml`
+  - `apps.yaml`
+  - `traffic-autoscale.yaml`
+- uat: shared `values-uat.yaml` (not split yet)
+- prod: shared `values-prod.yaml` (not split yet)
 
 ## Transition Notes
 

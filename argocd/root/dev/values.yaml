@@ -10,7 +10,6 @@ env:
   targetRevision: develop
   destinationNamespace: vizor
   baseValuesFile: values.yaml
-  envValuesFile: values-dev.yaml
   ingress:
     className: traefik
     host: ""

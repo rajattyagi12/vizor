@@ -1,0 +1,127 @@
+# Dev overrides for apps layer
+mailhog:
+  enabled: true
+
+sftpgo:
+  enabled: true
+  image:
+    repository: drakkan/sftpgo
+    tag: v2.6.6
+    pullPolicy: IfNotPresent
+  persistence:
+    enabled: true
+    storageClass: "local-path"
+    accessModes:
+      - ReadWriteOnce
+    size: 1Gi
+  service:
+    type: ClusterIP
+    ports:
+      - name: sftp
+        port: 2022
+        targetPort: 2022
+        protocol: TCP
+      - name: http
+        port: 8080
+        targetPort: 8080
+        protocol: TCP
+  env:
+    - name: SFTPGO_DATA_PROVIDER__DRIVER
+      value: "sqlite"
+    - name: SFTPGO_DATA_PROVIDER__NAME
+      value: "/srv/sftpgo/sftpgo.db"
+    - name: SFTPGO_PRE_CREATE_USERS_FILE
+      value: /etc/sftpgo/description.json
+    - name: SFTPGO_LOADDATA_FROM
+      value: /etc/sftpgo/description.json
+    - name: SFTPGO_CONFIG_FILE
+      value: /etc/sftpgo/config.yml
+    - name: SFTPGO_DEFAULT_ADMIN_ENABLED
+      value: "false"
+  config: |
+    data_provider:
+      driver: sqlite
+      name: "/srv/sftpgo/sftpgo.db"
+
+    httpd:
+      bindings:
+        - port: 8080
+          enable_web_admin: true
+          enable_web_client: true
+          enable_rest_api: true
+          enable_https: false
+
+    sftpd:
+      bindings:
+        - port: 2022
+
+    common:
+      max_total_connections: 1000
+      max_per_host_connections: 50
+      max_login_attempts: 5
+      log_level: info
+      log_file: "/srv/sftpgo/log/sftpgo.log"
+
+    telemetry:
+      enabled: false
+
+    create_default_admin: false
+  extraConfigmapMounts:
+    - name: vizor-sftpgo-description
+      mountPath: /etc/sftpgo/description.json
+      subPath: description.json
+      readOnly: true
+  description: |
+    {
+      "admin": [
+        {
+          "username": "admin",
+          "password": "Admin@123",
+          "email": "admin@example.com",
+          "status": 1
+        }
+      ],
+      "users": [
+        {
+          "username": "vizor",
+          "password": "Vizor@123",
+          "home_dir": "/srv/sftpgo/data/vizor",
+          "uid": 1000,
+          "gid": 1000,
+          "max_sessions": 10,
+          "quota_size": 0,
+          "quota_files": 0,
+          "permissions": ["*"]
+        }
+      ]
+    }
+  extraVolumeMounts:
+    - name: sftpgo-config
+      mountPath: /etc/sftpgo/config.yml
+      subPath: config.yml
+    - name: sftpgo-description
+      mountPath: /etc/sftpgo/description.json
+      subPath: description.json
+  extraVolumes:
+    - name: sftpgo-config
+      configMap:
+        name: vizor-sftpgo-config
+        items:
+          - key: config.yml
+            path: config.yml
+    - name: sftpgo-description
+      configMap:
+        name: vizor-sftpgo-description
+        items:
+          - key: description.json
+            path: description.json
+
+daprComponents:
+  sftp:
+    name: sftpgo-binding
+    componentType: bindings.sftp
+    rootPath: "."
+    address: "vizor-sftpgo:2022"
+    username: "vizor"
+    password: "Vizor@123"
+    insecureIgnoreHostKey: true

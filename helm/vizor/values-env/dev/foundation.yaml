@@ -1,0 +1,18 @@
+# Dev overrides for foundation layer
+sqlServer:
+  dbPassword: "P@55w0rd"
+
+daprComponents:
+  secrets:
+    smtpusername: "AKIAVWE2WCVHKTCNHJEE"
+    smtppassword: "BIqlgWKuB3MhaFYTxaAXCeglcjLL7mzHYGR1G54OqHLM"
+    SsrsUsername: "DESKTOP-OC31DDE\\ASUS"
+    SsrsPassword: "9582"
+    SsrsBaseUrl: "http://172.16.16.102/ReportServer"
+  sftp:
+    password: "Vizor@123"
+
+keycloakRealmConfiguration:
+  clientPrivateSecret: "ADD-YOUR-SECRET"
+  keycloakEnv:
+    KEYCLOAK_ADMIN_PASSWORD: "password"

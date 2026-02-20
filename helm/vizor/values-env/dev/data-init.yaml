@@ -1,0 +1,4 @@
+# Dev overrides for data-init layer
+sqlServer:
+  enabled: true
+  dbPassword: "P@55w0rd"
