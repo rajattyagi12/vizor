@@ -1,0 +1,18 @@
+argocdNamespace: argocd
+project: default
+
+applicationSet:
+  name: vizor-apps-prod
+
+env:
+  name: prod
+  repoURL: "#CHANGEME"
+  targetRevision: main
+  destinationNamespace: vizor
+  baseValuesFile: values.yaml
+  envValuesFile: values-prod.yaml
+  ingress:
+    className: traefik
+    host: "#CHANGEME"
+    certName: "#CHANGEME"
+    certIssuer: "#CHANGEME"

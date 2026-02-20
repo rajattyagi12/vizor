@@ -1,0 +1,19 @@
+# Example overrides for argocd/root/dev
+argocdNamespace: argocd
+project: default
+
+applicationSet:
+  name: vizor-apps-dev
+
+env:
+  name: dev
+  repoURL: git@git.nbt.local:vizor/deploy.git
+  targetRevision: codex/app-of-apps-inplace-convert
+  destinationNamespace: vizor
+  baseValuesFile: values.yaml
+  envValuesFile: values-dev.yaml
+  ingress:
+    className: traefik
+    host: vizor-dev.example.com
+    certName: vizor-dev-tls
+    certIssuer: letsencrypt-dev

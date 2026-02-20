@@ -1,0 +1,19 @@
+# Example overrides for argocd/root/uat
+argocdNamespace: argocd
+project: default
+
+applicationSet:
+  name: vizor-apps-uat
+
+env:
+  name: uat
+  repoURL: git@git.uat.example.com:vizor/deploy.git
+  targetRevision: uat
+  destinationNamespace: vizor
+  baseValuesFile: values.yaml
+  envValuesFile: values-uat.yaml
+  ingress:
+    className: traefik
+    host: vizor-uat.example.com
+    certName: vizor-uat-tls
+    certIssuer: letsencrypt-uat

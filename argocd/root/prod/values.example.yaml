@@ -1,0 +1,19 @@
+# Example overrides for argocd/root/prod
+argocdNamespace: argocd
+project: default
+
+applicationSet:
+  name: vizor-apps-prod
+
+env:
+  name: prod
+  repoURL: git@git.prod.example.com:vizor/deploy.git
+  targetRevision: main
+  destinationNamespace: vizor
+  baseValuesFile: values.yaml
+  envValuesFile: values-prod.yaml
+  ingress:
+    className: traefik
+    host: vizor.example.com
+    certName: vizor-prod-tls
+    certIssuer: letsencrypt-prod

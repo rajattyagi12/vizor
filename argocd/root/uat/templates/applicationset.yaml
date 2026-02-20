@@ -1,0 +1,73 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: {{ .Values.applicationSet.name | quote }}
+  namespace: {{ .Values.argocdNamespace | quote }}
+spec:
+  generators:
+    - matrix:
+        generators:
+          - list:
+              elements:
+                - env: {{ .Values.env.name | quote }}
+                  repoURL: {{ .Values.env.repoURL | quote }}
+                  targetRevision: {{ .Values.env.targetRevision | quote }}
+                  destinationNamespace: {{ .Values.env.destinationNamespace | quote }}
+                  baseValuesFile: {{ .Values.env.baseValuesFile | quote }}
+                  envValuesFile: {{ .Values.env.envValuesFile | quote }}
+                  ingressClassName: {{ .Values.env.ingress.className | quote }}
+                  ingressHost: {{ .Values.env.ingress.host | quote }}
+                  ingressCertName: {{ .Values.env.ingress.certName | quote }}
+                  ingressCertIssuer: {{ .Values.env.ingress.certIssuer | quote }}
+          - list:
+              elements:
+                - appName: vizor-foundation
+                  wave: "-2"
+                  layerValuesFile: values-layers/values-foundation.yaml
+                - appName: vizor-data-init
+                  wave: "-1"
+                  layerValuesFile: values-layers/values-data-init.yaml
+                - appName: vizor-identity
+                  wave: "0"
+                  layerValuesFile: values-layers/values-identity.yaml
+                - appName: vizor-apps
+                  wave: "1"
+                  layerValuesFile: values-layers/values-apps.yaml
+                - appName: vizor-traffic-autoscale
+                  wave: "2"
+                  layerValuesFile: values-layers/values-traffic-autoscale.yaml
+  template:
+    metadata:
+      name: {{ "{{appName}}" | quote }}
+      namespace: {{ .Values.argocdNamespace | quote }}
+      annotations:
+        argocd.argoproj.io/sync-wave: {{ "{{wave}}" | quote }}
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: {{ .Values.project | quote }}
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: {{ "{{destinationNamespace}}" | quote }}
+      source:
+        repoURL: {{ "{{repoURL}}" | quote }}
+        targetRevision: {{ "{{targetRevision}}" | quote }}
+        path: helm/vizor
+        helm:
+          valueFiles:
+            - {{ "{{baseValuesFile}}" | quote }}
+            - {{ "{{envValuesFile}}" | quote }}
+            - {{ "{{layerValuesFile}}" | quote }}
+          parameters:
+            - name: ingress.className
+              value: {{ "{{ingressClassName}}" | quote }}
+            - name: ingress.host
+              value: {{ "{{ingressHost}}" | quote }}
+            - name: ingress.certName
+              value: {{ "{{ingressCertName}}" | quote }}
+            - name: ingress.certIssuer
+              value: {{ "{{ingressCertIssuer}}" | quote }}
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
