@@ -13,9 +13,9 @@
 
 {{- define "vizor-foundation.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create -}}
-{{- default .Values.global.serviceAccountName .Values.serviceAccount.name | default (printf "%s-runtime" .Values.global.namespace) -}}
+{{- .Values.serviceAccount.name | default (printf "%s-runtime" .Release.Namespace) | default .Values.global.serviceAccountName | default "vizor-runtime" -}}
 {{- else -}}
-{{- default "default" .Values.serviceAccount.name -}}
+{{- .Values.serviceAccount.name | default (printf "%s-runtime" .Release.Namespace) | default "default" -}}
 {{- end -}}
 {{- end -}}
 

@@ -1,5 +1,5 @@
 {{- define "vizor-identity.serviceAccountName" -}}
-{{- .Values.serviceAccount.name | default .Values.global.serviceAccountName | default "vizor-runtime" -}}
+{{- .Values.serviceAccount.name | default (printf "%s-runtime" .Release.Namespace) | default .Values.global.serviceAccountName | default "vizor-runtime" -}}
 {{- end -}}
 
 {{- define "vizor-identity.labels" -}}
