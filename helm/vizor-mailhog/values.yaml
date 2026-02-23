@@ -1,0 +1,16 @@
+# Standalone Mailhog — no dependencies. Deploy early (e.g. wave -2) like Redis.
+# vizor-traffic can expose it via mailhog-ingress when mailhog.enabled is true (service name: mailhog).
+
+enabled: true  # Set false to render no resources (e.g. in envs that don't need Mailhog).
+
+image:
+  repository: docker.io/mailhog/mailhog
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  smtpPort: 1025
+  webPort: 8025
+
+replicas: 1  # Single replica; no HA needed for dev/test SMTP capture

@@ -14,6 +14,7 @@ All vizor-* charts use these **fixed names** for cross-referencing so resources 
 | Engagement service | `vizor-engagement-service` | apps chart |
 | Interaction service | `vizor-interaction-service` | apps chart |
 | API proxy (Caddy) | `api-proxy` | platform-support chart |
-| Redis service | `vizor-redis-master` | vizor-0-redis app (OCI chart) |
+| Redis service | `vizor-redis-master` | vizor-redis app (OCI chart, wave -3) |
+| Mailhog service | `mailhog` | vizor-mailhog app (standalone, wave -2); vizor-traffic mailhog-ingress references it |
 
 Each chart's `values.yaml` includes a `global` section with these names so templates reference `global.secretName`, `global.serviceAccountName`, etc., instead of `.Chart.Name` or `.Release.Name` for cross-chart resources.

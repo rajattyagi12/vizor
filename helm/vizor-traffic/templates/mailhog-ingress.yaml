@@ -1,4 +1,5 @@
 {{- if .Values.mailhog.enabled }}
+# Mailhog Deployment/Service are deployed by standalone vizor-mailhog Application (service name: mailhog).
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

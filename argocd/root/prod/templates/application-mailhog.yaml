@@ -1,0 +1,31 @@
+# Standalone Mailhog Application (wave -2). No dependencies; SMTP capture + Web UI for dev/test.
+# Service name "mailhog" — vizor-traffic renders mailhog-ingress when mailhog.enabled is true.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vizor-mailhog
+  namespace: {{ .Values.argocdNamespace | quote }}
+  labels:
+    vizor.com/app-order: "0.5"
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: {{ .Values.project | quote }}
+  source:
+    repoURL: {{ .Values.env.repoURL | quote }}
+    targetRevision: {{ .Values.env.targetRevision | quote }}
+    path: helm/vizor-mailhog
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{ .Values.env.destinationNamespace | quote }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

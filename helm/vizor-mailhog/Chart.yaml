@@ -1,0 +1,7 @@
+apiVersion: v2
+name: vizor-mailhog
+description: Standalone Mailhog (SMTP capture + Web UI) for dev/test. No dependencies on other vizor services.
+type: application
+version: 0.1.0
+appVersion: "1.0"
+maintainers: []

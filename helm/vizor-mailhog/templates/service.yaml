@@ -1,0 +1,20 @@
+{{- if .Values.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: mailhog
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: mailhog
+spec:
+  selector:
+    app: mailhog
+  ports:
+    - name: smtp
+      port: {{ .Values.service.smtpPort }}
+      targetPort: {{ .Values.service.smtpPort }}
+    - name: web
+      port: {{ .Values.service.webPort }}
+      targetPort: {{ .Values.service.webPort }}
+  type: {{ .Values.service.type }}
+{{- end }}

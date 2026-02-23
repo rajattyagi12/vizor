@@ -14,6 +14,7 @@ ingress:
   certName: ""
   certIssuer: ""
 
+# When true, traffic chart renders mailhog-ingress (backend: service "mailhog" from vizor-mailhog app).
 mailhog:
   enabled: false
 

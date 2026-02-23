@@ -1,0 +1,29 @@
+{{- if .Values.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mailhog
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: mailhog
+    app.kubernetes.io/name: vizor-mailhog
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: mailhog
+  template:
+    metadata:
+      labels:
+        app: mailhog
+    spec:
+      containers:
+        - name: mailhog
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: smtp
+              containerPort: {{ .Values.service.smtpPort }}
+            - name: web
+              containerPort: {{ .Values.service.webPort }}
+{{- end }}
