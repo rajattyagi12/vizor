@@ -1,10 +1,12 @@
 
-{{- if and .Values.components.dataInit.enabled .Values.sqlServer.enabled }}
+{{- if and .Values.components.identity.enabled .Values.sqlServer.enabled }}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: mssql-init-job
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
 spec:
   ttlSecondsAfterFinished: 600 # Allow Job to exist for ArgoCD to discover completion
   # backoffLimit: 3
@@ -39,6 +41,9 @@ spec:
 
               echo "Connected. Creating databases..."
               /opt/mssql-tools/bin/sqlcmd -S "$SERVER" -U "$USER" -P "$PASSWORD" -Q "IF NOT EXISTS(SELECT name FROM sys.databases WHERE name='$AUTH_DATABASE_NAME') CREATE DATABASE $AUTH_DATABASE_NAME;"
+
+              echo "Setting Keycloak-recommended isolation level for $AUTH_DATABASE_NAME..."
+              /opt/mssql-tools/bin/sqlcmd -S "$SERVER" -U "$USER" -P "$PASSWORD" -Q "ALTER DATABASE $AUTH_DATABASE_NAME SET READ_COMMITTED_SNAPSHOT ON;"
           env:
             - name: connectionString
               valueFrom:

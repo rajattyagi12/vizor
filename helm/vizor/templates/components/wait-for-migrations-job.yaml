@@ -1,0 +1,36 @@
+{{- if .Values.components.apps.enabled }}
+# PreSync hook: blocks vizor-apps sync until vizor-data-init's migrations job has completed.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: wait-for-migrations
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 0
+  template:
+    spec:
+      serviceAccountName: {{ include "vizor.serviceAccountName" . }}
+      restartPolicy: Never
+      containers:
+        - name: wait
+          image: bitnami/kubectl:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "Waiting for migrations job {{ .Chart.Name }}-migrations to exist..."
+              until kubectl get job {{ .Chart.Name }}-migrations -n "${NAMESPACE}" 2>/dev/null; do
+                echo "Job not found, retrying in 5s..."
+                sleep 5
+              done
+              echo "Job exists. Waiting for completion..."
+              kubectl wait --for=condition=complete job/{{ .Chart.Name }}-migrations -n "${NAMESPACE}" --timeout=600s
+              echo "Migrations job completed."
+          env:
+            - name: NAMESPACE
+              value: {{ .Release.Namespace | quote }}
+{{- end }}

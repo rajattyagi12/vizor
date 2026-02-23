@@ -22,6 +22,8 @@ Each root chart generates six child apps with fixed wave ordering:
 
 Secret content (SQL, Keycloak, Dapr keys) is owned by the **vizor-secrets** chart and its value files (`values-env/*/secrets.yaml`), not by foundation.
 
+**Cross-app ordering:** vizor-apps uses a PreSync hook (`wait-for-migrations`) that blocks until the vizor-data-init migrations Job (`vizor-migrations`) has completed, so app Deployments only sync after DB migrations are done. Foundation must create the `job-reader` Role/RoleBinding so the wait job can query Job status.
+
 ## User-Configurable Inputs
 
 Set these through root app Helm values (file or ArgoCD Helm parameters):
