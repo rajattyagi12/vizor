@@ -36,7 +36,7 @@ spec:
                   chartPath: helm/vizor
                   appEnvValuesFile: ""
                   layerValuesFile: values-layers/values-foundation.yaml
-                  extraValueFile: values-layers/values-redis.yaml
+                  extraValueFile: values-layers/values-empty.yaml
                 - appName: vizor-data-init
                   wave: "-1"
                   chartPath: helm/vizor

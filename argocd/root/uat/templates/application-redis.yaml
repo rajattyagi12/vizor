@@ -1,0 +1,35 @@
+# Standalone Redis Application (wave -3, before vizor-foundation). CloudPirates OSS chart; service name vizor-redis-master for Dapr/SignalR.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vizor-redis
+  namespace: {{ .Values.argocdNamespace | quote }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-3"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: {{ .Values.project | quote }}
+  source:
+    repoURL: oci://registry-1.docker.io/cloudpirates/redis
+    chart: redis
+    targetRevision: "0.24.0"
+    helm:
+      parameters:
+        - name: fullnameOverride
+          value: vizor-redis-master
+        - name: auth.enabled
+          value: "false"
+        - name: architecture
+          value: standalone
+        - name: persistence.enabled
+          value: "false"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{ .Values.env.destinationNamespace | quote }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

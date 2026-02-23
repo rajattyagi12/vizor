@@ -9,4 +9,4 @@ components:
     enabled: false
   trafficAutoscale:
     enabled: false
-# Redis is configured in values-layers/values-redis.yaml and loaded only by vizor-foundation (extraValueFile)
+# Redis is deployed by the standalone vizor-redis Application (wave -3), not by this chart.

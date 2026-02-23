@@ -187,10 +187,6 @@ backupCronJob:
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 1
 
-# --- Redis (CloudPirates OSS subchart); full config in values-layers/values-redis.yaml, loaded only by vizor-foundation ---
-redis:
-  enabled: false
-
 # --- Configuration for the local-path-provisioner subchart ---
 local-path-provisioner:
   # This key must match the `name` in Chart.yaml dependencies

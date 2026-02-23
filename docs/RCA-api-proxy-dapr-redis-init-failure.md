@@ -37,7 +37,7 @@ So:
 2. **Redis is in another namespace**: the hostname `vizor-redis-master` is a short name and resolves only inside the **same namespace** as the pod. If Redis runs in another namespace (e.g. `redis`), the lookup in the vizor namespace fails unless you use the FQDN, e.g. `vizor-redis-master.redis.svc.cluster.local:6379`, or  
 3. **Service name differs**: the Redis service might have a different name (e.g. `redis-master`).
 
-When using the Argo CD app-of-apps, **Redis is deployed by vizor-foundation** (CloudPirates OSS Redis subchart; `redis.enabled: true` in the foundation layer) with service name `vizor-redis-master`. If Redis is disabled in foundation or you deploy without Argo, Redis is an external prerequisite (e.g. via `deploy.sh` or another Redis Helm chart in the same namespace).
+When using the Argo CD app-of-apps, **Redis is deployed by the standalone vizor-redis Application** (wave -3, CloudPirates OSS chart from OCI) with service name `vizor-redis-master`. If you deploy without Argo, Redis is an external prerequisite (e.g. via `deploy.sh` or another Redis Helm chart in the same namespace).
 
 ## Conclusion
 
@@ -46,6 +46,6 @@ When using the Argo CD app-of-apps, **Redis is deployed by vizor-foundation** (C
 
 ## Recommendations
 
-1. **Use foundation-deployed Redis** (default): ensure `redis.enabled: true` in the foundation layer so vizor-foundation deploys Redis (CloudPirates chart) with service `vizor-redis-master`. Or **deploy Redis in the same namespace as Vizor** with service name `vizor-redis-master` if you disabled Redis in foundation.
+1. **Use the vizor-redis Application** (default): the app-of-apps creates a vizor-redis Application (wave -3) that deploys Redis with service `vizor-redis-master`. Or **deploy Redis in the same namespace as Vizor** with service name `vizor-redis-master` if not using the app-of-apps.
 2. **If Redis is in another namespace:** set `daprComponents.state.redisHost` and `daprComponents.pubsub.redisHost` in foundation values to the **FQDN**, e.g. `vizor-redis-master.<redis-namespace>.svc.cluster.local:6379`.
 3. **Document** Redis (and Dapr control plane) as prerequisites in the Argo CD README or deploy docs so operators deploy them before or with Vizor.

@@ -11,21 +11,22 @@ Point each environment's existing ArgoCD root Application to one path:
 - UAT: `argocd/root/uat`
 - Prod: `argocd/root/prod`
 
-Each root chart generates seven child apps with fixed wave ordering:
+Each root chart generates eight child apps with fixed wave ordering:
 
-1. `vizor-secrets` (`-2`) — creates the Secret `vizor-secrets`; chart path `helm/vizor-secrets`
-2. `vizor-foundation` (`-2`)
-3. `vizor-data-init` (`-1`)
-4. `vizor-identity` (`0`)
-5. `vizor-platform-support` (`1`) — api-proxy (Caddy), optional mailhog, optional sftpgo (supporting platform; not core app workloads)
-6. `vizor-apps` (`2`) — core, engagement, interaction, frontend (core developer components)
-7. `vizor-traffic-autoscale` (`3`)
+1. `vizor-redis` (`-3`) — Redis (CloudPirates OSS, OCI); service `vizor-redis-master` for Dapr/SignalR
+2. `vizor-secrets` (`-2`) — creates the Secret `vizor-secrets`; chart path `helm/vizor-secrets`
+3. `vizor-foundation` (`-2`)
+4. `vizor-data-init` (`-1`)
+5. `vizor-identity` (`0`)
+6. `vizor-platform-support` (`1`) — api-proxy (Caddy), optional mailhog, optional sftpgo (supporting platform; not core app workloads)
+7. `vizor-apps` (`2`) — core, engagement, interaction, frontend (core developer components)
+8. `vizor-traffic-autoscale` (`3`)
 
 Secret content (SQL, Keycloak, Dapr keys) is owned by the **vizor-secrets** chart and its value files (`values-env/*/secrets.yaml`), not by foundation.
 
 **Cross-app ordering:** vizor-apps uses a PreSync hook (`wait-for-migrations`) that blocks until the vizor-data-init migrations Job (`vizor-migrations`) has completed, so app Deployments only sync after DB migrations are done. Foundation must create the `job-reader` Role/RoleBinding so the wait job can query Job status.
 
-**Prerequisites (external to this repo):** **Dapr control plane** must be available. **Redis** is deployed by **vizor-foundation** (CloudPirates OSS Redis subchart) in the same namespace with service name `vizor-redis-master`, so no separate Redis deploy is needed when using the app-of-apps. If you disable Redis in foundation (`redis.enabled: false`), deploy Redis elsewhere with service name `vizor-redis-master` or set `daprComponents.state.redisHost` / `pubsub.redisHost` (and `interactionService.redisConnectionString` if used). See [docs/RCA-api-proxy-dapr-redis-init-failure.md](docs/RCA-api-proxy-dapr-redis-init-failure.md) if api-proxy fails with "lookup vizor-redis-master ... no such host".
+**Prerequisites (external to this repo):** **Dapr control plane** must be available. **Redis** is deployed by the standalone **vizor-redis** Application (wave -3, CloudPirates OSS chart from OCI) in the same namespace with service name `vizor-redis-master`. No Chart.lock or vizor chart dependency needed. See [docs/RCA-api-proxy-dapr-redis-init-failure.md](docs/RCA-api-proxy-dapr-redis-init-failure.md) if api-proxy fails with "lookup vizor-redis-master ... no such host".
 
 ## User-Configurable Inputs
 
