@@ -27,6 +27,10 @@ Cross-chart resource names are fixed so Ingress, Caddy, and HPA reference the sa
 
 Env-specific overrides (dev/uat/prod) remain under `helm/vizor/values-env/{env}/` and are referenced by Argo as `../vizor/values-env/{env}/<app>.yaml`. Each separate chart’s `values.yaml` is self-contained; overlay only what you need per env.
 
+## Validation
+
+See [VALIDATION_CHECKLIST.md](VALIDATION_CHECKLIST.md) for `helm template` commands, value coverage, Argo checks, and naming/namespace notes.
+
 ## Running
 
 1. Ensure `vizor-secrets` and `vizor-0-redis` (if used) are deployed first.

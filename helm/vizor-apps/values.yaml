@@ -13,6 +13,12 @@ global:
     interaction: vizor-interaction-service
     frontend: vizor-frontend
 
+# Create SA in this app's namespace so pods can run (idempotent if same namespace as foundation).
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
 image:
   registry: harbor.nbt.local
   repo: vizor

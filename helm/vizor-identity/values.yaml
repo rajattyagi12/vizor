@@ -5,6 +5,12 @@ global:
   secretName: vizor-secrets
   serviceAccountName: vizor-runtime
 
+# Create SA in this app's namespace so pods can run (idempotent if same namespace as foundation).
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
 # SQL Server is deployed by vizor-data-init; use same service name for Keycloak DB connection.
 sqlServer:
   service:

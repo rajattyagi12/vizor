@@ -1,5 +1,5 @@
 {{- define "vizor-data-init.serviceAccountName" -}}
-{{- default .Values.global.serviceAccountName "vizor-runtime" -}}
+{{- .Values.serviceAccount.name | default .Values.global.serviceAccountName | default "vizor-runtime" -}}
 {{- end -}}
 
 {{- define "vizor-data-init.labels" -}}

@@ -6,6 +6,12 @@ global:
   serviceAccountName: vizor-runtime
   migrationsJobName: vizor-migrations  # Fixed name so vizor-apps PreSync can wait for it
 
+# Create SA in this app's namespace so pods can run (idempotent if same namespace as foundation).
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
 image:
   registry: harbor.nbt.local
   repo: vizor

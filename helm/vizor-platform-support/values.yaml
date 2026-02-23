@@ -11,6 +11,12 @@ global:
     interaction: vizor-interaction-service
     frontend: vizor-frontend
 
+# Create SA in this app's namespace so pods can run (idempotent if same namespace as foundation).
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
 apiProxy:
   replicas: 1
 
@@ -45,6 +51,7 @@ sftpgo:
   config: |
     # SFTPGo config (override in env values)
   description: "{}"
+  env: []  # optional env vars, e.g. [ { name: "SFTPGO_DEFAULT_ADMIN_USERNAME", value: "admin" } ]
   persistence:
     accessModes:
       - ReadWriteOnce
