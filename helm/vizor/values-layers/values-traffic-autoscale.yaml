@@ -10,5 +10,9 @@ components:
   trafficAutoscale:
     enabled: true
 
+# Do not create SA here; use the one from foundation (name from Argo param serviceAccount.name or "default").
+serviceAccount:
+  create: false
+
 local-path-provisioner:
   enabled: false
