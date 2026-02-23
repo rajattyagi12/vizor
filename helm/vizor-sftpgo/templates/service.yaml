@@ -1,4 +1,4 @@
-{{- if .Values.sftpgo.enabled }}
+{{- if .Values.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -7,15 +7,14 @@ metadata:
   labels:
     app: sftpgo
 spec:
-  type: {{ .Values.sftpgo.service.type }}
+  type: {{ .Values.service.type }}
   selector:
     app: sftpgo
   ports:
-{{- range .Values.sftpgo.service.ports }}
+{{- range .Values.service.ports }}
     - name: {{ .name }}
       protocol: {{ .protocol }}
       port: {{ .port }}
       targetPort: {{ .targetPort }}
 {{- end }}
-
 {{- end }}

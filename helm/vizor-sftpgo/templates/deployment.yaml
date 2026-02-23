@@ -1,12 +1,13 @@
-{{- if .Values.sftpgo.enabled }}
+{{- if .Values.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: vizor-sftpgo
+  namespace: {{ .Release.Namespace }}
   labels:
     app: sftpgo
 spec:
-  replicas: 1  # Single replica; no HA needed for supporting platform SFTP
+  replicas: 1
   selector:
     matchLabels:
       app: sftpgo
@@ -15,18 +16,26 @@ spec:
       labels:
         app: sftpgo
     spec:
-      serviceAccountName: {{ include "vizor-platform-support.serviceAccountName" . }}
+      serviceAccountName: {{ include "vizor-sftpgo.serviceAccountName" . }}
+      {{- with .Values.scheduling.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.scheduling.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: sftpgo
-          image: "{{ .Values.sftpgo.image.repository }}:{{ .Values.sftpgo.image.tag }}"
-          imagePullPolicy: {{ .Values.sftpgo.image.pullPolicy }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 2022
             - containerPort: 8080
           env:
-            {{- range .Values.sftpgo.env }}
-              - name: {{ .name }}
-                value: {{ .value | quote }}
+            {{- range .Values.env }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
             {{- end }}
           volumeMounts:
             - name: sftpgo-data

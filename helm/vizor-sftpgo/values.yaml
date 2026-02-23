@@ -1,0 +1,53 @@
+# Standalone SFTPGo — depends only on vizor-secrets (key sftpPassword). Single replica; not HA.
+
+enabled: true  # Set false to render no resources.
+
+global:
+  secretName: vizor-secrets
+  serviceAccountName: vizor-runtime
+
+# Do not create SA here; use the one from vizor-foundation.
+serviceAccount:
+  create: false
+  name: ""
+  annotations: {}
+
+image:
+  repository: docker.io/drakkan/sftpgo
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  ports:
+    - name: sftp
+      protocol: TCP
+      port: 2022
+      targetPort: 2022
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+
+config: |
+  # SFTPGo config (override in env values)
+description: "{}"
+env: []  # optional env vars, e.g. [ { name: "SFTPGO_DEFAULT_ADMIN_USERNAME", value: "admin" } ]
+
+persistence:
+  accessModes:
+    - ReadWriteOnce
+  size: 10Gi
+  storageClass: local-path
+
+# Dapr component (sftpgo-binding) created by this chart; references this service.
+daprComponent:
+  name: sftpgo-binding
+  rootPath: "/"
+  address: "vizor-sftpgo:2022"
+  username: "vizor"
+  insecureIgnoreHostKey: true
+
+scheduling:
+  affinity: {}
+  topologySpreadConstraints: []

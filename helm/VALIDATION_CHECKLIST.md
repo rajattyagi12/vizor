@@ -9,8 +9,10 @@ NS=vizor SA=vizor-runtime
 helm template vizor-data-init    helm/vizor-data-init    -n $NS --set serviceAccount.name=$SA -f helm/vizor-data-init/values.yaml    > /dev/null && echo data-init OK
 helm template vizor-identity      helm/vizor-identity     -n $NS --set serviceAccount.name=$SA -f helm/vizor-identity/values.yaml     > /dev/null && echo identity OK
 helm template vizor-platform-support helm/vizor-platform-support -n $NS --set serviceAccount.name=$SA -f helm/vizor-platform-support/values.yaml > /dev/null && echo platform-support OK
+helm template vizor-sftpgo        helm/vizor-sftpgo       -n $NS --set serviceAccount.name=$SA -f helm/vizor-sftpgo/values.yaml       > /dev/null && echo sftpgo OK
 helm template vizor-apps          helm/vizor-apps         -n $NS --set serviceAccount.name=$SA -f helm/vizor-apps/values.yaml        > /dev/null && echo apps OK
 helm template vizor-traffic       helm/vizor-traffic      -n $NS -f helm/vizor-traffic/values.yaml > /dev/null && echo traffic OK
+helm template vizor-mailhog       helm/vizor-mailhog      -n $NS -f helm/vizor-mailhog/values.yaml  > /dev/null && echo mailhog OK
 ```
 
 **vizor-foundation** requires the `local-path-provisioner` subchart. Either run `helm dependency update` in `helm/vizor-foundation` (with network), or deploy foundation with the monolith vizor chart and foundation layer until the subchart is available.
@@ -21,7 +23,8 @@ helm template vizor-traffic       helm/vizor-traffic      -n $NS -f helm/vizor-t
 |-------|------------|-------|
 | vizor-data-init | global.*, sqlServer.*, image.*, serviceAccount.* | All present in values.yaml |
 | vizor-identity | global.*, sqlServer.service, keycloak.*, keycloakRealmConfiguration.*, image.*, serviceAccount.* | All present |
-| vizor-platform-support | global.*, apiProxy, mailhog, sftpgo (incl. env, persistence), daprComponents.sftp, serviceAccount.* | sftpgo.env: [] added |
+| vizor-platform-support | global.*, apiProxy, serviceAccount.*, scheduling.* | Caddy only; Mailhog/SFTPGo are standalone |
+| vizor-sftpgo | global.secretName, serviceAccount.*, image.*, service.*, config, description, env, persistence, daprComponent.* | env: [] |
 | vizor-apps | global.*, image.*, resources, auth.clientId, *Service.replicas/annotations, interactionService.redisConnectionString, serviceAccount.* | All present |
 | vizor-traffic | global.serviceNames, ingress.*, autoscaling.*, observability.enabled | All present (Mailhog ingress is in vizor-mailhog) |
 | vizor-foundation | global.*, serviceAccount.*, daprComponents.*, persistence.*, local-path-provisioner.* | All present |

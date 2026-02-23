@@ -20,42 +20,7 @@ serviceAccount:
 apiProxy:
   replicas: 1
 
-# Mailhog is deployed by standalone vizor-mailhog Application (wave -2); not part of platform-support.
-
-daprComponents:
-  sftp:
-    name: sftpgo-binding
-    rootPath: "/"
-    address: "vizor-sftpgo:2022"
-    username: "vizor"
-    insecureIgnoreHostKey: "true"
-
-sftpgo:
-  enabled: false
-  image:
-    repository: docker.io/drakkan/sftpgo
-    tag: latest
-    pullPolicy: IfNotPresent
-  service:
-    type: ClusterIP
-    ports:
-      - name: sftp
-        protocol: TCP
-        port: 2022
-        targetPort: 2022
-      - name: http
-        protocol: TCP
-        port: 8080
-        targetPort: 8080
-  config: |
-    # SFTPGo config (override in env values)
-  description: "{}"
-  env: []  # optional env vars, e.g. [ { name: "SFTPGO_DEFAULT_ADMIN_USERNAME", value: "admin" } ]
-  persistence:
-    accessModes:
-      - ReadWriteOnce
-    size: 10Gi
-    storageClass: local-path
+# Mailhog: vizor-mailhog Application. SFTPGo: vizor-sftpgo Application (wave 1). Platform-support is Caddy (api-proxy) only.
 
 scheduling:
   affinity: {}

@@ -1,0 +1,7 @@
+apiVersion: v2
+name: vizor-sftpgo
+description: Standalone SFTPGo (SFTP server + Dapr binding). Depends only on vizor-secrets (sftpPassword). Service name vizor-sftpgo for Dapr binding.
+type: application
+version: 0.1.0
+appVersion: "1.0"
+maintainers: []
