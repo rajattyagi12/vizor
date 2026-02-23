@@ -39,11 +39,10 @@ spec:
                 sleep 3
               done
 
-              echo "Connected. Creating databases..."
-              /opt/mssql-tools/bin/sqlcmd -S "$SERVER" -U "$USER" -P "$PASSWORD" -Q "IF NOT EXISTS(SELECT name FROM sys.databases WHERE name='$AUTH_DATABASE_NAME') CREATE DATABASE $AUTH_DATABASE_NAME;"
-
-              echo "Setting Keycloak-recommended isolation level for $AUTH_DATABASE_NAME..."
-              /opt/mssql-tools/bin/sqlcmd -S "$SERVER" -U "$USER" -P "$PASSWORD" -Q "ALTER DATABASE $AUTH_DATABASE_NAME SET READ_COMMITTED_SNAPSHOT ON;"
+              echo "Connected. Creating databases and setting isolation level..."
+              # Run CREATE and ALTER in one sqlcmd batch so no other connection holds the DB (ALTER can block otherwise).
+              /opt/mssql-tools/bin/sqlcmd -S "$SERVER" -U "$USER" -P "$PASSWORD" -Q "IF NOT EXISTS (SELECT name FROM sys.databases WHERE name='$AUTH_DATABASE_NAME') CREATE DATABASE $AUTH_DATABASE_NAME; ALTER DATABASE $AUTH_DATABASE_NAME SET READ_COMMITTED_SNAPSHOT ON;"
+              echo "Done."
           env:
             - name: connectionString
               valueFrom:
