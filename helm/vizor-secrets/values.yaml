@@ -1,0 +1,43 @@
+# Default values for vizor-secrets chart.
+# This chart creates the single Secret "vizor-secrets" used by Dapr, keycloak-db-job,
+# migrations-job, sftpgo-binding, and apps. Override via value files or Argo CD parameters.
+
+createSecret: true
+
+# -- Secret name; must match daprComponents.secretStore.secretName and all secretKeyRef.name in repo
+secretName: vizor-secrets
+
+sqlServer:
+  username: "sa"
+  database: "vizor"
+  dbPassword: "#CHANGEME"
+  service:
+    name: sql-server-service
+    port: 1433
+
+keycloakRealmConfiguration:
+  serverUrl: "http://127.0.0.1:8080"
+  vizorEntityId: "urn:vizor:saml"
+  realmName: "vizor"
+  keycloakApiBaseUrl: "http://vizor-keycloak-api-service:4567/"
+  keycloakServiceUrl: "http://keycloak:8080/auth"
+  clientPrivateSecret: "#CHANGEME"
+  keycloakEnv:
+    KEYCLOAK_ADMIN: "admin"
+    KEYCLOAK_ADMIN_PASSWORD: "#CHANGEME"
+
+daprComponents:
+  secrets:
+    smtp-host: "#CHANGEME"
+    smtp-port: "587"
+    smtp-starttls: "true"
+    smtp-auth: "true"
+    smtp-mail-display-name: "Vizor"
+    smtpusername: "#CHANGEME"
+    smtppassword: "#CHANGEME"
+    SsrsUsername: "#CHANGEME"
+    SsrsPassword: "#CHANGEME"
+    SsrsBaseUrl: "#CHANGEME"
+    SsrsTimeoutSeconds: "300"
+  sftp:
+    password: ""  # optional; set per env

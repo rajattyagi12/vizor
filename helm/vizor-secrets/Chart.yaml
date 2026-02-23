@@ -1,0 +1,7 @@
+apiVersion: v2
+name: vizor-secrets
+description: Vizor shared Secret (vizor-secrets) for Dapr, SQL, Keycloak, and apps
+type: application
+version: 0.1.0
+appVersion: "1"
+maintainers: []

@@ -11,13 +11,16 @@ Point each environment's existing ArgoCD root Application to one path:
 - UAT: `argocd/root/uat`
 - Prod: `argocd/root/prod`
 
-Each root chart generates the same five child apps with fixed wave ordering:
+Each root chart generates six child apps with fixed wave ordering:
 
-1. `vizor-foundation` (`-2`)
-2. `vizor-data-init` (`-1`)
-3. `vizor-identity` (`0`)
-4. `vizor-apps` (`1`)
-5. `vizor-traffic-autoscale` (`2`)
+1. `vizor-secrets` (`-2`) — creates the Secret `vizor-secrets`; chart path `helm/vizor-secrets`
+2. `vizor-foundation` (`-2`)
+3. `vizor-data-init` (`-1`)
+4. `vizor-identity` (`0`)
+5. `vizor-apps` (`1`)
+6. `vizor-traffic-autoscale` (`2`)
+
+Secret content (SQL, Keycloak, Dapr keys) is owned by the **vizor-secrets** chart and its value files (`values-env/*/secrets.yaml`), not by foundation.
 
 ## User-Configurable Inputs
 
@@ -47,7 +50,7 @@ Example files you can copy from:
 
 ## Child App Value Files
 
-Generated child apps deploy `helm/vizor` with:
+Generated child apps deploy either `helm/vizor` or `helm/vizor-secrets` (vizor-secrets app only) with:
 
 - `values.yaml`
 - one environment file
@@ -55,7 +58,8 @@ Generated child apps deploy `helm/vizor` with:
 
 Current mapping:
 
-- dev: split per child app under `/Users/pritam/x/Vizor/deploy/helm/vizor/values-env/dev/`
+- dev: split per child app under `helm/vizor/values-env/dev/`
+  - `secrets.yaml` (vizor-secrets app only)
   - `foundation.yaml`
   - `data-init.yaml`
   - `identity.yaml`

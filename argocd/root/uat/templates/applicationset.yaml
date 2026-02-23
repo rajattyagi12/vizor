@@ -25,20 +25,35 @@ spec:
                   ingressCertIssuer: {{ .Values.env.ingress.certIssuer | quote }}
           - list:
               elements:
+                - appName: vizor-secrets
+                  wave: "-2"
+                  chartPath: helm/vizor-secrets
+                  appEnvValuesFile: helm/vizor/values-env/uat/secrets.yaml
+                  layerValuesFile: helm/vizor/values-layers/values-secrets.yaml
                 - appName: vizor-foundation
                   wave: "-2"
+                  chartPath: helm/vizor
+                  appEnvValuesFile: ""
                   layerValuesFile: values-layers/values-foundation.yaml
                 - appName: vizor-data-init
                   wave: "-1"
+                  chartPath: helm/vizor
+                  appEnvValuesFile: ""
                   layerValuesFile: values-layers/values-data-init.yaml
                 - appName: vizor-identity
                   wave: "0"
+                  chartPath: helm/vizor
+                  appEnvValuesFile: ""
                   layerValuesFile: values-layers/values-identity.yaml
                 - appName: vizor-apps
                   wave: "1"
+                  chartPath: helm/vizor
+                  appEnvValuesFile: ""
                   layerValuesFile: values-layers/values-apps.yaml
                 - appName: vizor-traffic-autoscale
                   wave: "2"
+                  chartPath: helm/vizor
+                  appEnvValuesFile: ""
                   layerValuesFile: values-layers/values-traffic-autoscale.yaml
   template:
     metadata:
@@ -56,11 +71,11 @@ spec:
       source:
         repoURL: {{ "{{ .repoURL }}" | quote }}
         targetRevision: {{ "{{ .targetRevision }}" | quote }}
-        path: helm/vizor
+        path: {{ "{{ .chartPath }}" | quote }}
         helm:
           valueFiles:
             - {{ "{{ .baseValuesFile }}" | quote }}
-            - {{ "{{ .envValuesFile }}" | quote }}
+            - {{ "{{ or .appEnvValuesFile .envValuesFile }}" | quote }}
             - {{ "{{ .layerValuesFile }}" | quote }}
           parameters:
             - name: serviceAccount.name

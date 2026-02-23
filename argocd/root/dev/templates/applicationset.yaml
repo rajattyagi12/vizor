@@ -24,24 +24,34 @@ spec:
                   ingressCertIssuer: {{ .Values.env.ingress.certIssuer | quote }}
           - list:
               elements:
+                - appName: vizor-secrets
+                  wave: "-2"
+                  chartPath: helm/vizor-secrets
+                  appEnvValuesFile: helm/vizor/values-env/dev/secrets.yaml
+                  layerValuesFile: helm/vizor/values-layers/values-secrets.yaml
                 - appName: vizor-foundation
                   wave: "-2"
+                  chartPath: helm/vizor
                   appEnvValuesFile: values-env/dev/foundation.yaml
                   layerValuesFile: values-layers/values-foundation.yaml
                 - appName: vizor-data-init
                   wave: "-1"
+                  chartPath: helm/vizor
                   appEnvValuesFile: values-env/dev/data-init.yaml
                   layerValuesFile: values-layers/values-data-init.yaml
                 - appName: vizor-identity
                   wave: "0"
+                  chartPath: helm/vizor
                   appEnvValuesFile: values-env/dev/identity.yaml
                   layerValuesFile: values-layers/values-identity.yaml
                 - appName: vizor-apps
                   wave: "1"
+                  chartPath: helm/vizor
                   appEnvValuesFile: values-env/dev/apps.yaml
                   layerValuesFile: values-layers/values-apps.yaml
                 - appName: vizor-traffic-autoscale
                   wave: "2"
+                  chartPath: helm/vizor
                   appEnvValuesFile: values-env/dev/traffic-autoscale.yaml
                   layerValuesFile: values-layers/values-traffic-autoscale.yaml
   template:
@@ -60,7 +70,7 @@ spec:
       source:
         repoURL: {{ "{{ .repoURL }}" | quote }}
         targetRevision: {{ "{{ .targetRevision }}" | quote }}
-        path: helm/vizor
+        path: {{ "{{ .chartPath }}" | quote }}
         helm:
           valueFiles:
             - {{ "{{ .baseValuesFile }}" | quote }}
