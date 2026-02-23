@@ -23,7 +23,7 @@ helm template vizor-traffic       helm/vizor-traffic      -n $NS -f helm/vizor-t
 | vizor-identity | global.*, sqlServer.service, keycloak.*, keycloakRealmConfiguration.*, image.*, serviceAccount.* | All present |
 | vizor-platform-support | global.*, apiProxy, mailhog, sftpgo (incl. env, persistence), daprComponents.sftp, serviceAccount.* | sftpgo.env: [] added |
 | vizor-apps | global.*, image.*, resources, auth.clientId, *Service.replicas/annotations, interactionService.redisConnectionString, serviceAccount.* | All present |
-| vizor-traffic | global.serviceNames, ingress.*, mailhog.enabled, autoscaling.*, observability.enabled | All present |
+| vizor-traffic | global.serviceNames, ingress.*, autoscaling.*, observability.enabled | All present (Mailhog ingress is in vizor-mailhog) |
 | vizor-foundation | global.*, serviceAccount.*, daprComponents.*, persistence.*, local-path-provisioner.* | All present |
 
 ## Argo CD

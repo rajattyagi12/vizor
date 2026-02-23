@@ -1,5 +1,5 @@
 # Standalone Mailhog — no dependencies. Deploy early (e.g. wave -2) like Redis.
-# vizor-traffic can expose it via mailhog-ingress when mailhog.enabled is true (service name: mailhog).
+# Ingress is in this chart (Mailhog is not HA).
 
 enabled: true  # Set false to render no resources (e.g. in envs that don't need Mailhog).
 
@@ -14,3 +14,9 @@ service:
   webPort: 8025
 
 replicas: 1  # Single replica; no HA needed for dev/test SMTP capture
+
+ingress:
+  enabled: true
+  host: ""  # Default: mailhog-<Release.Namespace>.k8s.nbt.local; set to override (e.g. mailhog.k8s.nbt.local)
+  className: ""  # e.g. traefik
+  annotations: {}

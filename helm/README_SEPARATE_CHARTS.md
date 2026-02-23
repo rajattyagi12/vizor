@@ -10,10 +10,10 @@ Each vizor layer is now a **separate Helm chart** with **independent values**. T
 | vizor-foundation | `helm/vizor-foundation` | ServiceAccount, Dapr components (secretstore, state, pubsub), RBAC (secret-reader, job-reader), PVCs, local-path-provisioner |
 | vizor-data-init | `helm/vizor-data-init` | SQL Server deployment + service, migrations Job (`vizor-migrations`) |
 | vizor-identity | `helm/vizor-identity` | Keycloak (ConfigMap, Deployment, Service), mssql-init-job, keycloak-realm-job, keycloak-user-sync-job, rust-keycloak-api |
-| vizor-mailhog | `helm/vizor-mailhog` | Standalone Mailhog (Deployment + Service); no dependencies; wave -2 (like Redis) |
+| vizor-mailhog | `helm/vizor-mailhog` | Standalone Mailhog (Deployment + Service + Ingress); no dependencies; wave -2 (like Redis) |
 | vizor-platform-support | `helm/vizor-platform-support` | Caddy (api-proxy), optional SFTPGo + Dapr binding (Mailhog moved to vizor-mailhog) |
 | vizor-apps | `helm/vizor-apps` | PreSync wait-for-migrations, frontend, core-service, engagement-service, interaction-service + Services |
-| vizor-traffic | `helm/vizor-traffic` | Ingress, HPA, optional Mailhog ingress (backend: vizor-mailhog), optional observability (Loki, Grafana, Promtail) |
+| vizor-traffic | `helm/vizor-traffic` | Ingress, HPA, optional observability (Loki, Grafana, Promtail) |
 
 ## Naming contract
 
