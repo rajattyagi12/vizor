@@ -1,0 +1,12 @@
+# Redis subchart (CloudPirates OSS) – single source for Redis config.
+# Loaded only by vizor-foundation to avoid duplicating redis.* across apps.
+# Service name must be vizor-redis-master for daprComponents.state/pubsub and interactionService.redisConnectionString.
+
+redis:
+  enabled: true
+  fullnameOverride: vizor-redis-master
+  auth:
+    enabled: false
+  architecture: standalone
+  persistence:
+    enabled: false

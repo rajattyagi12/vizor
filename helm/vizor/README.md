@@ -13,9 +13,9 @@ A reference application showcasing the use of Dapr
 | core.replicas | int | `1` | Dapr store core replica count |
 | daprComponents.deploy | bool | `true` | Enable to deploy the Dapr components |
 | daprComponents.pubsub.name | string | `"pubsub"` | Dapr pubsub component name |
-| daprComponents.pubsub.redisHost | string | `"vizor-redis-master:6379"` | Hostname of redis, fullnameOverride should be used when deploying redis helm chart |
+| daprComponents.pubsub.redisHost | string | `"vizor-redis-master:6379"` | Hostname of Redis (foundation deploys CloudPirates Redis with fullnameOverride: vizor-redis-master) |
 | daprComponents.state.name | string | `"statestore"` | Dapr state store component name |
-| daprComponents.state.redisHost | string | `"vizor-redis-master:6379"` | Hostname of redis, fullnameOverride should be used when deploying redis helm chart |
+| daprComponents.state.redisHost | string | `"vizor-redis-master:6379"` | Hostname of Redis (foundation deploys CloudPirates Redis with fullnameOverride: vizor-redis-master) |
 | frontendHost.annotations | string | `nil` | Dapr store frontend host annotations |
 | frontendHost.replicas | int | `1` | Dapr store frontend host replica count |
 | image.pullSecrets | list | `[]` | Any pullsecrets that are required to pull the image |

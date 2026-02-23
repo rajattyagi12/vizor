@@ -16,3 +16,8 @@ dependencies:
     version: "0.0.32" # Recommended stable version. Check Artifact Hub for latest: https://artifacthub.io/packages/helm/choerodon/local-path-provisioner
     repository: "https://charts.containeroo.ch" # Or "https://charts.containeroo.ch"
     condition: local-path-provisioner.enabled
+  # Redis for Dapr state/pubsub and interaction-service SignalR backplane; deployed by foundation layer (CloudPirates OSS chart; Bitnami moved to commercial)
+  - name: redis
+    version: "0.24.0"
+    repository: "oci://registry-1.docker.io/cloudpirates/redis"
+    condition: redis.enabled

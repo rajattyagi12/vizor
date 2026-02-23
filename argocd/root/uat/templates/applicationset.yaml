@@ -30,36 +30,43 @@ spec:
                   chartPath: helm/vizor-secrets
                   appEnvValuesFile: ../vizor/values-env/uat/secrets.yaml
                   layerValuesFile: ../vizor/values-layers/values-secrets.yaml
+                  extraValueFile: ../vizor/values-layers/values-empty.yaml
                 - appName: vizor-foundation
                   wave: "-2"
                   chartPath: helm/vizor
                   appEnvValuesFile: ""
                   layerValuesFile: values-layers/values-foundation.yaml
+                  extraValueFile: values-layers/values-redis.yaml
                 - appName: vizor-data-init
                   wave: "-1"
                   chartPath: helm/vizor
                   appEnvValuesFile: ""
                   layerValuesFile: values-layers/values-data-init.yaml
+                  extraValueFile: values-layers/values-empty.yaml
                 - appName: vizor-identity
                   wave: "0"
                   chartPath: helm/vizor
                   appEnvValuesFile: ""
                   layerValuesFile: values-layers/values-identity.yaml
+                  extraValueFile: values-layers/values-empty.yaml
                 - appName: vizor-platform-support
                   wave: "1"
                   chartPath: helm/vizor
                   appEnvValuesFile: values-env/uat/platform-support.yaml
                   layerValuesFile: values-layers/values-platform-support.yaml
+                  extraValueFile: values-layers/values-empty.yaml
                 - appName: vizor-apps
                   wave: "2"
                   chartPath: helm/vizor
                   appEnvValuesFile: ""
                   layerValuesFile: values-layers/values-apps.yaml
+                  extraValueFile: values-layers/values-empty.yaml
                 - appName: vizor-traffic-autoscale
                   wave: "3"
                   chartPath: helm/vizor
                   appEnvValuesFile: ""
                   layerValuesFile: values-layers/values-traffic-autoscale.yaml
+                  extraValueFile: values-layers/values-empty.yaml
   template:
     metadata:
       name: {{ "{{ .appName }}" | quote }}
@@ -82,6 +89,7 @@ spec:
             - {{ "{{ .baseValuesFile }}" | quote }}
             - {{ "{{ or .appEnvValuesFile .envValuesFile }}" | quote }}
             - {{ "{{ .layerValuesFile }}" | quote }}
+            - {{ "{{ .extraValueFile }}" | quote }}
           parameters:
             - name: serviceAccount.name
               value: {{ "{{ .derivedServiceAccountName }}" | quote }}

@@ -25,6 +25,8 @@ Secret content (SQL, Keycloak, Dapr keys) is owned by the **vizor-secrets** char
 
 **Cross-app ordering:** vizor-apps uses a PreSync hook (`wait-for-migrations`) that blocks until the vizor-data-init migrations Job (`vizor-migrations`) has completed, so app Deployments only sync after DB migrations are done. Foundation must create the `job-reader` Role/RoleBinding so the wait job can query Job status.
 
+**Prerequisites (external to this repo):** **Dapr control plane** must be available. **Redis** is deployed by **vizor-foundation** (CloudPirates OSS Redis subchart) in the same namespace with service name `vizor-redis-master`, so no separate Redis deploy is needed when using the app-of-apps. If you disable Redis in foundation (`redis.enabled: false`), deploy Redis elsewhere with service name `vizor-redis-master` or set `daprComponents.state.redisHost` / `pubsub.redisHost` (and `interactionService.redisConnectionString` if used). See [docs/RCA-api-proxy-dapr-redis-init-failure.md](docs/RCA-api-proxy-dapr-redis-init-failure.md) if api-proxy fails with "lookup vizor-redis-master ... no such host".
+
 ## User-Configurable Inputs
 
 Set these through root app Helm values (file or ArgoCD Helm parameters):
