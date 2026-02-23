@@ -20,7 +20,7 @@ spec:
         dapr.io/app-id: "api-proxy"
         dapr.io/app-port: "80"
         dapr.io/sidecar-listen-addresses: "0.0.0.0"
-        dapr.io/http-max-request-size: "100"
+        dapr.io/max-body-size: "4Mi"
         prometheus.io/scrape: "true"
         prometheus.io/port: "2019"
         prometheus.io/path: "/metrics"

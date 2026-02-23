@@ -59,7 +59,7 @@ Both branches contain the same Caddy deployment configuration:
   - `dapr.io/app-id: "api-proxy"`
   - `dapr.io/app-port: "80"`
   - `dapr.io/sidecar-listen-addresses: "0.0.0.0"`
-  - `dapr.io/http-max-request-size: "100"`
+  - `dapr.io/max-body-size: "4Mi"`
 - OpenTelemetry tracing configured
 - Resources: 100m CPU / 128Mi memory (requests), 250m CPU / 256Mi memory (limits)
 - ConfigMap volume mount for Caddyfile
