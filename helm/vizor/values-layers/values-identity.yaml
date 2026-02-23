@@ -5,6 +5,8 @@ components:
     enabled: false
   identity:
     enabled: true
+  platformSupport:
+    enabled: false
   apps:
     enabled: false
   trafficAutoscale:

@@ -1,0 +1,13 @@
+{{- if .Values.sftpgo.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vizor-sftpgo-data
+  namespace: {{ .Release.Namespace }}
+spec:
+  accessModes: {{ toYaml .Values.sftpgo.persistence.accessModes | nindent 2 }}
+  resources:
+    requests:
+      storage: {{ .Values.sftpgo.persistence.size }}
+  storageClassName: {{ .Values.sftpgo.persistence.storageClass | quote }}
+{{- end }}

@@ -1,0 +1,21 @@
+{{- if .Values.autoscaling.enabled }}
+{{- if .Values.autoscaling.coreService.enabled }}
+{{ include "vizor-traffic.hpa" (dict "name" .Values.global.serviceNames.core "minReplicas" .Values.autoscaling.coreService.minReplicas "maxReplicas" .Values.autoscaling.coreService.maxReplicas "targetCPUUtilizationPercentage" .Values.autoscaling.coreService.targetCPUUtilizationPercentage "Release" .Release) }}
+---
+{{- end }}
+{{- if .Values.autoscaling.interactionService.enabled }}
+{{ include "vizor-traffic.hpa" (dict "name" .Values.global.serviceNames.interaction "minReplicas" .Values.autoscaling.interactionService.minReplicas "maxReplicas" .Values.autoscaling.interactionService.maxReplicas "targetCPUUtilizationPercentage" .Values.autoscaling.interactionService.targetCPUUtilizationPercentage "Release" .Release) }}
+---
+{{- end }}
+{{- if .Values.autoscaling.engagementService.enabled }}
+{{ include "vizor-traffic.hpa" (dict "name" .Values.global.serviceNames.engagement "minReplicas" .Values.autoscaling.engagementService.minReplicas "maxReplicas" .Values.autoscaling.engagementService.maxReplicas "targetCPUUtilizationPercentage" .Values.autoscaling.engagementService.targetCPUUtilizationPercentage "Release" .Release) }}
+---
+{{- end }}
+{{- if .Values.autoscaling.frontend.enabled }}
+{{ include "vizor-traffic.hpa" (dict "name" .Values.global.serviceNames.frontend "minReplicas" .Values.autoscaling.frontend.minReplicas "maxReplicas" .Values.autoscaling.frontend.maxReplicas "targetCPUUtilizationPercentage" .Values.autoscaling.frontend.targetCPUUtilizationPercentage "Release" .Release) }}
+---
+{{- end }}
+{{- if .Values.autoscaling.apiProxy.enabled }}
+{{ include "vizor-traffic.hpa" (dict "name" "api-proxy" "minReplicas" .Values.autoscaling.apiProxy.minReplicas "maxReplicas" .Values.autoscaling.apiProxy.maxReplicas "targetCPUUtilizationPercentage" .Values.autoscaling.apiProxy.targetCPUUtilizationPercentage "Release" .Release) }}
+{{- end }}
+{{- end }}

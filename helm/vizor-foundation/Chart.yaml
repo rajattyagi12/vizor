@@ -1,0 +1,13 @@
+apiVersion: v2
+name: vizor-foundation
+description: Vizor Foundation - ServiceAccount, Dapr components, RBAC, optional PVCs
+type: application
+version: 0.1.0
+appVersion: "1"
+kubeVersion: ">=1.21.0"
+
+dependencies:
+  - name: local-path-provisioner
+    version: "0.0.32"
+    repository: "https://charts.containeroo.ch"
+    condition: local-path-provisioner.enabled

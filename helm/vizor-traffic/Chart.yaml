@@ -1,0 +1,7 @@
+apiVersion: v2
+name: vizor-traffic
+description: Vizor Traffic - Ingress, HPA, optional Mailhog ingress and observability
+type: application
+version: 0.1.0
+appVersion: "1"
+kubeVersion: ">=1.21.0"

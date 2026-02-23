@@ -1,0 +1,56 @@
+# Independent values for vizor-platform-support chart.
+
+global:
+  namespace: vizor
+  secretName: vizor-secrets
+  serviceAccountName: vizor-runtime
+  # Fixed service names (naming contract) for Caddy routing to apps
+  serviceNames:
+    core: vizor-core-service
+    engagement: vizor-engagement-service
+    interaction: vizor-interaction-service
+    frontend: vizor-frontend
+
+apiProxy:
+  replicas: 1
+
+mailhog:
+  enabled: false
+
+daprComponents:
+  sftp:
+    name: sftpgo-binding
+    rootPath: "/"
+    address: "vizor-sftpgo:2022"
+    username: "vizor"
+    insecureIgnoreHostKey: "true"
+
+sftpgo:
+  enabled: false
+  image:
+    repository: docker.io/drakkan/sftpgo
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    ports:
+      - name: sftp
+        protocol: TCP
+        port: 2022
+        targetPort: 2022
+      - name: http
+        protocol: TCP
+        port: 8080
+        targetPort: 8080
+  config: |
+    # SFTPGo config (override in env values)
+  description: "{}"
+  persistence:
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+    storageClass: local-path
+
+scheduling:
+  affinity: {}
+  topologySpreadConstraints: []

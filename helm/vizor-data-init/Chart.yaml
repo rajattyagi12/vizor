@@ -1,0 +1,7 @@
+apiVersion: v2
+name: vizor-data-init
+description: Vizor Data Init - SQL Server and migrations Job
+type: application
+version: 0.1.0
+appVersion: "1"
+kubeVersion: ">=1.21.0"

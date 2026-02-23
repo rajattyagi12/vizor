@@ -35,45 +35,45 @@ spec:
                 - order: 2
                   appName: vizor-foundation
                   wave: "-2"
-                  chartPath: helm/vizor
+                  chartPath: helm/vizor-foundation
                   appEnvValuesFile: ""
-                  layerValuesFile: values-layers/values-foundation.yaml
-                  extraValueFile: values-layers/values-empty.yaml
+                  layerValuesFile: values.yaml
+                  extraValueFile: values.yaml
                 - order: 3
                   appName: vizor-data-init
                   wave: "-1"
-                  chartPath: helm/vizor
+                  chartPath: helm/vizor-data-init
                   appEnvValuesFile: ""
-                  layerValuesFile: values-layers/values-data-init.yaml
-                  extraValueFile: values-layers/values-empty.yaml
+                  layerValuesFile: values.yaml
+                  extraValueFile: values.yaml
                 - order: 4
                   appName: vizor-identity
                   wave: "0"
-                  chartPath: helm/vizor
+                  chartPath: helm/vizor-identity
                   appEnvValuesFile: ""
-                  layerValuesFile: values-layers/values-identity.yaml
-                  extraValueFile: values-layers/values-empty.yaml
+                  layerValuesFile: values.yaml
+                  extraValueFile: values.yaml
                 - order: 5
                   appName: vizor-platform-support
                   wave: "1"
-                  chartPath: helm/vizor
-                  appEnvValuesFile: values-env/prod/platform-support.yaml
-                  layerValuesFile: values-layers/values-platform-support.yaml
-                  extraValueFile: values-layers/values-empty.yaml
+                  chartPath: helm/vizor-platform-support
+                  appEnvValuesFile: ../vizor/values-env/prod/platform-support.yaml
+                  layerValuesFile: values.yaml
+                  extraValueFile: values.yaml
                 - order: 6
                   appName: vizor-apps
                   wave: "2"
-                  chartPath: helm/vizor
+                  chartPath: helm/vizor-apps
                   appEnvValuesFile: ""
-                  layerValuesFile: values-layers/values-apps.yaml
-                  extraValueFile: values-layers/values-empty.yaml
+                  layerValuesFile: values.yaml
+                  extraValueFile: values.yaml
                 - order: 7
                   appName: vizor-traffic-autoscale
                   wave: "3"
-                  chartPath: helm/vizor
+                  chartPath: helm/vizor-traffic
                   appEnvValuesFile: ""
-                  layerValuesFile: values-layers/values-traffic-autoscale.yaml
-                  extraValueFile: values-layers/values-empty.yaml
+                  layerValuesFile: values.yaml
+                  extraValueFile: values.yaml
   template:
     metadata:
       name: {{ "{{ .appName }}" | quote }}

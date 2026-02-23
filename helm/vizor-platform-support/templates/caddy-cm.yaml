@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: caddy-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: api-proxy
+data:
+  Caddyfile: |
+    {
+      admin :2019
+      metrics
+    }
+
+    :80 {
+      log {
+        level DEBUG
+        output stdout
+        format console
+      }
+      handle /api/auth/saml/callback {
+        reverse_proxy {{ .Values.global.serviceNames.core }}:8080 {
+          header_up Host {host}
+          header_up X-Forwarded-For {remote}
+          header_up X-Real-IP {remote}
+          header_up X-Forwarded-Proto https
+        }
+      }
+
+      handle /auth* {
+        reverse_proxy keycloak:8080 {
+          header_up Host {host}
+          header_up X-Forwarded-For {remote}
+          header_up X-Real-IP {remote}
+          header_up X-Forwarded-Proto https
+        }
+      }
+
+      handle /v1.0/invoke* {
+        reverse_proxy api-proxy-dapr:3500 {
+          header_up Host {host}
+          header_up X-Forwarded-For {remote}
+          header_up X-Real-IP {remote}
+        }
+      }
+
+      handle /chathub* {
+        reverse_proxy {{ .Values.global.serviceNames.interaction }}:8080 {
+          header_up Host {host}
+          header_up X-Forwarded-For {remote}
+          header_up X-Real-IP {remote}
+          transport http {
+            read_timeout 5m
+            write_timeout 5m
+          }
+        }
+      }
+
+      handle /alerthub* {
+        reverse_proxy {{ .Values.global.serviceNames.interaction }}:8080 {
+          header_up Host {host}
+          header_up X-Forwarded-For {remote}
+          header_up X-Real-IP {remote}
+          transport http {
+            read_timeout 5m
+            write_timeout 5m
+          }
+        }
+      }
+
+      handle /api/auth/acs {
+        reverse_proxy {{ .Values.global.serviceNames.core }}:8080 {
+          header_up Host {host}
+          header_up X-Forwarded-For {remote}
+          header_up X-Real-IP {remote}
+          header_up X-Forwarded-Proto https
+        }
+      }
+
+      handle /health {
+        respond "OK"
+      }
+
+      handle {
+        reverse_proxy {{ .Values.global.serviceNames.frontend }}:8000 {
+          header_up Host {host}
+          header_up X-Forwarded-For {remote}
+          header_up X-Real-IP {remote}
+        }
+      }
+    }

@@ -1,0 +1,181 @@
+{{- if .Values.keycloakRealmConfiguration.userSyncJob.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: keycloak-user-sync
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
+
+spec:
+  ttlSecondsAfterFinished: 600 # Allow Job to exist for ArgoCD to discover completion
+  template:
+    spec:
+      serviceAccountName: {{ include "vizor-identity.serviceAccountName" . }}
+      restartPolicy: OnFailure
+      containers:
+        - name: user-sync
+          image: mcr.microsoft.com/mssql-tools:latest
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              set -e
+              apt-get update && apt-get install -y curl jq
+
+              echo "Waiting for Keycloak to be ready..."
+              until curl -s http://keycloak:8080/auth/realms/master > /dev/null; do
+                sleep 5
+              done
+              echo "Debug: raw token response:"
+              curl -s \
+                -d "client_id=admin-cli" \
+                -d "username=$KEYCLOAK_ADMIN" \
+                -d "password=$KEYCLOAK_ADMIN_PASSWORD" \
+                -d "grant_type=password" \
+                http://keycloak:8080/auth/realms/master/protocol/openid-connect/token
+
+              echo "Keycloak is ready. Getting admin token..."
+              TOKEN=$(curl -s \
+                -d "client_id=admin-cli" \
+                -d "username=$KEYCLOAK_ADMIN" \
+                -d "password=$KEYCLOAK_ADMIN_PASSWORD" \
+                -d "grant_type=password" \
+                http://keycloak:8080/auth/realms/master/protocol/openid-connect/token | jq -r '.access_token')
+
+              if [ -z "$TOKEN" ]; then
+                echo "Failed to get token"
+                exit 1
+              fi
+
+              echo "Querying database for users..."
+              echo "Debug: Attempting to connect to database server: $DB_SERVER"
+              echo "Debug: Database: $DB_NAME, User: $DB_USER"
+              
+              # Test database connection first
+              if ! /opt/mssql-tools/bin/sqlcmd -S $DB_SERVER -d $DB_NAME -U $DB_USER -P $DB_PASSWORD -Q "SELECT 1" -o /dev/null; then
+                echo "ERROR: Failed to connect to database server $DB_SERVER"
+                echo "Please verify:"
+                echo "  - Database server is running and accessible"
+                echo "  - Server IP address $DB_SERVER is correct"
+                echo "  - Database $DB_NAME exists"
+                echo "  - User $DB_USER has proper permissions"
+                exit 1
+              fi
+              
+              echo "Database connection successful, querying users..."
+              /opt/mssql-tools/bin/sqlcmd -S $DB_SERVER -d $DB_NAME -U $DB_USER -P $DB_PASSWORD -Q "SELECT AppUser_ID, FirstName, LastName, Email, IsActive FROM dbo.AppUser WHERE ISNUMERIC(AppUser_ID) = 1" -o /tmp/users.txt -s "," -W
+              
+              if [ ! -f /tmp/users.txt ] || [ ! -s /tmp/users.txt ]; then
+                echo "ERROR: No users found or query failed"
+                exit 1
+              fi
+              
+              echo "Found users in database:"
+              head -n 5 /tmp/users.txt
+
+              # Parse the output, skip header
+              tail -n +2 /tmp/users.txt | while IFS=',' read -r appuserid firstname lastname email isactive; do
+                if [ -n "$email" ]; then
+                  # Refresh token at start of loop
+                  TOKEN=$(curl -s \
+                    -d "client_id=admin-cli" \
+                    -d "username=$KEYCLOAK_ADMIN" \
+                    -d "password=$KEYCLOAK_ADMIN_PASSWORD" \
+                    -d "grant_type=password" \
+                    http://keycloak:8080/auth/realms/master/protocol/openid-connect/token | jq -r '.access_token')
+
+                  echo "Processing user: $firstname $lastname ($email)"
+                  # Get Client_ID
+                  echo "Debug: Querying Client_ID for AppUser_ID: $appuserid"
+                  CLIENT_ID=$(/opt/mssql-tools/bin/sqlcmd -S $DB_SERVER -d $DB_NAME -U $DB_USER -P $DB_PASSWORD -Q "SELECT TOP 1 RC.Client_ID FROM dbo.RoundtableClient RC INNER JOIN dbo.RoundtableClientUser RCU ON RC.RoundtableClient_ID = RCU.RoundtableClient_ID WHERE RCU.AppUser_ID = '$appuserid'" -h -1 | tr -d '\n')
+                  if [[ $CLIENT_ID == *"Msg"* ]] || [[ -z "$CLIENT_ID" ]]; then
+                    echo "SQL error or no Client_ID found for $email (AppUser_ID: $appuserid), skipping"
+                    continue
+                  fi
+                  CLIENT_ID=$(echo $CLIENT_ID | sed 's/[^0-9]*\([0-9]\+\).*/\1/')
+                  echo "Client_ID for $email: $CLIENT_ID"
+                  if ! [[ $CLIENT_ID =~ ^[0-9]+$ ]]; then
+                    echo "Invalid Client_ID for $email, skipping"
+                    continue
+                  fi
+
+                  echo "Creating user: $firstname $lastname ($email)"
+                  if [ "$isactive" = "1" ]; then enabled="true"; else enabled="false"; fi
+                  CREATE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+                    -H "Authorization: Bearer $TOKEN" \
+                    -H "Content-Type: application/json" \
+                    -d "{
+                      \"username\": \"$email\",
+                      \"email\": \"$email\",
+                      \"firstName\": \"$firstname\",
+                      \"lastName\": \"$lastname\",
+                      \"enabled\": $enabled,
+                      \"emailVerified\": true,
+                      \"attributes\": {
+                        \"clientID\": [\"$CLIENT_ID\"]
+                      }
+                    }" \
+                    "http://keycloak:8080/auth/admin/realms/$REALM_NAME/users")
+                  echo "Create status: $CREATE_STATUS"
+                  sleep 1
+
+                  if [ "$CREATE_STATUS" = "409" ]; then
+                    echo "User $email already exists - getting ID"
+                    USER_RESPONSE=$(curl -s \
+                      -H "Authorization: Bearer $TOKEN" \
+                      "http://keycloak:8080/auth/admin/realms/$REALM_NAME/users?email=$email")
+                    echo "User response: $USER_RESPONSE"
+                    USER_ID=$(echo "$USER_RESPONSE" | jq -r '.[0].id // empty')
+                  elif [ "$CREATE_STATUS" = "201" ]; then
+                    echo "User $email created successfully - getting ID"
+                    USER_RESPONSE=$(curl -s \
+                      -H "Authorization: Bearer $TOKEN" \
+                      "http://keycloak:8080/auth/admin/realms/$REALM_NAME/users?email=$email")
+                    echo "User response: $USER_RESPONSE"
+                    USER_ID=$(echo "$USER_RESPONSE" | jq -r '.[0].id // empty')
+                  else
+                    echo "Failed to create user $email - status $CREATE_STATUS"
+                    continue
+                  fi
+
+                  if [ -n "$USER_ID" ] && [ "$USER_ID" != "null" ]; then
+                    echo "Updating SubId for $email with $USER_ID"
+                    if ! /opt/mssql-tools/bin/sqlcmd -S $DB_SERVER -d $DB_NAME -U $DB_USER -P $DB_PASSWORD -Q "UPDATE dbo.AppUser SET SubId = '$USER_ID' WHERE Email = '$email'"; then
+                      echo "ERROR: Failed to update SubId for $email"
+                    else
+                      echo "Successfully updated SubId for $email"
+                    fi
+                  else
+                    echo "Failed to get USER_ID for $email"
+                  fi
+                fi
+              done
+
+              echo "User sync complete."
+          env:
+            - name: REALM_NAME
+              value: {{ .Values.keycloakRealmConfiguration.realmName | quote }}
+            - name: KEYCLOAK_ADMIN
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KEYCLOAK_ADMIN | quote }}
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KEYCLOAK_ADMIN_PASSWORD | quote }}
+            #Use this for prod
+            # - name: DB_SERVER
+            #   value: {{ .Values.sqlServer.service.name | quote }}
+            # - name: DB_USER
+            #   value: {{ .Values.sqlServer.username | quote }}
+            # - name: DB_PASSWORD
+            #   value: {{ .Values.sqlServer.dbPassword | quote }}
+            # - name: DB_NAME
+            #   value: {{ .Values.sqlServer.database | quote }}
+            
+            #Use this for dev
+            - name: DB_SERVER
+              value: {{ .Values.keycloakRealmConfiguration.userSyncDatabase.server | quote }}
+            - name: DB_USER
+              value: {{ .Values.keycloakRealmConfiguration.userSyncDatabase.user | quote }}
+            - name: DB_PASSWORD
+              value: {{ .Values.keycloakRealmConfiguration.userSyncDatabase.password | quote }}
+            - name: DB_NAME
+              value: {{ .Values.keycloakRealmConfiguration.userSyncDatabase.name | quote }}
+{{- end }}

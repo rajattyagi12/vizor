@@ -1,0 +1,50 @@
+{{- if .Values.sqlServer.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.sqlServer.releaseName }}
+  labels:
+    app: sqlserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sqlserver
+  template:
+    metadata:
+      labels:
+        app: sqlserver
+    spec:
+      serviceAccountName: {{ include "vizor-data-init.serviceAccountName" . }}
+      containers:
+        - name: mssql-server
+          image: "{{ .Values.sqlServer.image }}:{{ .Values.sqlServer.version }}"
+          ports:
+            - name: mssql
+              containerPort: {{ .Values.sqlServer.service.port }}
+          env:
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: SA_PASSWORD
+              value: {{ .Values.sqlServer.dbPassword | quote }}
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "2"
+            limits:
+              memory: "2Gi"
+              cpu: "2"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.sqlServer.service.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+    - port: {{ .Values.sqlServer.service.port }}
+      targetPort: {{ .Values.sqlServer.service.port }}
+  type: NodePort
+  selector:
+    app: sqlserver
+{{- end }}

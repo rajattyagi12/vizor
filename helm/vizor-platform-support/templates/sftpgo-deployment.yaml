@@ -1,0 +1,50 @@
+{{- if .Values.sftpgo.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vizor-sftpgo
+  labels:
+    app: sftpgo
+spec:
+  replicas: 1  # Single replica; no HA needed for supporting platform SFTP
+  selector:
+    matchLabels:
+      app: sftpgo
+  template:
+    metadata:
+      labels:
+        app: sftpgo
+    spec:
+      serviceAccountName: {{ include "vizor-platform-support.serviceAccountName" . }}
+      containers:
+        - name: sftpgo
+          image: "{{ .Values.sftpgo.image.repository }}:{{ .Values.sftpgo.image.tag }}"
+          imagePullPolicy: {{ .Values.sftpgo.image.pullPolicy }}
+          ports:
+            - containerPort: 2022
+            - containerPort: 8080
+          env:
+            {{- range .Values.sftpgo.env }}
+              - name: {{ .name }}
+                value: {{ .value | quote }}
+            {{- end }}
+          volumeMounts:
+            - name: sftpgo-data
+              mountPath: /srv/sftpgo
+            - name: sftpgo-config
+              mountPath: /etc/sftpgo/config.yml
+              subPath: config.yml
+            - name: sftpgo-description
+              mountPath: /etc/sftpgo/description.json
+              subPath: description.json
+      volumes:
+        - name: sftpgo-data
+          persistentVolumeClaim:
+            claimName: vizor-sftpgo-data
+        - name: sftpgo-config
+          configMap:
+            name: vizor-sftpgo-config
+        - name: sftpgo-description
+          configMap:
+            name: vizor-sftpgo-description
+{{- end }}

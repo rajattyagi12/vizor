@@ -1,0 +1,7 @@
+apiVersion: v2
+name: vizor-platform-support
+description: Vizor Platform Support - Caddy api-proxy, optional Mailhog, optional SFTPGo
+type: application
+version: 0.1.0
+appVersion: "1"
+kubeVersion: ">=1.21.0"

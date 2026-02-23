@@ -1,0 +1,35 @@
+{{- $tlsEnabled := (or .Values.ingress.certIssuer .Values.ingress.certName) -}}
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vizor-ingress-rules
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    {{- if .Values.ingress.certIssuer }}
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.certIssuer }}
+    {{- end }}
+    argocd.argoproj.io/ignore-healthcheck: "true"
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- if $tlsEnabled }}
+  tls:
+  - hosts:
+    - "{{ .Values.ingress.host }}"
+    secretName: {{ required "ingress.certName is required when TLS is enabled" .Values.ingress.certName }}
+  {{- end }}
+  rules:
+    {{- if .Values.ingress.host }}
+    - host: "{{ .Values.ingress.host }}"
+      http:
+    {{- else }}
+    - http:
+    {{- end }}
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api-proxy
+                port:
+                  number: 80

@@ -1,0 +1,124 @@
+# Independent values for vizor-identity chart.
+
+global:
+  namespace: vizor
+  secretName: vizor-secrets
+  serviceAccountName: vizor-runtime
+
+# SQL Server is deployed by vizor-data-init; use same service name for Keycloak DB connection.
+sqlServer:
+  service:
+    name: sql-server-service
+    port: 1433
+
+image:
+  registry: harbor.nbt.local
+  repo: vizor
+  tag: latest
+  pullSecrets: []
+
+keycloak:
+  startMode: "start"
+  hostname: ""
+  hostnameStrict: false
+  httpEnabled: true
+  proxyHeaders: "xforwarded"
+  managementPort: 9000
+
+keycloakRealmConfiguration:
+  realmName: "vizor"
+  clientId: "vizor-client"
+  clientPrivateId: "vizor-client-private"
+  clientPrivateSecret: "#CHANGEME"
+  roleName: "Superuser"
+  clientScope: "User-Client-ID"
+  adminEmail: "#CHANGEME"
+  serverUrl: "http://127.0.0.1:8080"
+  vizorEntityId: "urn:vizor:saml"
+  keycloakApiBaseUrl: "http://vizor-keycloak-api-service:4567/"
+  keycloakServiceUrl: "http://keycloak:8080/auth"
+  smtp:
+    host: "#CHANGEME"
+    port: "1025"
+    starttls: "false"
+    auth: "false"
+    mailDisplayName: "Vizor Auth"
+    smtpusername: "#CHANGEME"
+    smtppassword: "#CHANGEME"
+  keycloakEnv:
+    AUTH_DATABASE_NAME: "vizor_auth"
+    KEYCLOAK_ADMIN: "admin"
+    KEYCLOAK_ADMIN_PASSWORD: "#CHANGEME"
+    KC_DB: "mssql"
+    KC_DB_USERNAME: "sa"
+    KC_DB_PASSWORD: "#CHANGEME"
+    KC_HTTP_RELATIVE_PATH: "/auth"
+  resources:
+    requested_memory: "512Mi"
+    requested_cpu: "512m"
+  adminUser:
+    email: "#CHANGEME"
+    firstName: "Admin"
+    lastName: "User"
+    attributes_clientID: "1"
+    password: "#CHANGEME"
+  userSyncJob:
+    enabled: false
+  userSyncDatabase:
+    server: "172.16.16.76"
+    user: "sa"
+    password: "#CHANGEME"
+    name: "BenchmarkV2"
+  realmJson:
+    realm: vizor
+    enabled: true
+    ssoSessionMaxLifespan: 36000
+    ssoSessionIdleTimeout: 7200
+    accessTokenLifespan: 3600
+    editUsernameAllowed: true
+    registrationEmailAsUsername: true
+    loginWithEmailAllowed: true
+    verifyEmail: true
+    loginTheme: VizorTheme
+    resetPasswordAllowed: true
+    passwordPolicy: "length(8) and digits(1) and upperCase(1) and lowerCase(1) and specialChars(1) and passwordHistory(3)"
+    bruteForceProtected: true
+    permanentLockout: true
+    failureFactor: 5
+    rememberMe: false
+    clientSessionIdleTimeout: 3600
+    clientSessionMaxLifespan: 7200
+    roles:
+      realm:
+        - name: Superuser
+          description: Superuser role
+        - name: Director
+          description: Director role
+        - name: Associate
+          description: Associate role
+        - name: Events Admin
+          description: Events Admin role
+        - name: Viewer
+          description: Viewer role
+        - name: Client
+          description: Client role
+        - name: Configuration Manager
+          description: Configuration Manager role
+    clients:
+      - clientId: vizor-client
+        name: Vizor Client
+        rootUrl: "http://127.0.0.1:8080"
+        publicClient: true
+        directAccessGrantsEnabled: true
+        redirectUris:
+          - "http://127.0.0.1:8080/*"
+        attributes:
+          post.logout.redirect.uris: "http://127.0.0.1:8080/*"
+        enabled: true
+      - clientId: vizor-client-private
+        name: Vizor Client Private
+        secret: "#CHANGEME"
+        publicClient: false
+        standardFlowEnabled: true
+        directAccessGrantsEnabled: false
+        enabled: true

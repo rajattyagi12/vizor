@@ -1,0 +1,136 @@
+# Keycloak Realm Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vizor-realm
+  namespace: {{ .Release.Namespace }}
+data:
+  vizor-realm.json: |
+    {{- $cfg := .Values.keycloakRealmConfiguration }}
+    {{- $realm := deepCopy $cfg.realmJson }}
+    
+    {{- $client := index $realm.clients 0 }}  # Access the first client in the list
+    {{- $_ := set $client "rootUrl" $cfg.serverUrl }}
+    {{- $_ := set $client "redirectUris" (list (printf "%s/*" $cfg.serverUrl)) }}
+    {{- $_ := set $client "attributes" (dict "post.logout.redirect.uris" (printf "%s/*" $cfg.serverUrl)) }}
+
+    {{ $realm | toJson | nindent 4 }}
+
+---
+# Keycloak Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      serviceAccountName: {{ include "vizor-identity.serviceAccountName" . }}
+      initContainers:
+        - name: wait-for-mssql
+          image: mcr.microsoft.com/mssql-tools
+          command:
+            - /bin/bash
+            - -c
+            - |
+              echo "Waiting for MSSQL to become available..."
+              until /opt/mssql-tools/bin/sqlcmd -S "{{ .Values.sqlServer.service.name }},{{ .Values.sqlServer.service.port }}" \
+                -U "{{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_DB_USERNAME }}" \
+                -P "{{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_DB_PASSWORD }}" \
+                -Q "SELECT 1"; do
+                echo "Still waiting..."
+                sleep 3
+              done
+
+              echo "Connected. Ensuring DB exists..."
+              /opt/mssql-tools/bin/sqlcmd -S "{{ .Values.sqlServer.service.name }},{{ .Values.sqlServer.service.port }}" \
+                -U "{{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_DB_USERNAME }}" \
+                -P "{{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_DB_PASSWORD }}" \
+                -Q "IF NOT EXISTS(SELECT name FROM sys.databases WHERE name='{{ .Values.keycloakRealmConfiguration.keycloakEnv.AUTH_DATABASE_NAME }}') CREATE DATABASE {{ .Values.keycloakRealmConfiguration.keycloakEnv.AUTH_DATABASE_NAME }};"
+              echo "DB Exists Creating Keycloak"
+      containers:
+        - name: keycloak
+          image: {{ .Values.image.registry }}/{{ .Values.image.repo }}/vizor-themed-keycloak:{{ .Values.image.tag }}
+          imagePullPolicy: Always
+          args:
+            - {{ .Values.keycloak.startMode }}
+            - "--verbose"
+            - "--import-realm"
+            - --hostname={{ .Values.keycloak.hostname }}
+            - --hostname-strict={{ .Values.keycloak.hostnameStrict }}
+            - --http-enabled={{ .Values.keycloak.httpEnabled }}
+            - --proxy-headers={{ .Values.keycloak.proxyHeaders }}
+            - --http-management-port={{ .Values.keycloak.managementPort }}
+            - "--spi-events-listener-jboss-logging-success-level=info"
+            - "--spi-events-listener-jboss-logging-error-level=warn"
+          env:
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KEYCLOAK_ADMIN }}
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KEYCLOAK_ADMIN_PASSWORD }}
+            - name: KC_BOOTSTRAP_ADMIN_EXPIRATION
+              value: "0" 
+            - name: KC_DB
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_DB }}
+            - name: KC_DB_USERNAME
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_DB_USERNAME }}
+            - name: KC_DB_PASSWORD
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_DB_PASSWORD}}
+            - name: KC_DB_URL
+              value: "jdbc:sqlserver://{{ .Values.sqlServer.service.name }}:{{ .Values.sqlServer.service.port }};databaseName={{ .Values.keycloakRealmConfiguration.keycloakEnv.AUTH_DATABASE_NAME }};encrypt=true;trustServerCertificate=true"
+            - name: KC_HTTP_RELATIVE_PATH
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_HTTP_RELATIVE_PATH }}
+            - name: KC_DB_POOL_MIN_SIZE
+              value: "5"
+            - name: KC_DB_POOL_INITIAL_SIZE
+              value: "5"
+            - name: KC_HEALTH_ENABLED
+              value: "true"
+            - name: KC_METRICS_ENABLED
+              value: "true"
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: mgmt
+              containerPort: {{ .Values.keycloak.managementPort }}
+          resources:
+            requests:
+              memory: {{ .Values.keycloakRealmConfiguration.resources.requested_memory }}
+              cpu: {{ .Values.keycloakRealmConfiguration.resources.requested_cpu }}
+          volumeMounts:
+            - name: realm-config
+              mountPath: /opt/keycloak/data/import
+              readOnly: true
+      volumes:
+        - name: realm-config
+          configMap:
+            name: vizor-realm
+---
+# Keycloak Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: keycloak
+spec:
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+    - name: mgmt
+      port: {{ .Values.keycloak.managementPort }}
+      targetPort: {{ .Values.keycloak.managementPort }}
+  selector:
+    app: keycloak

@@ -1,0 +1,21 @@
+{{- if .Values.sftpgo.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: vizor-sftpgo
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: sftpgo
+spec:
+  type: {{ .Values.sftpgo.service.type }}
+  selector:
+    app: sftpgo
+  ports:
+{{- range .Values.sftpgo.service.ports }}
+    - name: {{ .name }}
+      protocol: {{ .protocol }}
+      port: {{ .port }}
+      targetPort: {{ .targetPort }}
+{{- end }}
+
+{{- end }}

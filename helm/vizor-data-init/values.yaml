@@ -1,0 +1,27 @@
+# Independent values for vizor-data-init chart.
+
+global:
+  namespace: vizor
+  secretName: vizor-secrets
+  serviceAccountName: vizor-runtime
+  migrationsJobName: vizor-migrations  # Fixed name so vizor-apps PreSync can wait for it
+
+image:
+  registry: harbor.nbt.local
+  repo: vizor
+  tag: latest
+  pullSecrets: []
+
+sqlServer:
+  enabled: true
+  image: mcr.microsoft.com/mssql/server
+  version: "2022-latest"
+  releaseName: sqlserver
+  username: sa
+  database: vizor
+  dbPassword: "#CHANGEME"
+  service:
+    name: sql-server-service
+    port: 1433
+
+useMigrationSql: false

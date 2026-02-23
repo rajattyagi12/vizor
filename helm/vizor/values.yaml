@@ -324,8 +324,10 @@ keycloakRealmConfiguration:
 observability:
   enabled: false
 
-# Mailhog / sftpgo: full config in platform-support layer (values-layers/values-platform-support.yaml, values-env/*/platform-support.yaml).
+# apiProxy / mailhog / sftpgo: full config in platform-support layer (values-layers/values-platform-support.yaml, values-env/*/platform-support.yaml).
 # Minimal defaults here so templates do not dereference nil when only foundation (or other non-platform-support) apps render.
+apiProxy:
+  replicas: 1
 mailhog:
   enabled: false
 sftpgo:

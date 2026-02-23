@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.global.serviceNames.frontend }}
+  labels:
+    {{- include "vizor-apps.labels" . | nindent 4 }}
+    vizor: frontend
+    
+spec:
+  replicas: {{ .Values.frontend.replicas }}
+  selector:
+    matchLabels:
+      vizor: frontend
+  template:
+    metadata:
+      labels:
+        vizor: frontend
+        {{- include "vizor-apps.selectorLabels" . | nindent 8 }}
+      annotations:
+      {{- with .Values.frontend.annotations }}
+          {{- toYaml . | nindent 8 }}
+      {{- end }}            
+    spec:
+      serviceAccountName: {{ include "vizor-apps.serviceAccountName" . }}
+    {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+
+      {{- with .Values.scheduling.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.scheduling.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      containers:
+      - name: server
+        image: {{ .Values.image.registry }}/{{ .Values.image.repo }}/frontend:{{ .Values.image.tag }}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+
+        {{- if .Values.auth.clientId }}
+        env:
+          - name: AUTH_CLIENT_ID
+            value: {{ .Values.auth.clientId }}
+        {{- end }}
+           
+        resources:
+        {{- with .Values.resources }}
+          {{- toYaml . | nindent 12 }}
+        {{- end }}
+
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8000
+            httpHeaders:
+              - name: "No-Log"
+                value: "true"
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Values.global.serviceNames.frontend }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vizor-apps.labels" . | nindent 4 }}
+    vizor: frontend
+spec:
+  selector:
+    vizor: frontend
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: 8000
+  type: ClusterIP

@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.global.serviceNames.core }}
+  labels:
+    {{- include "vizor-apps.labels" . | nindent 4 }}
+    vizor: core-service
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  replicas: {{ .Values.coreService.replicas }}
+  selector:
+    matchLabels:
+      vizor: core-service
+  template:
+    metadata:
+      labels:
+        vizor: core-service
+        {{- include "vizor-apps.selectorLabels" . | nindent 8 }}
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "core-service"
+        dapr.io/app-port: "8080"
+        dapr.io/log-as-json: "true"
+        dapr.io/max-body-size: "4Mi"
+        # Dapr sidecar resource requests/limits required for HPA CPU metrics
+        dapr.io/sidecar-cpu-request: "10m"
+        dapr.io/sidecar-memory-request: "32Mi"
+        dapr.io/sidecar-cpu-limit: "250m"
+        dapr.io/sidecar-memory-limit: "256Mi"
+      {{- with .Values.coreService.annotations }}
+          {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "vizor-apps.serviceAccountName" . }}
+    {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+
+      {{- with .Values.scheduling.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.scheduling.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      containers:
+      - name: server
+        {{- if .Values.coreService.image }}
+        image: {{ .Values.coreService.image }}
+        imagePullPolicy: {{ .Values.coreService.imagePullPolicy | default "Always" }}
+        {{- else }}
+        image: {{ .Values.image.registry }}/{{ .Values.image.repo }}/core-service:{{ .Values.image.tag }}
+        imagePullPolicy: Always
+        {{- end }}
+
+        {{- if .Values.auth.clientId }}
+        env:
+          - name: AUTH_CLIENT_ID
+            value: {{ .Values.auth.clientId }}
+        {{- end }}
+
+        resources:
+        {{- with .Values.resources }}
+          {{- toYaml . | nindent 12 }}
+        {{- end }}
+
+        # TODO: Add Health Path
+        # readinessProbe:
+        #   httpGet:
+        #     path: /health
+        #     port: 8080
+        #     httpHeaders:
+        #       - name: "No-Log"
+        #         value: "true"

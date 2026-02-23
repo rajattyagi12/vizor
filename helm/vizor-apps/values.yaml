@@ -1,0 +1,54 @@
+# Independent values for vizor-apps chart.
+
+global:
+  namespace: vizor
+  secretName: vizor-secrets
+  serviceAccountName: vizor-runtime
+  migrationsJobName: vizor-migrations  # Must match vizor-data-init's job name
+
+  # Fixed deployment/service names (naming contract) for Caddy and Ingress
+  serviceNames:
+    core: vizor-core-service
+    engagement: vizor-engagement-service
+    interaction: vizor-interaction-service
+    frontend: vizor-frontend
+
+image:
+  registry: harbor.nbt.local
+  repo: vizor
+  tag: latest
+  pullSecrets: []
+
+resources:
+  limits:
+    cpu: 256m
+    memory: 512Mi
+  requests:
+    cpu: 64m
+    memory: 128Mi
+
+coreService:
+  replicas: 2
+  annotations: {}
+
+engagementService:
+  replicas: 2
+  annotations: {}
+
+interactionService:
+  replicas: 2
+  annotations: {}
+  redisConnectionString: "vizor-redis-master:6379"
+
+frontend:
+  replicas: 1
+  annotations: {}
+
+scheduling:
+  affinity: {}
+  topologySpreadConstraints: []
+
+useMigrationSql: false
+
+auth:
+  clientId: ""  # Set to enable auth (e.g. vizor-client)

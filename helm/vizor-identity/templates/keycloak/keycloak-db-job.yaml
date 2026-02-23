@@ -1,0 +1,54 @@
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mssql-init-job
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  ttlSecondsAfterFinished: 600 # Allow Job to exist for ArgoCD to discover completion
+  # backoffLimit: 3
+  template:
+    spec:
+      serviceAccountName: {{ include "vizor-identity.serviceAccountName" . }}
+      restartPolicy: OnFailure
+      containers:
+        - name: init-mssql
+          image: mcr.microsoft.com/mssql-tools
+          command:
+            - /bin/bash
+            - -c
+            - |
+              # Parse connection string into variables
+              IFS=';' read -ra PARTS <<< "$connectionString"
+              for PART in "${PARTS[@]}"; do
+                KEY=$(echo $PART | cut -d= -f1 | xargs)
+                VALUE=$(echo $PART | cut -d= -f2- | xargs)
+                case "$KEY" in
+                  "Data Source") SERVER=$VALUE ;;
+                  "User Id") USER=$VALUE ;;
+                  "Password") PASSWORD=$VALUE ;;
+                esac
+              done
+
+              echo "Waiting for MSSQL to become available at $SERVER..."
+              until /opt/mssql-tools/bin/sqlcmd -S "$SERVER" -U "$USER" -P "$PASSWORD" -Q "SELECT 1" > /dev/null 2>&1; do
+                echo "Still waiting..."
+                sleep 3
+              done
+
+              echo "Connected. Creating databases and setting isolation level..."
+              # Run CREATE and ALTER in one sqlcmd batch so no other connection holds the DB (ALTER can block otherwise).
+              /opt/mssql-tools/bin/sqlcmd -S "$SERVER" -U "$USER" -P "$PASSWORD" -Q "IF NOT EXISTS (SELECT name FROM sys.databases WHERE name='$AUTH_DATABASE_NAME') CREATE DATABASE $AUTH_DATABASE_NAME; ALTER DATABASE $AUTH_DATABASE_NAME SET READ_COMMITTED_SNAPSHOT ON;"
+              echo "Done."
+          env:
+            - name: connectionString
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: connectionString
+            - name: AUTH_DATABASE_NAME
+              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.AUTH_DATABASE_NAME }}
+

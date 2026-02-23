@@ -1,0 +1,49 @@
+# Independent values for vizor-traffic chart.
+
+global:
+  namespace: vizor
+  serviceNames:
+    core: vizor-core-service
+    engagement: vizor-engagement-service
+    interaction: vizor-interaction-service
+    frontend: vizor-frontend
+
+ingress:
+  className: traefik
+  host: ""
+  certName: ""
+  certIssuer: ""
+
+mailhog:
+  enabled: false
+
+autoscaling:
+  enabled: false
+  coreService:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+  interactionService:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+  engagementService:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+  frontend:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+  apiProxy:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+
+observability:
+  enabled: false

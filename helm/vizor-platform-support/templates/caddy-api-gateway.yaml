@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-proxy
+  namespace: {{ .Release.Namespace }}
+  labels:
+    purpose: "vizor-api-gateway"
+spec:
+  replicas: {{ .Values.apiProxy.replicas }}
+  selector:
+    matchLabels:
+      app: api-proxy
+  template:
+    metadata:
+      labels:
+        app: api-proxy
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "api-proxy"
+        dapr.io/app-port: "80"
+        dapr.io/sidecar-listen-addresses: "0.0.0.0"
+        dapr.io/max-body-size: "4Mi"
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "2019"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: {{ include "vizor-platform-support.serviceAccountName" . }}
+      {{- with .Values.scheduling.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.scheduling.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: caddy
+          image: caddy:latest
+          env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://jaeger-inmemory-instance-collector.observability.svc.k8s.nbt:4317
+            - name: OTEL_EXPORTER_OTLP_INSECURE
+              value: "true"
+          ports:
+            - containerPort: 80
+            - containerPort: 2019
+          volumeMounts:
+            - name: caddyfile
+              mountPath: /etc/caddy/Caddyfile
+              subPath: Caddyfile
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+      volumes:
+        - name: caddyfile
+          configMap:
+            name: caddy-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-proxy
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: api-proxy
+    purpose: "vizor-api-gateway"
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+    - port: 2019
+      targetPort: 2019
+      protocol: TCP
+      name: metrics
+  selector:
+    app: api-proxy

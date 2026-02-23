@@ -1,0 +1,32 @@
+{{- if .Values.sftpgo.enabled }}
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: "{{ .Values.daprComponents.sftp.name }}"
+spec:
+  type: bindings.sftp
+  version: v1
+  metadata:
+    - name: rootPath
+      value: "{{ .Values.daprComponents.sftp.rootPath }}"
+    - name: address
+      value: "{{ .Values.daprComponents.sftp.address }}"
+    - name: username
+      value: "{{ .Values.daprComponents.sftp.username }}"
+    - name: password
+      secretKeyRef:
+        name: {{ .Values.global.secretName }}
+        key: sftpPassword
+    - name: startupDelaySeconds
+      value: "30"
+    - name: timeout
+      value: "60s"
+    - name: maxConnections
+      value: "10"
+    - name: keepAliveInterval
+      value: "30s"
+{{- if .Values.daprComponents.sftp.insecureIgnoreHostKey }}
+    - name: insecureIgnoreHostKey
+      value: "true"
+{{- end }}
+{{- end }}

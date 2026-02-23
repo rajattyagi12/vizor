@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.global.migrationsJobName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vizor-data-init.labels" . | nindent 4 }}
+    vizor: migrations
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  ttlSecondsAfterFinished: 600
+  backoffLimit: 4
+  template:
+    metadata:
+      labels:
+        vizor: migrations
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ include "vizor-data-init.serviceAccountName" . }}
+      restartPolicy: Never
+      containers:
+        - name: migrations
+          image: {{ .Values.image.registry }}/{{ .Values.image.repo }}/ef-core-migration:{{ .Values.image.tag }}
+          imagePullPolicy: Always
+          env:
+            - name: {{ if .Values.useMigrationSql }}MSSQL_CONNECTION_STRING{{ else }}ConnectionStrings__DefaultConnection{{ end }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: connectionString
+          workingDir: {{ if .Values.useMigrationSql }}/app{{ else }}/app/DotNetScaffolding{{ end }}
+          command: {{ if .Values.useMigrationSql }}["/bin/bash", "-c"]{{ else }}["/bin/sh", "-c"]{{ end }}
+          args:
+            - |
+              set -e
+              echo "===== Debug: List /app contents =====" && \
+              ls -la /app && \
+              echo "===== Debug: File type of /app/DotNetScaffolding =====" && \
+              file /app/DotNetScaffolding && \
+              echo "===== Debug: List /app/DotNetScaffolding contents if directory =====" && \
+              if [ -d /app/DotNetScaffolding ]; then ls -la /app/DotNetScaffolding; else echo "/app/DotNetScaffolding is not a directory"; fi && \
+              echo "===== Debug: Environment PATH =====" && \
+              echo $PATH && \
+              echo "===== Debug: Dotnet SDK versions =====" && \
+              dotnet --list-sdks && \
+              echo "===== Debug: Dotnet tools installed =====" && \
+              dotnet tool list --global || true && \
+              echo "===== Debug: Running dotnet tool restore =====" && \
+              dotnet tool restore && \
+              echo "===== Debug: Running EF Core migrations =====" && \
+              dotnet tool run dotnet-ef database update --project DotNetScaffolding.csproj --configuration Release --no-build

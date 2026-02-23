@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.global.serviceNames.core }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vizor-apps.labels" . | nindent 4 }}
+    vizor: core-service
+spec:
+  type: ClusterIP
+  # ----------------------------------------------------------------------------
+  # Session Affinity Configuration for SAML Authentication Support
+  # ----------------------------------------------------------------------------
+  # ClientIP session affinity ensures all requests from the same client IP
+  # are routed to the same pod. This is critical for SAML authentication because:
+  # 1. SAML authentication flow requires maintaining session state
+  # 2. Cookie-based authentication needs to hit the same pod
+  # 3. Without session affinity, SAML callbacks may hit different pods,
+  #    causing authentication failures
+  #
+  # Timeout: 3600 seconds (1 hour)
+  # - Matches typical SAML authentication session lifetime
+  # - Ensures SAML callback requests maintain affinity
+  # - Prevents authentication failures due to session timeout
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 3600  # 1 hour - matches SAML authentication session lifetime
+  selector:
+    vizor: core-service
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      # Direct routing to application port (bypassing Dapr sidecar)
+      # This is necessary because:
+      # - Dapr headless services don't support session affinity
+      # - SAML authentication requires maintaining session state
+      # - Direct routing allows Kubernetes to maintain session affinity
+      targetPort: 8080  # Direct to app port (bypassing Dapr for SAML)
