@@ -28,8 +28,8 @@ spec:
                 - appName: vizor-secrets
                   wave: "-2"
                   chartPath: helm/vizor-secrets
-                  appEnvValuesFile: helm/vizor/values-env/prod/secrets.yaml
-                  layerValuesFile: helm/vizor/values-layers/values-secrets.yaml
+                  appEnvValuesFile: ../vizor/values-env/prod/secrets.yaml
+                  layerValuesFile: ../vizor/values-layers/values-secrets.yaml
                 - appName: vizor-foundation
                   wave: "-2"
                   chartPath: helm/vizor
