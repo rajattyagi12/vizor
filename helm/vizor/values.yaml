@@ -13,6 +13,8 @@ components:
     enabled: true
   identity:
     enabled: true
+  platformSupport:
+    enabled: true   # api-proxy (Caddy), mailhog, sftpgo - supporting platform; set false when using separate vizor-platform-support app
   apps:
     enabled: true
   trafficAutoscale:
@@ -96,9 +98,6 @@ frontend:
   # -- Dapr store frontend host annotations
   annotations: # -- Dapr store frontend host replica count
 
-  replicas: 1
-
-apiProxy:
   replicas: 1
 
 autoscaling:
@@ -205,9 +204,7 @@ local-path-provisioner:
       paths:
         - /opt/local-path-provisioner
 
-# -- SFTPGo Configuration (dev only; full config in values-dev.yaml)
-sftpgo:
-  enabled: false
+# SFTPGo: moved to platform-support layer (values-layers/values-platform-support.yaml and values-env/*/platform-support.yaml)
 
 serviceAccount:
   # -- Create a dedicated ServiceAccount for Vizor workloads
@@ -327,9 +324,7 @@ keycloakRealmConfiguration:
 observability:
   enabled: false
 
-# -- MailHog fake SMTP server (dev/test only)
-mailhog:
-  enabled: false
+# Mailhog: moved to platform-support layer; traffic layer uses mailhog.enabled for mailhog-ingress (see values-layers/values-traffic-autoscale.yaml)
 
 keycloak:
   # -- Keycloak start mode: "start" (prod) or "start-dev" (dev)

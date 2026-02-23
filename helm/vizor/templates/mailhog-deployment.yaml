@@ -1,11 +1,11 @@
-{{- if and .Values.components.apps.enabled .Values.mailhog.enabled }}
+{{- if and .Values.components.platformSupport.enabled .Values.mailhog.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mailhog
   namespace: {{ .Release.Namespace }}
 spec:
-  replicas: 1
+  replicas: 1  # Single replica; no HA needed for dev/test SMTP capture
   selector:
     matchLabels:
       app: mailhog

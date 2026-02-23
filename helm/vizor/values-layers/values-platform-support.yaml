@@ -1,0 +1,35 @@
+# Platform-support app: api-proxy (Caddy), mailhog (optional), sftpgo (optional).
+# Deploy before vizor-apps (wave 1) so the gateway and optional services are ready.
+# Values for these components live here (not in the common values.yaml).
+components:
+  foundation:
+    enabled: false
+  dataInit:
+    enabled: false
+  identity:
+    enabled: false
+  platformSupport:
+    enabled: true
+  apps:
+    enabled: false
+  trafficAutoscale:
+    enabled: false
+
+# api-proxy (Caddy) — always deployed when this app is used
+apiProxy:
+  replicas: 1
+
+# mailhog — optional; single replica, no HA. Enable in env (e.g. values-env/dev/platform-support.yaml)
+mailhog:
+  enabled: false
+
+# sftpgo — optional; single replica, no HA. Enable and configure in env (e.g. values-env/dev/platform-support.yaml)
+sftpgo:
+  enabled: false
+
+# Do not create SA here; use the one from foundation.
+serviceAccount:
+  create: false
+
+local-path-provisioner:
+  enabled: false

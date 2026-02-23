@@ -10,6 +10,10 @@ components:
   trafficAutoscale:
     enabled: true
 
+# mailhog-ingress is rendered when mailhog.enabled is true (mailhog itself is deployed by vizor-platform-support)
+mailhog:
+  enabled: false
+
 # Do not create SA here; use the one from foundation (name from Argo param serviceAccount.name or "default").
 serviceAccount:
   create: false

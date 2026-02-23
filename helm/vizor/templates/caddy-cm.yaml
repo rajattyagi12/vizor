@@ -1,4 +1,4 @@
-{{- if .Values.components.apps.enabled }}
+{{- if .Values.components.platformSupport.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

@@ -11,14 +11,15 @@ Point each environment's existing ArgoCD root Application to one path:
 - UAT: `argocd/root/uat`
 - Prod: `argocd/root/prod`
 
-Each root chart generates six child apps with fixed wave ordering:
+Each root chart generates seven child apps with fixed wave ordering:
 
 1. `vizor-secrets` (`-2`) — creates the Secret `vizor-secrets`; chart path `helm/vizor-secrets`
 2. `vizor-foundation` (`-2`)
 3. `vizor-data-init` (`-1`)
 4. `vizor-identity` (`0`)
-5. `vizor-apps` (`1`)
-6. `vizor-traffic-autoscale` (`2`)
+5. `vizor-platform-support` (`1`) — api-proxy (Caddy), optional mailhog, optional sftpgo (supporting platform; not core app workloads)
+6. `vizor-apps` (`2`) — core, engagement, interaction, frontend (core developer components)
+7. `vizor-traffic-autoscale` (`3`)
 
 Secret content (SQL, Keycloak, Dapr keys) is owned by the **vizor-secrets** chart and its value files (`values-env/*/secrets.yaml`), not by foundation.
 
@@ -65,6 +66,7 @@ Current mapping:
   - `foundation.yaml`
   - `data-init.yaml`
   - `identity.yaml`
+  - `platform-support.yaml` (api-proxy; mailhog and sftpgo optional via `mailhog.enabled` / `sftpgo.enabled`)
   - `apps.yaml`
   - `traffic-autoscale.yaml`
 - uat: shared `values-uat.yaml` (not split yet)

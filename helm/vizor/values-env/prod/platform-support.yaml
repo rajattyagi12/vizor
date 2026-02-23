@@ -1,0 +1,5 @@
+# Prod: platform-support (api-proxy only by default; enable mailhog/sftpgo if needed)
+mailhog:
+  enabled: false
+sftpgo:
+  enabled: false

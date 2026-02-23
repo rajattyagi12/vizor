@@ -44,13 +44,18 @@ spec:
                   chartPath: helm/vizor
                   appEnvValuesFile: values-env/dev/identity.yaml
                   layerValuesFile: values-layers/values-identity.yaml
-                - appName: vizor-apps
+                - appName: vizor-platform-support
                   wave: "1"
+                  chartPath: helm/vizor
+                  appEnvValuesFile: values-env/dev/platform-support.yaml
+                  layerValuesFile: values-layers/values-platform-support.yaml
+                - appName: vizor-apps
+                  wave: "2"
                   chartPath: helm/vizor
                   appEnvValuesFile: values-env/dev/apps.yaml
                   layerValuesFile: values-layers/values-apps.yaml
                 - appName: vizor-traffic-autoscale
-                  wave: "2"
+                  wave: "3"
                   chartPath: helm/vizor
                   appEnvValuesFile: values-env/dev/traffic-autoscale.yaml
                   layerValuesFile: values-layers/values-traffic-autoscale.yaml

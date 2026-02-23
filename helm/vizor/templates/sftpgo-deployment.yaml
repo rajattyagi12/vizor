@@ -1,4 +1,4 @@
-{{- if and .Values.components.apps.enabled .Values.sftpgo.enabled }}
+{{- if and .Values.components.platformSupport.enabled .Values.sftpgo.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -6,7 +6,7 @@ metadata:
   labels:
     app: sftpgo
 spec:
-  replicas: 1
+  replicas: 1  # Single replica; no HA needed for supporting platform SFTP
   selector:
     matchLabels:
       app: sftpgo
