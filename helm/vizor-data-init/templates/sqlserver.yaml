@@ -26,7 +26,10 @@ spec:
             - name: ACCEPT_EULA
               value: "Y"
             - name: SA_PASSWORD
-              value: {{ .Values.sqlServer.dbPassword | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: SA_PASSWORD
           resources:
             requests:
               memory: "1Gi"

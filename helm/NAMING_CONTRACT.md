@@ -5,7 +5,7 @@ All vizor-* charts use these **fixed names** for cross-referencing so resources 
 | Resource | Fixed name | Used by |
 |----------|------------|---------|
 | Secret | `vizor-secrets` | vizor-secrets chart creates it; foundation, data-init, identity, apps reference it |
-| ServiceAccount | `vizor-runtime` (or `{namespace}-runtime`) | Set via Argo param `serviceAccount.name`. Created by foundation, data-init, identity, platform-support, and apps when `serviceAccount.create: true` (idempotent in same namespace). |
+| ServiceAccount | `vizor-runtime` (or `{namespace}-runtime`) | Set via Argo param `serviceAccount.name`. Created by **vizor-foundation only** when `serviceAccount.create: true`; data-init, identity, platform-support, and apps use it (same namespace, `serviceAccount.create: false`). |
 | SQL Server service | `sql-server-service` | data-init creates it; identity (Keycloak, mssql-init-job) uses it |
 | Migrations Job | `vizor-migrations` | data-init creates it; vizor-apps PreSync waits for it |
 | Keycloak deployment/service | `keycloak` | identity chart |

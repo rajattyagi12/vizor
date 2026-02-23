@@ -6,9 +6,9 @@ global:
   serviceAccountName: vizor-runtime
   migrationsJobName: vizor-migrations  # Fixed name so vizor-apps PreSync can wait for it
 
-# Create SA in this app's namespace so pods can run (idempotent if same namespace as foundation).
+# ServiceAccount is created by vizor-foundation only; data-init uses it (same namespace).
 serviceAccount:
-  create: true
+  create: false
   name: ""
   annotations: {}
 
@@ -18,6 +18,8 @@ image:
   tag: latest
   pullSecrets: []
 
+# SQL Server SA_PASSWORD is read from Secret (global.secretName, key SA_PASSWORD).
+# Deploy vizor-secrets before vizor-data-init so the secret exists.
 sqlServer:
   enabled: true
   image: mcr.microsoft.com/mssql/server
@@ -25,7 +27,7 @@ sqlServer:
   releaseName: sqlserver
   username: sa
   database: vizor
-  dbPassword: "#CHANGEME"
+  dbPassword: "#CHANGEME"  # Not used by SQL Server pod; vizor-secrets uses this to populate the Secret
   service:
     name: sql-server-service
     port: 1433

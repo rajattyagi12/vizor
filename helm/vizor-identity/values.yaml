@@ -5,9 +5,9 @@ global:
   secretName: vizor-secrets
   serviceAccountName: vizor-runtime
 
-# Create SA in this app's namespace so pods can run (idempotent if same namespace as foundation).
+# Do not create SA here; use the one created by vizor-foundation (vizor-runtime).
 serviceAccount:
-  create: true
+  create: false
   name: ""
   annotations: {}
 

@@ -25,6 +25,8 @@ keycloakRealmConfiguration:
   keycloakEnv:
     KEYCLOAK_ADMIN: "admin"
     KEYCLOAK_ADMIN_PASSWORD: "#CHANGEME"
+  adminUser:
+    password: "#CHANGEME"  # First Keycloak admin user; realm-job reads from secret KeycloakAdminUserPassword
 
 daprComponents:
   secrets:

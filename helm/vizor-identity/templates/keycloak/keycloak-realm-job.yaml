@@ -442,9 +442,15 @@ spec:
             - name: REALM_NAME
               value: {{ .Values.keycloakRealmConfiguration.realmName | quote }}
             - name: KEYCLOAK_ADMIN
-              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KEYCLOAK_ADMIN }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: KeycloakAdminUsername
             - name: KEYCLOAK_ADMIN_PASSWORD
-              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KEYCLOAK_ADMIN_PASSWORD }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: KeycloakAdminPassword
             - name: CLIENT_ID
               value: {{ .Values.keycloakRealmConfiguration.clientId | quote }}
             - name: ROLE_NAME
@@ -466,9 +472,15 @@ spec:
             - name: MAILDISPLAYNAME
               value: {{ .Values.keycloakRealmConfiguration.smtp.mailDisplayName }}
             - name: SMTP_USERNAME
-              value: {{ .Values.keycloakRealmConfiguration.smtp.smtpusername | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: smtpusername
             - name: SMTPPASSWORD
-              value: {{ .Values.keycloakRealmConfiguration.smtp.smtppassword }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: smtppassword
             - name: ADMIN_USER_EMAIL
               value: {{ .Values.keycloakRealmConfiguration.adminUser.email | quote }}
             - name: ADMIN_USER_FIRSTNAME
@@ -478,10 +490,16 @@ spec:
             - name: ADMIN_USER_ATTRIBUTES_CLIENTID
               value: {{ .Values.keycloakRealmConfiguration.adminUser.attributes_clientID | quote }}
             - name: ADMIN_USER_PASSWORD_REALM
-              value: {{ .Values.keycloakRealmConfiguration.adminUser.password | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: KeycloakAdminUserPassword
             - name: CLIENT_PRIVATE_ID
               value: {{ .Values.keycloakRealmConfiguration.clientPrivateId | quote }}
             - name: CLIENT_PRIVATE_NAME
               value: {{ .Values.keycloakRealmConfiguration.clientPrivateId | quote }}
             - name: CLIENT_PRIVATE_SECRET
-              value: {{ .Values.keycloakRealmConfiguration.clientPrivateSecret | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: VizorClientPrivateSecret

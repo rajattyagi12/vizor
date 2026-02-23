@@ -158,7 +158,10 @@ spec:
             - name: KEYCLOAK_ADMIN
               value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KEYCLOAK_ADMIN | quote }}
             - name: KEYCLOAK_ADMIN_PASSWORD
-              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KEYCLOAK_ADMIN_PASSWORD | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: KeycloakAdminPassword
             #Use this for prod
             # - name: DB_SERVER
             #   value: {{ .Values.sqlServer.service.name | quote }}
