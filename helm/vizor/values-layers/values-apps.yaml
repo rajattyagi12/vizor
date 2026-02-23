@@ -12,9 +12,9 @@ components:
   trafficAutoscale:
     enabled: false
 
-# Do not create SA here; use the one from foundation (name from Argo param serviceAccount.name or "default").
+# Create the same SA as foundation (same name via Argo param) so it exists if foundation hasn't synced yet.
 serviceAccount:
-  create: false
+  create: true
 
 local-path-provisioner:
   enabled: false

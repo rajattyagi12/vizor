@@ -324,7 +324,12 @@ keycloakRealmConfiguration:
 observability:
   enabled: false
 
-# Mailhog: moved to platform-support layer; traffic layer uses mailhog.enabled for mailhog-ingress (see values-layers/values-traffic-autoscale.yaml)
+# Mailhog / sftpgo: full config in platform-support layer (values-layers/values-platform-support.yaml, values-env/*/platform-support.yaml).
+# Minimal defaults here so templates do not dereference nil when only foundation (or other non-platform-support) apps render.
+mailhog:
+  enabled: false
+sftpgo:
+  enabled: false
 
 keycloak:
   # -- Keycloak start mode: "start" (prod) or "start-dev" (dev)

@@ -4,6 +4,8 @@ kind: Application
 metadata:
   name: vizor-redis
   namespace: {{ .Values.argocdNamespace | quote }}
+  labels:
+    vizor.com/app-order: "0"
   annotations:
     argocd.argoproj.io/sync-wave: "-3"
   finalizers:
