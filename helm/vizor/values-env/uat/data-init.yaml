@@ -1,0 +1,4 @@
+# UAT: disable in-cluster SQL Server; use external SQL or override per-deploy.
+# Connection string and SA_PASSWORD come from vizor-secrets.
+sqlServer:
+  enabled: false

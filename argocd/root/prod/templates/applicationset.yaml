@@ -1,5 +1,5 @@
 {{- if or (not .Values.env.repoURL) (eq .Values.env.repoURL "#CHANGEME") -}}
-{{- fail "env.repoURL must be set on the root Application via Helm parameter env.repoURL (use same URL as source.repoURL)." -}}
+{{- fail "env.repoURL is empty or #CHANGEME. On the root Application, add a Helm parameter: name=env.repoURL, value=<same URL as Source repo URL> (non-empty)." -}}
 {{- end -}}
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet

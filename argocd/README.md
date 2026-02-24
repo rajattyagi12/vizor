@@ -60,12 +60,20 @@ When creating the root Application (e.g. Vizor UAT Root), pass `env.repoURL` (an
 helm:
   parameters:
     - name: env.repoURL
-      value: "https://gitlab.com/group/vizor/deploy.git"   # same as source.repoURL
+      value: "https://gitlab.com/group/vizor/deploy.git"   # same as source.repoURL; must be non-empty
     - name: env.targetRevision
       value: "uat"
     - name: env.destinationNamespace
       value: "vizor-uat"
 ```
+
+**Troubleshooting "env.repoURL must be set on the root Application"**
+
+If sync fails with that error, the chart received an empty or `#CHANGEME` `env.repoURL`. Fix it by:
+
+1. Opening the root Application (e.g. Vizor UAT Root) in Argo CD.
+2. Ensuring **Source** → **Helm** → **Parameters** includes an entry with **name** `env.repoURL` and **value** set to the full repo URL (the same URL as the Application's **Source** → **Repository URL**). The value must be non-empty.
+3. If using YAML/CLI, the Application must have `spec.source.helm.parameters` with `name: env.repoURL` and `value: "https://..."` or `value: "ssh://git@..."` (same as `spec.source.repoURL`).
 
 ## Child App Value Files
 
