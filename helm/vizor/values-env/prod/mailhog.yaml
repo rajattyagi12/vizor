@@ -1,0 +1,2 @@
+# Prod: disable Mailhog (no fake SMTP in production)
+enabled: false

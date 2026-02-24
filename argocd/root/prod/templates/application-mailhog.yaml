@@ -20,6 +20,7 @@ spec:
     helm:
       valueFiles:
         - values.yaml
+        - ../vizor/values-env/prod/mailhog.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.env.destinationNamespace | quote }}

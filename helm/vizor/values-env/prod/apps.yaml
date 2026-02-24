@@ -1,0 +1,3 @@
+# Prod overrides for apps layer.
+# Pin image tag; set replicas/resources and auth as needed.
+# mailhog/sftpgo are standalone charts; disable there if not used in prod.

@@ -1,0 +1,2 @@
+# Prod: disable in-cluster SFTPGo (use external SFTP in production)
+enabled: false
