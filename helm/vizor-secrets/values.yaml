@@ -44,4 +44,9 @@ daprComponents:
     SsrsBaseUrl: "#CHANGEME"
     SsrsTimeoutSeconds: "300"
   sftp:
-    password: ""  # optional; set per env
+    name: sftpgo-binding
+    address: ""
+    username: ""
+    password: ""
+    rootPath: "."
+    insecureIgnoreHostKey: false

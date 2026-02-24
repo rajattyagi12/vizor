@@ -40,13 +40,8 @@ persistence:
   size: 10Gi
   storageClass: local-path
 
-# Dapr component (sftpgo-binding) created by this chart; references this service.
-daprComponent:
-  name: sftpgo-binding
-  rootPath: "/"
-  address: "vizor-sftpgo:2022"
-  username: "vizor"
-  insecureIgnoreHostKey: true
+# Dapr component (sftpgo-binding) is created by vizor-secrets, not here.
+# When this chart is enabled (SFTPGo deployed), set daprComponents.sftp in values-env/*/secrets.yaml to address: vizor-sftpgo:2022, username: vizor so the binding uses this service.
 
 scheduling:
   affinity: {}

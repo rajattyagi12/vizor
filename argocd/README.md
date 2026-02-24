@@ -24,6 +24,8 @@ Each root chart generates eight child apps with fixed wave ordering:
 
 Secret content (SQL, Keycloak, Dapr keys) is owned by the **vizor-secrets** chart and its value files (`values-env/*/secrets.yaml`), not by foundation.
 
+**SFTP / Dapr binding:** The application uses a Dapr SFTP binding (`sftpgo-binding`) to talk to an SFTP server. Dev machines may not have native SFTP, so in **dev** the binding targets in-cluster **SFTPGo** (vizor-sftpgo) at `vizor-sftpgo:2022`. In **prod** (and UAT when using external SFTP) the binding targets an **external SFTP server**; set `daprComponents.sftp.address`, `username`, and `password` in `values-env/*/secrets.yaml`. vizor-secrets creates both the Secret and the Dapr Component from that config.
+
 **Cross-app ordering:** vizor-apps uses a PreSync hook (`wait-for-migrations`) that blocks until the vizor-data-init migrations Job (`vizor-migrations`) has completed, so app Deployments only sync after DB migrations are done. Foundation must create the `job-reader` Role/RoleBinding so the wait job can query Job status.
 
 **Prerequisites (external to this repo):** **Dapr control plane** must be available. **Redis** is deployed by the standalone **vizor-redis** Application (wave -3, CloudPirates OSS chart from OCI) in the same namespace with service name `vizor-redis-master`. No Chart.lock or vizor chart dependency needed. See [docs/RCA-api-proxy-dapr-redis-init-failure.md](docs/RCA-api-proxy-dapr-redis-init-failure.md) if api-proxy fails with "lookup vizor-redis-master ... no such host".
