@@ -1,0 +1,2 @@
+# UAT: disable SFTPGo by default (enable in values if needed for UAT testing)
+enabled: false

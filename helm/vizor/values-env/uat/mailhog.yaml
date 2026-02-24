@@ -1,0 +1,2 @@
+# UAT: disable Mailhog by default (enable in values if needed for UAT testing)
+enabled: false
