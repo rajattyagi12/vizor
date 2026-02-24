@@ -3,6 +3,8 @@
 # migrations-job, sftpgo-binding, and apps. Override via value files or Argo CD parameters.
 
 createSecret: true
+# Set true to skip fail-fast validation when required secret values are #CHANGEME (e.g. CI).
+skipSecretValidation: false
 
 # -- Secret name; must match daprComponents.secretStore.secretName and all secretKeyRef.name in repo
 secretName: vizor-secrets

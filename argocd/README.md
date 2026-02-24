@@ -32,7 +32,7 @@ Secret content (SQL, Keycloak, Dapr keys) is owned by the **vizor-secrets** char
 
 Set these through root app Helm values (file or ArgoCD Helm parameters):
 
-- `env.repoURL`
+- `env.repoURL` — **Required for UAT/prod.** Argo CD does not pass the root Application's `source.repoURL` into the chart. You must set `env.repoURL` via Helm parameters on the root Application (use the same URL as the root's `source.repoURL`) so child apps get the correct repo. If unset or `#CHANGEME`, the chart will fail render with an error.
 - `env.targetRevision`
 - `env.destinationNamespace`
 - `env.ingress.className`
@@ -53,6 +53,19 @@ Example files you can copy from:
 - `/Users/pritam/x/Vizor/deploy/argocd/root/dev/values.example.yaml`
 - `/Users/pritam/x/Vizor/deploy/argocd/root/uat/values.example.yaml`
 - `/Users/pritam/x/Vizor/deploy/argocd/root/prod/values.example.yaml`
+
+When creating the root Application (e.g. Vizor UAT Root), pass `env.repoURL` (and optionally `env.targetRevision`, `env.destinationNamespace`) as Helm parameters so they propagate to child apps. Use the same URL as the root's `source.repoURL`:
+
+```yaml
+helm:
+  parameters:
+    - name: env.repoURL
+      value: "https://gitlab.com/group/vizor/deploy.git"   # same as source.repoURL
+    - name: env.targetRevision
+      value: "uat"
+    - name: env.destinationNamespace
+      value: "vizor-uat"
+```
 
 ## Child App Value Files
 

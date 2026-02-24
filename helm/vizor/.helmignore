@@ -21,3 +21,5 @@
 .idea/
 *.tmproj
 .vscode/
+# Helm cache (e.g. from dependency update) — avoid packaging large index files
+.helm-cache/

@@ -1,5 +1,8 @@
 # Standalone Mailhog Application (wave -2). No dependencies; SMTP capture + Web UI for dev/test.
 # Service name "mailhog" — vizor-traffic renders mailhog-ingress when mailhog.enabled is true.
+{{- if or (not .Values.env.repoURL) (eq .Values.env.repoURL "#CHANGEME") -}}
+{{- fail "env.repoURL must be set on the root Application (Helm parameter env.repoURL, same as source.repoURL)." -}}
+{{- end }}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

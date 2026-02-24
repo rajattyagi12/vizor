@@ -1,5 +1,28 @@
 # Separate charts – validation checklist
 
+## Helm lint (all charts)
+
+Run from repo root. Use env value files where needed so validations pass.
+
+```bash
+# Lint all vizor-* and root charts (vizor-secrets needs dev values to pass secret validation)
+helm lint helm/vizor-secrets    -f helm/vizor-secrets/values.yaml -f helm/vizor/values-env/dev/secrets.yaml
+helm lint helm/vizor-foundation helm/vizor-foundation/values.yaml
+helm lint helm/vizor-data-init  helm/vizor-data-init/values.yaml
+helm lint helm/vizor-identity  helm/vizor-identity/values.yaml
+helm lint helm/vizor-platform-support helm/vizor-platform-support/values.yaml
+helm lint helm/vizor-apps      helm/vizor-apps/values.yaml
+helm lint helm/vizor-traffic   helm/vizor-traffic/values.yaml
+helm lint helm/vizor-mailhog   helm/vizor-mailhog/values.yaml
+helm lint helm/vizor-sftpgo    helm/vizor-sftpgo/values.yaml
+helm lint helm/vizor           # monolith; ensure .helmignore has .helm-cache/
+helm lint argocd/root/dev      -f argocd/root/dev/values.yaml
+helm lint argocd/root/uat      -f argocd/root/uat/values.yaml --set env.repoURL=https://example.com/repo.git
+helm lint argocd/root/prod     -f argocd/root/prod/values.yaml --set env.repoURL=https://example.com/repo.git
+```
+
+**vizor-foundation:** lint may warn about missing dependency `local-path-provisioner`; run `helm dependency build helm/vizor-foundation` if you need to template it. **vizor:** ensure `helm/vizor/.helmignore` includes `.helm-cache/` so large cache files are not included.
+
 ## Helm template (per chart)
 
 Run from repo root. Use namespace and SA param matching your Argo env (e.g. `vizor` / `vizor-runtime` or `vizor-apps` / `vizor-apps-runtime`).

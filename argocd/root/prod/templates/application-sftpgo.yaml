@@ -1,5 +1,8 @@
 # Standalone SFTPGo Application (wave 1). Depends on vizor-secrets (sftpPassword), vizor-foundation (SA, Dapr).
 # Service vizor-sftpgo; Dapr component sftpgo-binding created by this chart.
+{{- if or (not .Values.env.repoURL) (eq .Values.env.repoURL "#CHANGEME") -}}
+{{- fail "env.repoURL must be set on the root Application (Helm parameter env.repoURL, same as source.repoURL)." -}}
+{{- end }}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
