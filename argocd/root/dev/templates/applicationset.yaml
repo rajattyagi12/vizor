@@ -23,15 +23,9 @@ spec:
                   ingressHost: {{ .Values.env.ingress.host | quote }}
                   ingressCertName: {{ .Values.env.ingress.certName | quote }}
                   ingressCertIssuer: {{ .Values.env.ingress.certIssuer | quote }}
+                  extraValuesFile: {{ .Values.env.extraValuesFile | default "" | quote }}
           - list:
               elements:
-                - order: 1
-                  appName: vizor-secrets
-                  wave: "-2"
-                  chartPath: helm/vizor-secrets
-                  appEnvValuesFile: ../vizor/values-env/dev/secrets.yaml
-                  layerValuesFile: ../vizor/values-layers/values-secrets.yaml
-                  extraValueFile: ../vizor/values-layers/values-empty.yaml
                 - order: 2
                   appName: vizor-foundation
                   wave: "-2"
@@ -99,6 +93,8 @@ spec:
             - {{ "{{ .appEnvValuesFile }}" | quote }}
             - {{ "{{ .layerValuesFile }}" | quote }}
             - {{ "{{ .extraValueFile }}" | quote }}
+            - {{ "{{ .extraValuesFile }}" | default "" | quote }}
+          values: {{ "{{ \"\" | quote }}" | quote }}
           parameters:
             - name: serviceAccount.name
               value: {{ "{{ .derivedServiceAccountName }}" | quote }}
