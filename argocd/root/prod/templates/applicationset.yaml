@@ -86,7 +86,7 @@ spec:
                   extraValueFile: values.yaml
   template:
     metadata:
-      name: {{ "{{ printf \"vizor-%s-%s-%s\" .env .nameOrder .appShortName }}" | quote }}
+      name: {{ "{{ printf \"vizor-%s-%v-%s\" .env .nameOrder .appShortName }}" | quote }}
       namespace: {{ .Values.argocdNamespace | quote }}
       labels:
         vizor.com/app-order: {{ "{{ .order }}" | quote }}
