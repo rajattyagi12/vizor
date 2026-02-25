@@ -90,7 +90,6 @@ spec:
           valueFiles:
             - {{ "{{ .baseValuesFile }}" | quote }}
             - {{ "{{ .appEnvValuesFile }}" | quote }}
-          values: {{ "{{ \"\" | quote }}" | quote }}
           parameters:
             - name: serviceAccount.name
               value: {{ "{{ .derivedServiceAccountName }}" | quote }}
