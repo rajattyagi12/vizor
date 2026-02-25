@@ -185,11 +185,4 @@ keycloakRealmConfiguration:
 
 keycloak:
   startMode: "start-dev"
-  smtp:
-    host: "mailhog"
-    port: "1025"
-    starttls: "false"
-    auth: "false"
-    mailDisplayName: "Vizor Auth"
-    smtpusername: "set the username"
-    smtppassword: "set the password"
+  # SMTP: set under daprComponents.secrets (or values-env/dev/secrets.yaml); Keycloak reads from Secret

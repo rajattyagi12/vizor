@@ -1,0 +1,68 @@
+# Preprod environment values (converted from Helm parameters).
+# Use with the appropriate chart(s) or as an overlay; some keys apply to vizor-secrets, vizor-data-init, vizor-identity, etc.
+
+global:
+  namespace: vizor
+
+image:
+  registry: registry.vizor-registry.svc.k8s.nbt:5000
+
+ingress:
+  host: vizorpreprod.roundtables.us
+
+sqlServer:
+  enabled: false
+  database: BenchmarkV2
+  username: appuser
+  dbPassword: "5Wl9G#S&J{53"
+  service:
+    name: 10.0.0.15
+
+sftpgo:
+  enabled: false
+  persistence:
+    enabled: false
+
+daprComponents:
+  sftp:
+    address: 10.0.1.110:22
+    username: ftpuser
+    password: "P@55w0rd"
+    rootPath: /upload
+  state:
+    redisHost: dapr-redis-master.dapr-system.svc.k8s.nbt:6379
+  pubsub:
+    redisHost: dapr-redis-master.dapr-system.svc.k8s.nbt:6379
+  secrets:
+    # SMTP: single source for Dapr and Keycloak (realm job reads from Secret)
+    smtp-host: email-smtp.us-east-1.amazonaws.com
+    smtp-port: "587"
+    smtp-starttls: "true"
+    smtp-auth: "true"
+    smtp-mail-display-name: Vizor
+    smtpusername: AKIAVWE2WCVHKTCNHJEE
+    smtppassword: BIqlgWKuB3MhaFYTxaAXCeglcjLL7mzHYGR1G54OqHLM
+    SsrsBaseUrl: http://10.0.0.15/reports
+
+local-path-provisioner:
+  enabled: false
+
+keycloakRealmConfiguration:
+  serverUrl: https://vizorpreprod.roundtables.us
+  clientPrivateSecret: ec6P80yhlvwpFFpQy+MXtSZebsmJVzvzyd31725W3zE=
+  adminUser:
+    password: "'@1V,Z4P;X98mySoB'"
+  keycloakEnv:
+    KC_DB_USERNAME: appuser
+    KC_DB_PASSWORD: "5Wl9G#S&J{53}"
+    KEYCLOAK_ADMIN: kcadmin
+    KEYCLOAK_ADMIN_PASSWORD: xumqyt-vegsY9-zuzsob
+    AUTH_DATABASE_NAME: BenchmarkV2_Auth
+  resources:
+    requested_memory: 512Mi
+    requested_cpu: 500m
+  realmJson:
+    clients:
+      - {}
+      - secret: M62N8ht+QgGwR7gO6bGliw3fVUA9DgZNk51JHIld4YA=
+  # SMTP: set only under daprComponents.secrets (vizor-secrets); Keycloak reads from Secret

@@ -456,20 +456,42 @@ spec:
               value: {{ .Values.keycloakRealmConfiguration.adminEmail | quote }}
             - name: FRONTEND_URL
               value: "{{ .Values.keycloakRealmConfiguration.serverUrl }}/auth"
+            # SMTP: from Secret (single source: vizor-secrets daprComponents.secrets)
             - name: SMTP_HOST
-              value: {{ .Values.keycloakRealmConfiguration.smtp.host | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.daprComponents.secretStore.secretName | default "vizor-secrets" }}
+                  key: smtp-host
             - name: SMTP_PORT
-              value: {{ .Values.keycloakRealmConfiguration.smtp.port | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.daprComponents.secretStore.secretName | default "vizor-secrets" }}
+                  key: smtp-port
             - name: SMTP_STARTTLS
-              value: {{ .Values.keycloakRealmConfiguration.smtp.starttls | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.daprComponents.secretStore.secretName | default "vizor-secrets" }}
+                  key: smtp-starttls
             - name: SMTP_AUTH
-              value: {{ .Values.keycloakRealmConfiguration.smtp.auth | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.daprComponents.secretStore.secretName | default "vizor-secrets" }}
+                  key: smtp-auth
             - name: MAILDISPLAYNAME
-              value: {{ .Values.keycloakRealmConfiguration.smtp.mailDisplayName }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.daprComponents.secretStore.secretName | default "vizor-secrets" }}
+                  key: smtp-mail-display-name
             - name: SMTP_USERNAME
-              value: {{ .Values.keycloakRealmConfiguration.smtp.smtpusername | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.daprComponents.secretStore.secretName | default "vizor-secrets" }}
+                  key: smtpusername
             - name: SMTPPASSWORD
-              value: {{ .Values.keycloakRealmConfiguration.smtp.smtppassword }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.daprComponents.secretStore.secretName | default "vizor-secrets" }}
+                  key: smtppassword
             - name: ADMIN_USER_EMAIL
               value: {{ .Values.keycloakRealmConfiguration.adminUser.email | quote }}
             - name: ADMIN_USER_FIRSTNAME

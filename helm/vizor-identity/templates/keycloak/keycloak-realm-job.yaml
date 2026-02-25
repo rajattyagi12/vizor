@@ -461,16 +461,32 @@ spec:
               value: {{ .Values.keycloakRealmConfiguration.adminEmail | quote }}
             - name: FRONTEND_URL
               value: "{{ .Values.keycloakRealmConfiguration.serverUrl }}/auth"
+            # SMTP: all from vizor-secrets Secret (single source: daprComponents.secrets in values-env/*/secrets.yaml)
             - name: SMTP_HOST
-              value: {{ .Values.keycloakRealmConfiguration.smtp.host | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: smtp-host
             - name: SMTP_PORT
-              value: {{ .Values.keycloakRealmConfiguration.smtp.port | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: smtp-port
             - name: SMTP_STARTTLS
-              value: {{ .Values.keycloakRealmConfiguration.smtp.starttls | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: smtp-starttls
             - name: SMTP_AUTH
-              value: {{ .Values.keycloakRealmConfiguration.smtp.auth | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: smtp-auth
             - name: MAILDISPLAYNAME
-              value: {{ .Values.keycloakRealmConfiguration.smtp.mailDisplayName }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: smtp-mail-display-name
             - name: SMTP_USERNAME
               valueFrom:
                 secretKeyRef:

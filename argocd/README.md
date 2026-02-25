@@ -77,6 +77,19 @@ If sync fails with that error, the chart received an empty or `#CHANGEME` `env.r
 2. Ensuring **Source** → **Helm** → **Parameters** includes an entry with **name** `env.repoURL` and **value** set to the full repo URL (the same URL as the Application's **Source** → **Repository URL**). The value must be non-empty.
 3. If using YAML/CLI, the Application must have `spec.source.helm.parameters` with `name: env.repoURL` and `value: "https://..."` or `value: "ssh://git@..."` (same as `spec.source.repoURL`).
 
+**Troubleshooting "Unable to save changes... ssh: handshake failed" (vizor-secrets or other child app)**
+
+When you edit a child app (e.g. vizor-secrets) in the Argo CD UI and click **Save**, Argo validates the app by asking the **repo server** to generate manifests from that app’s repo URL. The error means the repo server could not authenticate to the Git repo via SSH for that URL.
+
+1. **Register the repo with SSH credentials in Argo CD**  
+   Go to **Settings → Repositories** (or your project’s **Repositories**) and add the deploy repo URL (same as the root app’s **Source → Repository URL**, e.g. `git@git.nbt.local:vizor/deploy.git`). Configure **SSH private key** (and optional **Insecure ignore host key** for self-signed). The repo server uses this to fetch for *any* Application that uses this URL, including child apps.
+
+2. **Ensure the child app uses the same repo URL**  
+   The vizor-secrets (and other) child app’s **Source → Repository URL** should match the root. It is set by the ApplicationSet from `env.repoURL`. If it was changed manually in the UI, sync the **root** app again so the ApplicationSet reapplies the correct spec, or set `env.repoURL` on the root and let the generator overwrite the child.
+
+3. **Prefer changing values via the root, not the child**  
+   To avoid validation errors when saving, drive config from the **root** Application (Helm parameters or value files in repo) rather than editing the child app’s Helm parameters in the UI. Child app source (repo, path, value files) is owned by the ApplicationSet; edits there can be overwritten on next root sync.
+
 ## Child App Value Files
 
 Generated child apps deploy either `helm/vizor` or `helm/vizor-secrets` (vizor-secrets app only) with:

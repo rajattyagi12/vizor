@@ -227,14 +227,7 @@ keycloakRealmConfiguration:
   vizorEntityId: "urn:vizor:saml"
   keycloakApiBaseUrl: "http://vizor-keycloak-api-service:4567/"
   keycloakServiceUrl: "http://keycloak:8080/auth"
-  smtp:
-    host: "#CHANGEME"
-    port: "1025"
-    starttls: "false"
-    auth: "false"
-    mailDisplayName: "Vizor Auth"
-    smtpusername: "#CHANGEME"
-    smtppassword: "#CHANGEME"
+  # SMTP: set in vizor-secrets (daprComponents.secrets); Keycloak realm job reads from Secret.
 
   keycloakEnv:
     AUTH_DATABASE_NAME: "vizor_auth"
