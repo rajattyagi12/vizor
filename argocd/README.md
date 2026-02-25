@@ -28,7 +28,7 @@ Secret content (SQL, Keycloak, Dapr keys) is owned by the **vizor-secrets** char
 
 **Cross-app ordering:** vizor-apps uses a PreSync hook (`wait-for-migrations`) that blocks until the vizor-data-init migrations Job (`vizor-migrations`) has completed, so app Deployments only sync after DB migrations are done. Foundation must create the `job-reader` Role/RoleBinding so the wait job can query Job status.
 
-**Prerequisites (external to this repo):** **Dapr control plane** must be available. **Redis** is deployed by the standalone **vizor-redis** Application (wave -3, CloudPirates OSS chart from OCI) in the same namespace with service name `vizor-redis-master`. No Chart.lock or vizor chart dependency needed. See [docs/RCA-api-proxy-dapr-redis-init-failure.md](docs/RCA-api-proxy-dapr-redis-init-failure.md) if api-proxy fails with "lookup vizor-redis-master ... no such host".
+**Prerequisites (external to this repo):** **Dapr control plane** must be available. **Redis** is deployed by the standalone **vizor-redis** Application (wave -3, CloudPirates OSS chart from OCI) in the same namespace; service name is `env.redisServiceName` (default `vizor-redis-master`). Dapr state/pubsub host is derived from that app as `<redisServiceName>:6379`. No Chart.lock or vizor chart dependency needed. See [docs/RCA-api-proxy-dapr-redis-init-failure.md](docs/RCA-api-proxy-dapr-redis-init-failure.md) if api-proxy fails with "lookup vizor-redis-master ... no such host".
 
 ## User-Configurable Inputs
 
@@ -37,6 +37,7 @@ Set these through root app Helm values (file or ArgoCD Helm parameters):
 - `env.repoURL` — **Required for UAT/prod.** Argo CD does not pass the root Application's `source.repoURL` into the chart. You must set `env.repoURL` via Helm parameters on the root Application (use the same URL as the root's `source.repoURL`) so child apps get the correct repo. If unset or `#CHANGEME`, the chart will fail render with an error.
 - `env.targetRevision`
 - `env.destinationNamespace`
+- `env.redisServiceName` — **Optional.** Service name of the Redis deployed by the root’s vizor-redis Application (default `vizor-redis-master`). The Dapr Redis host is **derived** from this: vizor-foundation receives `daprComponents.state.redisHost` and `daprComponents.pubsub.redisHost` as `<redisServiceName>:6379`, so it always matches the Redis app (same namespace).
 - `env.ingress.className`
 - `env.ingress.host`
 - `env.ingress.certName`

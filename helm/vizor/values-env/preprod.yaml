@@ -29,10 +29,11 @@ daprComponents:
     username: ftpuser
     password: "P@55w0rd"
     rootPath: /upload
+  # When using app-of-apps, redisHost is derived from the Redis app (root env.redisServiceName:6379). Override here only if using this overlay standalone with a different Redis.
   state:
-    redisHost: dapr-redis-master.dapr-system.svc.k8s.nbt:6379
+    redisHost: vizor-redis-master:6379
   pubsub:
-    redisHost: dapr-redis-master.dapr-system.svc.k8s.nbt:6379
+    redisHost: vizor-redis-master:6379
   secrets:
     # SMTP: single source for Dapr and Keycloak (realm job reads from Secret)
     smtp-host: email-smtp.us-east-1.amazonaws.com

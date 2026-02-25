@@ -18,6 +18,7 @@ spec:
                   destinationNamespace: {{ .Values.env.destinationNamespace | quote }}
                   derivedServiceAccountName: {{ printf "%s-runtime" .Values.env.destinationNamespace | quote }}
                   baseValuesFile: {{ .Values.env.baseValuesFile | quote }}
+                  redisHost: {{ printf "%s:6379" (.Values.env.redisServiceName | default "vizor-redis-master") | quote }}
                   ingressClassName: {{ .Values.env.ingress.className | quote }}
                   ingressHost: {{ .Values.env.ingress.host | quote }}
                   ingressCertName: {{ .Values.env.ingress.certName | quote }}
@@ -108,6 +109,18 @@ spec:
         syncOptions:
           - CreateNamespace=true
   templatePatch: |
+    {{ "{{- if eq .appName \"vizor-foundation\" }}" }}
+    spec:
+      source:
+        helm:
+          parameters:
+            - name: serviceAccount.name
+              value: '{{ "{{ .derivedServiceAccountName }}" }}'
+            - name: daprComponents.state.redisHost
+              value: '{{ "{{ .redisHost }}" }}'
+            - name: daprComponents.pubsub.redisHost
+              value: '{{ "{{ .redisHost }}" }}'
+    {{ "{{- end }}" }}
     {{ "{{- if eq .appName \"vizor-traffic-autoscale\" }}" }}
     spec:
       source:

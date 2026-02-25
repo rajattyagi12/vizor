@@ -10,6 +10,7 @@ env:
   targetRevision: develop
   destinationNamespace: vizor
   baseValuesFile: values.yaml
+  # redisServiceName: optional; default vizor-redis-master. Dapr redisHost is derived as <redisServiceName>:6379 from the Redis app (same namespace).
   ingress:
     className: traefik
     host: ""

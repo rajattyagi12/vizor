@@ -11,6 +11,7 @@ env:
   destinationNamespace: vizor
   baseValuesFile: values.yaml
   envValuesFile: values-prod.yaml
+  # redisServiceName: optional; default vizor-redis-master. Dapr redisHost derived from Redis app.
   ingress:
     className: traefik
     host: "#CHANGEME"

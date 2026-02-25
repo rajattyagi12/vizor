@@ -82,7 +82,7 @@ interactionService:
   replicas: 2
   # -- Redis connection string for SignalR backplane
   # This is used by SignalR to share connection state across multiple pods
-  # Format: "host:port" (e.g., "vizor-redis-master:6379")
+  # Format: "host:port". When using the root app-of-apps, match the Redis app (env.redisServiceName, default vizor-redis-master).
   # If not set, defaults to "vizor-redis-master:6379" in Program.cs
   redisConnectionString: "vizor-redis-master:6379"
 

@@ -11,4 +11,4 @@ components:
     enabled: false
   trafficAutoscale:
     enabled: false
-# Redis is deployed by the standalone vizor-redis Application (wave -3), not by this chart.
+# Redis is deployed by the standalone vizor-redis Application (wave -3). Dapr redisHost for vizor-foundation is derived from that app (env.redisServiceName:6379) via the root ApplicationSet templatePatch.
