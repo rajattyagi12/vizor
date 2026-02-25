@@ -5,7 +5,7 @@ global:
   namespace: vizor
 
 image:
-  registry: registry.vizor-registry.svc.k8s.nbt:5000
+  registry: registry.vizor-registry.svc.k8s.vizor.local:5000
 
 ingress:
   host: vizorpreprod.roundtables.us
@@ -44,6 +44,9 @@ daprComponents:
     smtpusername: AKIAVWE2WCVHKTCNHJEE
     smtppassword: BIqlgWKuB3MhaFYTxaAXCeglcjLL7mzHYGR1G54OqHLM
     SsrsBaseUrl: http://10.0.0.15/reports
+    SsrsUsername: ssrsuser
+    SsrsPassword: ssrspassword
+
 
 local-path-provisioner:
   enabled: false

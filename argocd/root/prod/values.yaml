@@ -1,6 +1,10 @@
 argocdNamespace: argocd
 project: default
 
+# Set false to omit the standalone mailhog Application (no SMTP capture in prod).
+mailhog:
+  enabled: false
+
 applicationSet:
   name: vizor-apps-prod
 

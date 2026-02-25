@@ -1,9 +1,11 @@
+{{- $mailhog := index .Values "mailhog" }}
+{{- if or (not $mailhog) (ne (index $mailhog "enabled") false) }}
 # Standalone Mailhog Application (wave -2). No dependencies; SMTP capture + Web UI for dev/test.
 # Service name "mailhog" — vizor-traffic renders mailhog-ingress when mailhog.enabled is true.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: vizor-mailhog
+  name: vizor-{{ .Values.env.name }}-mailhog
   namespace: {{ .Values.argocdNamespace | quote }}
   labels:
     vizor.com/app-order: "0.5"
@@ -29,3 +31,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+{{- end }}
