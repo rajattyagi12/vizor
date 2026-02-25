@@ -23,7 +23,6 @@ spec:
                   ingressHost: {{ .Values.env.ingress.host | quote }}
                   ingressCertName: {{ .Values.env.ingress.certName | quote }}
                   ingressCertIssuer: {{ .Values.env.ingress.certIssuer | quote }}
-                  extraValuesFile: {{ .Values.env.extraValuesFile | default "" | quote }}
           - list:
               elements:
                 - order: 2
@@ -33,8 +32,6 @@ spec:
                   wave: "-2"
                   chartPath: helm/vizor-foundation
                   appEnvValuesFile: ../vizor/values-env/dev/foundation.yaml
-                  layerValuesFile: values.yaml
-                  extraValueFile: values.yaml
                 - order: 3
                   nameOrder: 5
                   appName: vizor-data-init
@@ -42,8 +39,6 @@ spec:
                   wave: "-1"
                   chartPath: helm/vizor-data-init
                   appEnvValuesFile: ../vizor/values-env/dev/data-init.yaml
-                  layerValuesFile: values.yaml
-                  extraValueFile: values.yaml
                 - order: 4
                   nameOrder: 6
                   appName: vizor-identity
@@ -51,8 +46,6 @@ spec:
                   wave: "0"
                   chartPath: helm/vizor-identity
                   appEnvValuesFile: ../vizor/values-env/dev/identity.yaml
-                  layerValuesFile: values.yaml
-                  extraValueFile: values.yaml
                 - order: 5
                   nameOrder: 7
                   appName: vizor-platform-support
@@ -60,8 +53,6 @@ spec:
                   wave: "1"
                   chartPath: helm/vizor-platform-support
                   appEnvValuesFile: ../vizor/values-env/dev/platform-support.yaml
-                  layerValuesFile: values.yaml
-                  extraValueFile: values.yaml
                 - order: 6
                   nameOrder: 8
                   appName: vizor-apps
@@ -69,8 +60,6 @@ spec:
                   wave: "2"
                   chartPath: helm/vizor-apps
                   appEnvValuesFile: ../vizor/values-env/dev/apps.yaml
-                  layerValuesFile: values.yaml
-                  extraValueFile: values.yaml
                 - order: 7
                   nameOrder: 9
                   appName: vizor-traffic-autoscale
@@ -78,8 +67,6 @@ spec:
                   wave: "3"
                   chartPath: helm/vizor-traffic
                   appEnvValuesFile: ../vizor/values-env/dev/traffic-autoscale.yaml
-                  layerValuesFile: values.yaml
-                  extraValueFile: values.yaml
   template:
     metadata:
       name: {{ "{{ printf \"vizor-%s-%v-%s\" .env .nameOrder .appShortName }}" | quote }}
@@ -103,9 +90,6 @@ spec:
           valueFiles:
             - {{ "{{ .baseValuesFile }}" | quote }}
             - {{ "{{ .appEnvValuesFile }}" | quote }}
-            - {{ "{{ .layerValuesFile }}" | quote }}
-            - {{ "{{ .extraValueFile }}" | quote }}
-            - {{ "{{ .extraValuesFile }}" | default "" | quote }}
           values: {{ "{{ \"\" | quote }}" | quote }}
           parameters:
             - name: serviceAccount.name
