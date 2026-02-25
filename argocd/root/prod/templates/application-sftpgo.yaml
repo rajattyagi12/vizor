@@ -6,7 +6,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: vizor-{{ .Values.env.name }}-sftpgo
+  name: vizor-{{ .Values.env.name }}-3-sftpgo
   namespace: {{ .Values.argocdNamespace | quote }}
   labels:
     vizor.com/app-order: "5.5"
