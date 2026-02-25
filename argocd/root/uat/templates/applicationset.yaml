@@ -34,7 +34,7 @@ spec:
                   appName: vizor-foundation
                   wave: "-2"
                   chartPath: helm/vizor-foundation
-                  appEnvValuesFile: ""
+                  appEnvValuesFile: ../vizor/values-env/uat/foundation.yaml
                   layerValuesFile: values.yaml
                   extraValueFile: values.yaml
                 - order: 3
@@ -48,7 +48,7 @@ spec:
                   appName: vizor-identity
                   wave: "0"
                   chartPath: helm/vizor-identity
-                  appEnvValuesFile: ""
+                  appEnvValuesFile: ../vizor/values-env/uat/identity.yaml
                   layerValuesFile: values.yaml
                   extraValueFile: values.yaml
                 - order: 5
@@ -62,14 +62,14 @@ spec:
                   appName: vizor-apps
                   wave: "2"
                   chartPath: helm/vizor-apps
-                  appEnvValuesFile: ""
+                  appEnvValuesFile: ../vizor/values-env/uat/apps.yaml
                   layerValuesFile: values.yaml
                   extraValueFile: values.yaml
                 - order: 7
                   appName: vizor-traffic-autoscale
                   wave: "3"
                   chartPath: helm/vizor-traffic
-                  appEnvValuesFile: ""
+                  appEnvValuesFile: ../vizor/values-env/uat/traffic-autoscale.yaml
                   layerValuesFile: values.yaml
                   extraValueFile: values.yaml
   template:

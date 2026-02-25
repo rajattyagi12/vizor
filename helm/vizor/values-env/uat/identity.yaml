@@ -1,0 +1,5 @@
+# UAT overrides for identity layer.
+# Keycloak and realm secrets from vizor-secrets; set hostname and pin image tag.
+keycloak:
+  startMode: "start"
+  # hostname: set via ingress or templatePatch from root values

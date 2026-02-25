@@ -1,0 +1,6 @@
+# UAT overrides for foundation layer.
+# No local PVCs or local-path provisioner in UAT; use cluster storage if needed.
+persistence:
+  enabled: false
+local-path-provisioner:
+  enabled: false
