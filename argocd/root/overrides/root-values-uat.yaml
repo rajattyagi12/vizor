@@ -1,23 +1,36 @@
-# Preprod environment values (converted from Helm parameters).
-# Use with the appropriate chart(s) or as an overlay; some keys apply to vizor-secrets, vizor-data-init, vizor-identity, etc.
+# Root app values override bundle for UAT
 
-global:
-  namespace: vizor-uat
+argocdNamespace: argocd
+project: vizor-uat
 
-secretValues: |
+applicationSet:
+  name: vizor-apps-uat
+
+mailhog:
+  enabled: false
+
+env:
+  name: uat
+  repoURL: git@gitlab.com:nbt-projects/vizor/deploy.git
+  targetRevision: uat
+  destinationNamespace: vizor-uat
+  baseValuesFile: values.yaml
   image:
-    registry: registry.vizor-registry.svc.k8s.vizor.local:5000
-
+    # Project images only (vizor-*). Standard/vendor images remain chart defaults.
+    projectRegistry: registry.vizor-registry.svc.k8s.vizor.local:5000
   ingress:
-    host: vizorpreprod.roundtables.us
+    className: traefik
+    host: vizor-uat.k8s.vizor.local
 
+# Merged only into vizor-secrets child app via template value injection.
+secretValues: |
   sqlServer:
     enabled: false
-    database: BenchmarkV2
-    username: appuser
-    dbPassword: "5Wl9G#S&J{53"
+    database: "#CHANGEME"
+    username: "#CHANGEME"
+    dbPassword: "#CHANGEME"
     service:
-      name: 10.0.0.15
+      name: "#CHANGEME"
 
   sftpgo:
     enabled: false
@@ -30,13 +43,12 @@ secretValues: |
       username: ftpuser
       password: "P@55w0rd"
       rootPath: /upload
-    # When using app-of-apps, redisHost is derived from the Redis app (root env.redisServiceName:6379). Override here only if using this overlay standalone with a different Redis.
+    # redisHost defaults from root Redis app. Override only if needed.
     state:
       redisHost: vizor-redis-master:6379
     pubsub:
       redisHost: vizor-redis-master:6379
     secrets:
-      # SMTP: single source for Dapr and Keycloak (realm job reads from Secret)
       smtp-host: email-smtp.us-east-1.amazonaws.com
       smtp-port: "587"
       smtp-starttls: "true"
@@ -48,9 +60,8 @@ secretValues: |
       SsrsUsername: ssrsuser
       SsrsPassword: ssrspassword
 
-
   local-path-provisioner:
-    enabled: false
+      enabled: false
 
   keycloakRealmConfiguration:
     serverUrl: https://vizorpreprod.roundtables.us
@@ -70,4 +81,3 @@ secretValues: |
       clients:
         - {}
         - secret: M62N8ht+QgGwR7gO6bGliw3fVUA9DgZNk51JHIld4YA=
-  # SMTP: set only under daprComponents.secrets (vizor-secrets); Keycloak reads from Secret

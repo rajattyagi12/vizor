@@ -11,7 +11,8 @@ env:
   targetRevision: uat
   destinationNamespace: vizor
   baseValuesFile: values.yaml
-  envValuesFile: values-uat.yaml
+  image:
+    projectRegistry: registry.vizor-registry.svc.k8s.vizor.local:5000
   ingress:
     className: traefik
     host: vizor-uat.example.com

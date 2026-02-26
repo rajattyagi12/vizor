@@ -23,6 +23,7 @@ spec:
                   ingressHost: {{ .Values.env.ingress.host | quote }}
                   ingressCertName: {{ .Values.env.ingress.certName | quote }}
                   ingressCertIssuer: {{ .Values.env.ingress.certIssuer | quote }}
+                  projectRegistry: {{ .Values.env.image.projectRegistry | quote }}
           - list:
               elements:
                 - order: 2
@@ -111,6 +112,36 @@ spec:
               value: '{{ "{{ .redisHost }}" }}'
             - name: daprComponents.pubsub.redisHost
               value: '{{ "{{ .redisHost }}" }}'
+    {{ "{{- end }}" }}
+    {{ "{{- if eq .appName \"vizor-data-init\" }}" }}
+    spec:
+      source:
+        helm:
+          parameters:
+            - name: serviceAccount.name
+              value: '{{ "{{ .derivedServiceAccountName }}" }}'
+            - name: image.registry
+              value: '{{ "{{ .projectRegistry }}" }}'
+    {{ "{{- end }}" }}
+    {{ "{{- if eq .appName \"vizor-identity\" }}" }}
+    spec:
+      source:
+        helm:
+          parameters:
+            - name: serviceAccount.name
+              value: '{{ "{{ .derivedServiceAccountName }}" }}'
+            - name: image.registry
+              value: '{{ "{{ .projectRegistry }}" }}'
+    {{ "{{- end }}" }}
+    {{ "{{- if eq .appName \"vizor-apps\" }}" }}
+    spec:
+      source:
+        helm:
+          parameters:
+            - name: serviceAccount.name
+              value: '{{ "{{ .derivedServiceAccountName }}" }}'
+            - name: image.registry
+              value: '{{ "{{ .projectRegistry }}" }}'
     {{ "{{- end }}" }}
     {{ "{{- if eq .appName \"vizor-traffic-autoscale\" }}" }}
     spec:

@@ -11,6 +11,8 @@ env:
   targetRevision: codex/app-of-apps-inplace-convert
   destinationNamespace: vizor
   baseValuesFile: values.yaml
+  image:
+    projectRegistry: harbor.nbt.local
   ingress:
     className: traefik
     host: vizor-dev.example.com

@@ -1,0 +1,73 @@
+# Root app values override bundle for PROD
+
+argocdNamespace: argocd
+project: vizor-prod
+
+applicationSet:
+  name: vizor-apps-prod
+
+mailhog:
+  enabled: false
+
+env:
+  name: prod
+  repoURL: "#CHANGEME"
+  targetRevision: main
+  destinationNamespace: vizor-prod
+  baseValuesFile: values.yaml
+  image:
+    # Project images only (vizor-*). Standard/vendor images remain chart defaults.
+    projectRegistry: "#CHANGEME"
+  ingress:
+    className: traefik
+    host: "#CHANGEME"
+
+# Merged only into vizor-secrets child app via template value injection.
+secretValues: |
+  image:
+    registry: "#CHANGEME"
+
+  sqlServer:
+    enabled: false
+    database: "#CHANGEME"
+    username: "#CHANGEME"
+    dbPassword: "#CHANGEME"
+    service:
+      name: "#CHANGEME"
+
+  sftpgo:
+    enabled: false
+
+  daprComponents:
+    sftp:
+      address: "#CHANGEME"
+      username: "#CHANGEME"
+      password: "#CHANGEME"
+      rootPath: "/upload"
+    secrets:
+      smtp-host: "#CHANGEME"
+      smtp-port: "587"
+      smtp-starttls: "true"
+      smtp-auth: "true"
+      smtp-mail-display-name: "Vizor"
+      smtpusername: "#CHANGEME"
+      smtppassword: "#CHANGEME"
+      SsrsBaseUrl: "#CHANGEME"
+      SsrsUsername: "#CHANGEME"
+      SsrsPassword: "#CHANGEME"
+
+  keycloakRealmConfiguration:
+    serverUrl: "#CHANGEME"
+    clientPrivateSecret: "#CHANGEME"
+    adminUser:
+      password: "#CHANGEME"
+    keycloakEnv:
+      KC_DB_USERNAME: "#CHANGEME"
+      KC_DB_PASSWORD: "#CHANGEME"
+      KEYCLOAK_ADMIN: "#CHANGEME"
+      KEYCLOAK_ADMIN_PASSWORD: "#CHANGEME"
+      AUTH_DATABASE_NAME: "#CHANGEME"
+    realmJson:
+      clients:
+        - {}
+        - secret: "#CHANGEME"
