@@ -68,6 +68,34 @@ spec:
                   wave: "3"
                   chartPath: helm/vizor-traffic
                   appEnvValuesFile: ../vizor/values-env/dev/traffic-autoscale.yaml
+  strategy:
+    type: RollingSync
+    rollingSync:
+      steps:
+        - matchExpressions:
+            - key: vizor.com/app-order
+              operator: In
+              values: ["2"]
+        - matchExpressions:
+            - key: vizor.com/app-order
+              operator: In
+              values: ["3"]
+        - matchExpressions:
+            - key: vizor.com/app-order
+              operator: In
+              values: ["4"]
+        - matchExpressions:
+            - key: vizor.com/app-order
+              operator: In
+              values: ["5"]
+        - matchExpressions:
+            - key: vizor.com/app-order
+              operator: In
+              values: ["6"]
+        - matchExpressions:
+            - key: vizor.com/app-order
+              operator: In
+              values: ["7"]
   template:
     metadata:
       name: {{ "{{ printf \"vizor-%s-%v-%s\" .env .nameOrder .appShortName }}" | quote }}
@@ -91,9 +119,6 @@ spec:
           valueFiles:
             - {{ "{{ .baseValuesFile }}" | quote }}
             - {{ "{{ .appEnvValuesFile }}" | quote }}
-          parameters:
-            - name: serviceAccount.name
-              value: {{ "{{ .derivedServiceAccountName }}" | quote }}
       syncPolicy:
         automated:
           prune: true
@@ -132,6 +157,14 @@ spec:
               value: '{{ "{{ .derivedServiceAccountName }}" }}'
             - name: image.registry
               value: '{{ "{{ .projectRegistry }}" }}'
+    {{ "{{- end }}" }}
+    {{ "{{- if eq .appName \"vizor-platform-support\" }}" }}
+    spec:
+      source:
+        helm:
+          parameters:
+            - name: serviceAccount.name
+              value: '{{ "{{ .derivedServiceAccountName }}" }}'
     {{ "{{- end }}" }}
     {{ "{{- if eq .appName \"vizor-apps\" }}" }}
     spec:
