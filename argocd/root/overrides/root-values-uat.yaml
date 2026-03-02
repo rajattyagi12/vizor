@@ -17,13 +17,17 @@ env:
   baseValuesFile: values.yaml
   image:
     # Project images only (vizor-*). Standard/vendor images remain chart defaults.
-    projectRegistry: registry.vizor-registry.svc.k8s.vizor.local:5000
+    projectRegistry: registry.vizor-registry.svc.k8s.vizor:5000
   ingress:
     className: traefik
     host: vizor-uat.k8s.vizor.local
 
 # Merged only into vizor-secrets child app via template value injection.
+# Runtime credentials are managed by Kubespray via the vizor-secrets Secret.
 secretValues: |
+  image:
+    registry: "#CHANGEME"
+
   sqlServer:
     enabled: false
     database: "#CHANGEME"
@@ -39,9 +43,9 @@ secretValues: |
 
   daprComponents:
     sftp:
-      address: 10.0.1.110:22
-      username: ftpuser
-      password: "P@55w0rd"
+      address: "#CHANGEME"
+      username: "#CHANGEME"
+      password: "#CHANGEME"
       rootPath: /upload
     # redisHost defaults from root Redis app. Override only if needed.
     state:
@@ -49,35 +53,35 @@ secretValues: |
     pubsub:
       redisHost: vizor-redis-master:6379
     secrets:
-      smtp-host: email-smtp.us-east-1.amazonaws.com
+      smtp-host: "#CHANGEME"
       smtp-port: "587"
       smtp-starttls: "true"
       smtp-auth: "true"
-      smtp-mail-display-name: Vizor
-      smtpusername: AKIAVWE2WCVHKTCNHJEE
-      smtppassword: BIqlgWKuB3MhaFYTxaAXCeglcjLL7mzHYGR1G54OqHLM
-      SsrsBaseUrl: http://10.0.0.15/reports
-      SsrsUsername: ssrsuser
-      SsrsPassword: ssrspassword
+      smtp-mail-display-name: "Vizor"
+      smtpusername: "#CHANGEME"
+      smtppassword: "#CHANGEME"
+      SsrsBaseUrl: "#CHANGEME"
+      SsrsUsername: "#CHANGEME"
+      SsrsPassword: "#CHANGEME"
 
   local-path-provisioner:
-      enabled: false
+    enabled: false
 
   keycloakRealmConfiguration:
-    serverUrl: https://vizorpreprod.roundtables.us
-    clientPrivateSecret: ec6P80yhlvwpFFpQy+MXtSZebsmJVzvzyd31725W3zE=
+    serverUrl: "#CHANGEME"
+    clientPrivateSecret: "#CHANGEME"
     adminUser:
-      password: "'@1V,Z4P;X98mySoB'"
+      password: "#CHANGEME"
     keycloakEnv:
-      KC_DB_USERNAME: appuser
-      KC_DB_PASSWORD: "5Wl9G#S&J{53}"
-      KEYCLOAK_ADMIN: kcadmin
-      KEYCLOAK_ADMIN_PASSWORD: xumqyt-vegsY9-zuzsob
-      AUTH_DATABASE_NAME: BenchmarkV2_Auth
+      KC_DB_USERNAME: "#CHANGEME"
+      KC_DB_PASSWORD: "#CHANGEME"
+      KEYCLOAK_ADMIN: "#CHANGEME"
+      KEYCLOAK_ADMIN_PASSWORD: "#CHANGEME"
+      AUTH_DATABASE_NAME: "#CHANGEME"
     resources:
       requested_memory: 512Mi
       requested_cpu: 500m
     realmJson:
       clients:
         - {}
-        - secret: M62N8ht+QgGwR7gO6bGliw3fVUA9DgZNk51JHIld4YA=
+        - secret: "#CHANGEME"

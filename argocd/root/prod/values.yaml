@@ -20,5 +20,3 @@ env:
   ingress:
     className: traefik
     host: "#CHANGEME"
-    certName: "#CHANGEME"
-    certIssuer: "#CHANGEME"

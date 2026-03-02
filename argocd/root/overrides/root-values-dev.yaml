@@ -23,8 +23,6 @@ env:
   ingress:
     className: traefik
     host: ""
-    certName: ""
-    certIssuer: ""
 
 # Merged only into vizor-secrets child app via template value injection.
 secretValues: |

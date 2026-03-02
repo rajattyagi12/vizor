@@ -37,24 +37,11 @@ Set these through root app Helm values (file or ArgoCD Helm parameters):
 - `env.redisServiceName` — **Optional.** Service name of the Redis deployed by the root’s vizor-redis Application (default `vizor-redis-master`). The Dapr Redis host is **derived** from this: vizor-foundation receives `daprComponents.state.redisHost` and `daprComponents.pubsub.redisHost` as `<redisServiceName>:6379`, so it always matches the Redis app (same namespace).
 - `env.ingress.className`
 - `env.ingress.host`
-- `env.ingress.certName`
-- `env.ingress.certIssuer`
 - `env.extraValuesFile` — **Optional.** Path to a values file in the repo (e.g. `helm/vizor/values-env/preprod.yaml`) merged into all child apps after their normal value files.
 - `mailhog.enabled` — **Optional.** Set to `false` in root values to omit the standalone Mailhog Application (e.g. in UAT/prod). When unset, the Mailhog app is included.
-- `secretValues` — **Optional.** Raw YAML merged into the **vizor-secrets** Application’s Helm values. Use the root Application’s **HELM → VALUES** text area: paste a YAML block under this key and it will be applied only to vizor-secrets. Example:
+- `secretValues` — **Do not use for runtime credentials.** Runtime credentials are managed by Kubespray in the `vizor-secrets` Secret in the project namespace (`vizor-{env}`). Keep `secretValues` empty by default; use only for temporary non-sensitive testing overrides.
 
-  ```yaml
-  secretValues: |
-    daprComponents:
-      secrets:
-        smtp-host: email-smtp.example.com
-        smtp-port: "587"
-    sqlServer:
-      database: MyDb
-    # ... paste overrides for vizor-secrets chart only
-  ```
-
-This allows branch-based testing and secret overrides without changing repo files (for example `env.targetRevision=codex/<branch>`).
+This allows branch-based testing via non-secret inputs (for example `env.targetRevision=codex/<branch>`) without storing credentials in this repo.
 
 ServiceAccount naming is derived automatically for all child apps as:
 
@@ -131,4 +118,4 @@ Current mapping:
 ## Non-Secret Policy
 
 - Keep root/env config files non-secret.
-- Continue providing secrets via Helm parameter overrides or external secret mechanism.
+- Runtime credentials must come from Kubespray-managed `vizor-secrets`; do not commit or pass credentials via root Helm parameters/values.

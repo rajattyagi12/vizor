@@ -24,8 +24,6 @@ spec:
                   redisHost: {{ printf "%s:6379" (.Values.env.redisServiceName | default "vizor-redis-master") | quote }}
                   ingressClassName: {{ .Values.env.ingress.className | quote }}
                   ingressHost: {{ .Values.env.ingress.host | quote }}
-                  ingressCertName: {{ .Values.env.ingress.certName | quote }}
-                  ingressCertIssuer: {{ .Values.env.ingress.certIssuer | quote }}
                   projectRegistry: {{ .Values.env.image.projectRegistry | quote }}
           - list:
               elements:
@@ -188,10 +186,6 @@ spec:
               value: '{{ "{{ .ingressClassName }}" }}'
             - name: ingress.host
               value: '{{ "{{ .ingressHost }}" }}'
-            - name: ingress.certName
-              value: '{{ "{{ .ingressCertName }}" }}'
-            - name: ingress.certIssuer
-              value: '{{ "{{ .ingressCertIssuer }}" }}'
             - name: serviceAccount.name
               value: '{{ "{{ .derivedServiceAccountName }}" }}'
     {{ "{{- end }}" }}

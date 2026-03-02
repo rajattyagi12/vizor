@@ -16,5 +16,3 @@ env:
   ingress:
     className: traefik
     host: vizor-dev.example.com
-    certName: vizor-dev-tls
-    certIssuer: letsencrypt-dev
