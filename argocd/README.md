@@ -15,7 +15,7 @@ Each root chart renders **standalone Applications** (same level as the Applicati
 
 1. **vizor-{env}-0-redis** (`-3`) — Standalone. Redis (CloudPirates OSS, OCI); service `vizor-redis-master` for Dapr/SignalR.
 2. **vizor-{env}-2-mailhog** (`-2`) — **Optional.** Standalone Mailhog (SMTP capture + Web UI). Set `mailhog.enabled: false` in root values to omit (e.g. UAT/prod); default when unset is to include.
-3. **vizor-{env}-3-sftpgo** (wave `1`) — Standalone SFTPGo when used for that env. It expects the `vizor-secrets` Secret to exist in the destination namespace (managed by Kubespray). There is no root-level `sftpgo.enabled` toggle; the Application is always rendered when the template is present. Per-env omission could be added later if needed.
+3. **vizor-{env}-3-sftpgo** (wave `1`) — Standalone SFTPGo when used for that env. It expects the `vizor-secrets` Secret to exist in the destination namespace (managed by Kubespray). Rendered only when `sftpgo.enabled: true` in root values.
 4. **ApplicationSet** generates (names: vizor-{env}-{order}-{app}): **vizor-{env}-4-foundation** (`-2`), **vizor-{env}-5-data-init** (`-1`), **vizor-{env}-6-identity** (`0`), **vizor-{env}-7-platform-support** (`1`), **vizor-{env}-8-apps** (`2`), **vizor-{env}-9-traffic-autoscale** (`3`)
 
 Secret content (SQL, Keycloak, Dapr keys) is owned by Kubespray-managed `vizor-secrets` in the project namespace (`vizor-{env}`).
@@ -38,6 +38,7 @@ Set these through root app Helm values (file or ArgoCD Helm parameters):
 - `env.ingress.host`
 - `env.extraValuesFile` — **Optional.** Path to a values file in the repo (e.g. `helm/vizor/values-env/preprod.yaml`) merged into all child apps after their normal value files.
 - `mailhog.enabled` — **Optional.** Set to `false` in root values to omit the standalone Mailhog Application (e.g. in UAT/prod). When unset, the Mailhog app is included.
+- `sftpgo.enabled` — **Optional.** Set to `true` to render the standalone SFTPGo Application. Keep `false` in UAT/prod when using external SFTP.
 This allows branch-based testing via non-secret inputs (for example `env.targetRevision=codex/<branch>`) without storing credentials in this repo.
 
 ServiceAccount naming is derived automatically for all child apps as:

@@ -11,6 +11,9 @@ applicationSet:
 mailhog:
   enabled: true
 
+sftpgo:
+  enabled: true
+
 env:
   name: dev
   repoURL: git@git.nbt.local:vizor/deploy.git

@@ -40,8 +40,8 @@ persistence:
   size: 10Gi
   storageClass: local-path
 
-# Dapr component (sftpgo-binding) is created by vizor-secrets, not here.
-# When this chart is enabled (SFTPGo deployed), set daprComponents.sftp in values-env/*/secrets.yaml to address: vizor-sftpgo:2022, username: vizor so the binding uses this service.
+# Dapr component (sftpgo-binding) is created by vizor-foundation, not here.
+# Ensure Kubespray-managed vizor-secrets contains sftpAddress/sftpUsername/sftpPassword and points to this service when SFTPGo is enabled.
 
 scheduling:
   affinity: {}

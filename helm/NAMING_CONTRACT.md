@@ -16,6 +16,6 @@ All vizor-* charts use these **fixed names** for cross-referencing so resources 
 | API proxy (Caddy) | `api-proxy` | platform-support chart |
 | Redis service | `vizor-redis-master` | vizor-redis app (OCI chart, wave -3) |
 | Mailhog service | `mailhog` | vizor-mailhog app (standalone, wave -2); mailhog-ingress is in same chart |
-| SFTPGo service | `vizor-sftpgo` | vizor-sftpgo app (standalone, wave 1); Dapr component sftpgo-binding in same chart |
+| SFTPGo service | `vizor-sftpgo` | vizor-sftpgo app (standalone, wave 1); Dapr component sftpgo-binding in vizor-foundation |
 
 Each chart's `values.yaml` includes a `global` section with these names so templates reference `global.secretName`, `global.serviceAccountName`, etc., instead of `.Chart.Name` or `.Release.Name` for cross-chart resources.

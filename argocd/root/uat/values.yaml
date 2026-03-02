@@ -5,6 +5,9 @@ project: default
 mailhog:
   enabled: false
 
+sftpgo:
+  enabled: false
+
 applicationSet:
   name: vizor-apps-uat
 

@@ -9,6 +9,9 @@ applicationSet:
 mailhog:
   enabled: false
 
+sftpgo:
+  enabled: false
+
 env:
   name: prod
   repoURL: "#CHANGEME"

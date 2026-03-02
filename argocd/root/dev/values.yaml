@@ -1,6 +1,9 @@
 argocdNamespace: argocd
 project: default
 
+sftpgo:
+  enabled: true
+
 applicationSet:
   name: vizor-apps-dev
 

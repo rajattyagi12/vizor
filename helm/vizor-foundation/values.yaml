@@ -25,6 +25,14 @@ daprComponents:
     name: vizor-secretstore
     componentType: secretstores.kubernetes
     secretName: vizor-secrets
+  sftp:
+    name: sftpgo-binding
+    rootPath: "."
+    addressKey: sftpAddress
+    usernameKey: sftpUsername
+    passwordKey: sftpPassword
+    secretName: ""
+    insecureIgnoreHostKey: false
 
 persistence:
   enabled: false

@@ -1,6 +1,6 @@
 # Default values for vizor-secrets chart.
-# This chart creates the single Secret "vizor-secrets" used by Dapr, keycloak-db-job,
-# migrations-job, sftpgo-binding, and apps. Override via value files or Argo CD parameters.
+# This chart creates the single Secret "vizor-secrets" consumed by Dapr, keycloak-db-job,
+# migrations-job, and apps. Override via value files or Argo CD parameters.
 
 createSecret: true
 # Set true to skip fail-fast validation when required secret values are #CHANGEME (e.g. CI).

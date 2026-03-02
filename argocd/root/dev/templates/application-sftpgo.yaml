@@ -1,5 +1,6 @@
+{{- if .Values.sftpgo.enabled | default false }}
 # Standalone SFTPGo Application (wave 1). Depends on Kubespray-managed vizor-secrets (sftpPassword) and vizor-foundation (SA, Dapr).
-# Service vizor-sftpgo; Dapr component sftpgo-binding created by this chart.
+# Service vizor-sftpgo; Dapr component sftpgo-binding is created by vizor-foundation.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -29,3 +30,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+{{- end }}

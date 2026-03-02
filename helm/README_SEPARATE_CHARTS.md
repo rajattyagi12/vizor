@@ -11,7 +11,7 @@ Each vizor layer is now a **separate Helm chart** with **independent values**. T
 | vizor-data-init | `helm/vizor-data-init` | SQL Server deployment + service, migrations Job (`vizor-migrations`) |
 | vizor-identity | `helm/vizor-identity` | Keycloak (ConfigMap, Deployment, Service), mssql-init-job, keycloak-realm-job, keycloak-user-sync-job, rust-keycloak-api |
 | vizor-mailhog | `helm/vizor-mailhog` | Standalone Mailhog (Deployment + Service + Ingress); no dependencies; wave -2 (like Redis) |
-| vizor-sftpgo | `helm/vizor-sftpgo` | Standalone SFTPGo (Deployment, Service, PVC, config, Dapr sftpgo-binding); depends on vizor-secrets (sftpPassword); wave 1 |
+| vizor-sftpgo | `helm/vizor-sftpgo` | Standalone SFTPGo (Deployment, Service, PVC, config); depends on Kubespray-managed vizor-secrets for credentials; wave 1 |
 | vizor-platform-support | `helm/vizor-platform-support` | Caddy (api-proxy) only; Mailhog and SFTPGo are standalone apps |
 | vizor-apps | `helm/vizor-apps` | PreSync wait-for-migrations, frontend, core-service, engagement-service, interaction-service + Services |
 | vizor-traffic | `helm/vizor-traffic` | Ingress, HPA, optional observability (Loki, Grafana, Promtail) |

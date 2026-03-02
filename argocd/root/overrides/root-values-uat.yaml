@@ -9,6 +9,9 @@ applicationSet:
 mailhog:
   enabled: false
 
+sftpgo:
+  enabled: false
+
 env:
   name: uat
   repoURL: git@gitlab.com:nbt-projects/vizor/deploy.git
