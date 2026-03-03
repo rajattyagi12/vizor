@@ -39,9 +39,38 @@ spec:
                 sleep 3
               done
 
-              echo "Connected. Creating databases and setting isolation level..."
-              # Run CREATE and ALTER in one sqlcmd batch so no other connection holds the DB (ALTER can block otherwise).
-              /opt/mssql-tools/bin/sqlcmd -S "$SERVER" -U "$USER" -P "$PASSWORD" -Q "IF NOT EXISTS (SELECT name FROM sys.databases WHERE name='$AUTH_DATABASE_NAME') CREATE DATABASE $AUTH_DATABASE_NAME; ALTER DATABASE $AUTH_DATABASE_NAME SET READ_COMMITTED_SNAPSHOT ON;"
+              echo "Connected. Creating auth database if not exists..."
+              /opt/mssql-tools/bin/sqlcmd -S "$SERVER" -U "$USER" -P "$PASSWORD" \
+                -Q "IF NOT EXISTS (SELECT name FROM sys.databases WHERE name='$AUTH_DATABASE_NAME') CREATE DATABASE [$AUTH_DATABASE_NAME];"
+
+              echo "Checking RCSI status on $AUTH_DATABASE_NAME..."
+              RCSI=$(/opt/mssql-tools/bin/sqlcmd -S "$SERVER" -U "$USER" -P "$PASSWORD" \
+                -h -1 -W \
+                -Q "SET NOCOUNT ON; SELECT CASE WHEN is_read_committed_snapshot_on = 1 THEN 'RCSI_ON' ELSE 'RCSI_OFF' END FROM sys.databases WHERE name='$AUTH_DATABASE_NAME'" \
+                2>/dev/null)
+
+              if echo "$RCSI" | grep -q "RCSI_ON"; then
+                echo "RCSI already enabled on $AUTH_DATABASE_NAME. Skipping ALTER DATABASE."
+              else
+                echo "Checking ALTER DATABASE permission for connecting account..."
+                HAS_ALTER=$(/opt/mssql-tools/bin/sqlcmd -S "$SERVER" -U "$USER" -P "$PASSWORD" \
+                  -h -1 -W \
+                  -Q "SET NOCOUNT ON; SELECT CASE WHEN HAS_PERMS_BY_NAME('$AUTH_DATABASE_NAME', 'DATABASE', 'ALTER') = 1 THEN 'HAS_PERM' ELSE 'NO_PERM' END" \
+                  2>/dev/null)
+
+                if echo "$HAS_ALTER" | grep -q "NO_PERM"; then
+                  echo "Warning: Connecting SQL account lacks ALTER permission on $AUTH_DATABASE_NAME."
+                  echo "RCSI cannot be enabled. Skipping ALTER DATABASE."
+                  echo "To resolve: GRANT ALTER ON DATABASE::[$AUTH_DATABASE_NAME] TO [<connecting_user>]"
+                  echo "            then delete this Job so ArgoCD recreates it on next sync."
+                else
+                  echo "Enabling RCSI on $AUTH_DATABASE_NAME (WITH ROLLBACK IMMEDIATE)..."
+                  /opt/mssql-tools/bin/sqlcmd -S "$SERVER" -U "$USER" -P "$PASSWORD" \
+                    -Q "ALTER DATABASE [$AUTH_DATABASE_NAME] SET READ_COMMITTED_SNAPSHOT ON WITH ROLLBACK IMMEDIATE;"
+                  echo "RCSI enabled successfully."
+                fi
+              fi
+
               echo "Done."
           env:
             - name: connectionString
