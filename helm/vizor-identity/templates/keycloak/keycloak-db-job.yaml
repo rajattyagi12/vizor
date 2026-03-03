@@ -50,5 +50,8 @@ spec:
                   name: {{ .Values.global.secretName }}
                   key: connectionString
             - name: AUTH_DATABASE_NAME
-              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.AUTH_DATABASE_NAME }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: KeycloakDbName
 

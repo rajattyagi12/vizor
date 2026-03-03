@@ -154,31 +154,38 @@ spec:
               echo "User sync complete."
           env:
             - name: REALM_NAME
-              value: {{ .Values.keycloakRealmConfiguration.realmName | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: KeycloakRealmName
             - name: KEYCLOAK_ADMIN
-              value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KEYCLOAK_ADMIN | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: KeycloakAdminUsername
             - name: KEYCLOAK_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.global.secretName }}
                   key: KeycloakAdminPassword
-            #Use this for prod
-            # - name: DB_SERVER
-            #   value: {{ .Values.sqlServer.service.name | quote }}
-            # - name: DB_USER
-            #   value: {{ .Values.sqlServer.username | quote }}
-            # - name: DB_PASSWORD
-            #   value: {{ .Values.sqlServer.dbPassword | quote }}
-            # - name: DB_NAME
-            #   value: {{ .Values.sqlServer.database | quote }}
-            
-            #Use this for dev
             - name: DB_SERVER
-              value: {{ .Values.keycloakRealmConfiguration.userSyncDatabase.server | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: VizorAppSqlHost
             - name: DB_USER
-              value: {{ .Values.keycloakRealmConfiguration.userSyncDatabase.user | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: VizorAppSqlUsername
             - name: DB_PASSWORD
-              value: {{ .Values.keycloakRealmConfiguration.userSyncDatabase.password | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: VizorAppSqlPassword
             - name: DB_NAME
-              value: {{ .Values.keycloakRealmConfiguration.userSyncDatabase.name | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: VizorAppSqlDatabase
 {{- end }}

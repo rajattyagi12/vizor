@@ -44,7 +44,7 @@ spec:
             - -c
             - |
               echo "Waiting for MSSQL to become available..."
-              until /opt/mssql-tools/bin/sqlcmd -S "{{ .Values.sqlServer.service.name }},{{ .Values.sqlServer.service.port }}" \
+              until /opt/mssql-tools/bin/sqlcmd -S "$KEYCLOAK_DB_HOST,$KEYCLOAK_DB_PORT" \
                 -U "$KC_DB_USERNAME" -P "$KC_DB_PASSWORD" \
                 -Q "SELECT 1"; do
                 echo "Still waiting..."
@@ -52,21 +52,36 @@ spec:
               done
 
               echo "Connected. Ensuring DB exists..."
-              /opt/mssql-tools/bin/sqlcmd -S "{{ .Values.sqlServer.service.name }},{{ .Values.sqlServer.service.port }}" \
+              /opt/mssql-tools/bin/sqlcmd -S "$KEYCLOAK_DB_HOST,$KEYCLOAK_DB_PORT" \
                 -U "$KC_DB_USERNAME" -P "$KC_DB_PASSWORD" \
-                -Q "IF NOT EXISTS(SELECT name FROM sys.databases WHERE name='{{ .Values.keycloakRealmConfiguration.keycloakEnv.AUTH_DATABASE_NAME }}') CREATE DATABASE {{ .Values.keycloakRealmConfiguration.keycloakEnv.AUTH_DATABASE_NAME }};"
+                -Q "IF NOT EXISTS(SELECT name FROM sys.databases WHERE name='$KEYCLOAK_DB_NAME') CREATE DATABASE $KEYCLOAK_DB_NAME;"
               echo "DB Exists Creating Keycloak"
           env:
+            - name: KEYCLOAK_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: KeycloakDbHost
+            - name: KEYCLOAK_DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: KeycloakDbPort
+            - name: KEYCLOAK_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: KeycloakDbName
             - name: KC_DB_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.global.secretName }}
-                  key: SA_USERNAME
+                  key: KeycloakDbUsername
             - name: KC_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.global.secretName }}
-                  key: SA_PASSWORD
+                  key: KeycloakDbPassword
       containers:
         - name: keycloak
           image: {{ .Values.image.registry }}/{{ .Values.image.repo }}/vizor-themed-keycloak:{{ .Values.image.tag }}
@@ -97,18 +112,33 @@ spec:
               value: "0"
             - name: KC_DB
               value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_DB }}
+            - name: KEYCLOAK_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: KeycloakDbHost
+            - name: KEYCLOAK_DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: KeycloakDbPort
+            - name: KEYCLOAK_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: KeycloakDbName
             - name: KC_DB_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.global.secretName }}
-                  key: SA_USERNAME
+                  key: KeycloakDbUsername
             - name: KC_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.global.secretName }}
-                  key: SA_PASSWORD
+                  key: KeycloakDbPassword
             - name: KC_DB_URL
-              value: "jdbc:sqlserver://{{ .Values.sqlServer.service.name }}:{{ .Values.sqlServer.service.port }};databaseName={{ .Values.keycloakRealmConfiguration.keycloakEnv.AUTH_DATABASE_NAME }};encrypt=true;trustServerCertificate=true"
+              value: "jdbc:sqlserver://$(KEYCLOAK_DB_HOST):$(KEYCLOAK_DB_PORT);databaseName=$(KEYCLOAK_DB_NAME);encrypt=true;trustServerCertificate=true"
             - name: KC_HTTP_RELATIVE_PATH
               value: {{ .Values.keycloakRealmConfiguration.keycloakEnv.KC_HTTP_RELATIVE_PATH }}
             - name: KC_DB_POOL_MIN_SIZE

@@ -218,7 +218,7 @@ spec:
                 echo "Admin user not found in master realm!"
               fi
 
-              echo "Creating user ljacoby@roundtables.us ...Make the firstname dynamic"
+              echo "Creating user $ADMIN_USER_EMAIL ..."
               CREATE_OUTPUT=$(curl -s -X POST \
                 -H "Authorization: Bearer $TOKEN" \
                 -H "Content-Type: application/json" \
@@ -238,7 +238,7 @@ spec:
               #Get the created user's ID
               USER_ID=$(curl -s \
                 -H "Authorization: Bearer $TOKEN" \
-                http://keycloak:8080/auth/admin/realms/$REALM_NAME/users?username=ljacoby@roundtables.us | jq -r '.[0].id')
+                "http://keycloak:8080/auth/admin/realms/$REALM_NAME/users?username=$ADMIN_USER_EMAIL" | jq -r '.[0].id')
 
               #SET ADMIN-USER PASSWORD
               if [ -n "$USER_ID" ]; then
@@ -440,7 +440,10 @@ spec:
               echo "Realm, client, roles, user attribute, client scope, mapper, and authentication flows setup complete."
           env:
             - name: REALM_NAME
-              value: {{ .Values.keycloakRealmConfiguration.realmName | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: KeycloakRealmName
             - name: KEYCLOAK_ADMIN
               valueFrom:
                 secretKeyRef:
@@ -458,7 +461,10 @@ spec:
             - name: CLIENT_SCOPE
               value: {{ .Values.keycloakRealmConfiguration.clientScope | quote }}
             - name: ADMIN_EMAIL
-              value: {{ .Values.keycloakRealmConfiguration.adminEmail | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: KeycloakAdminEmail
             - name: FRONTEND_URL
               value: "{{ .Values.keycloakRealmConfiguration.serverUrl }}/auth"
             # SMTP: all from vizor-secrets Secret (single source: daprComponents.secrets in values-env/*/secrets.yaml)
@@ -498,7 +504,10 @@ spec:
                   name: {{ .Values.global.secretName }}
                   key: smtppassword
             - name: ADMIN_USER_EMAIL
-              value: {{ .Values.keycloakRealmConfiguration.adminUser.email | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: KeycloakAdminUserEmail
             - name: ADMIN_USER_FIRSTNAME
               value: {{ .Values.keycloakRealmConfiguration.adminUser.firstName | quote }}
             - name: ADMIN_USER_LASTNAME
