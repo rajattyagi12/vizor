@@ -1,3 +1,9 @@
 # Dev overrides for foundation layer.
 # Secret content (sqlServer, keycloakRealmConfiguration, daprComponents.secrets/sftp)
 # is now in values-env/dev/secrets.yaml and used only by the vizor-secrets app.
+
+daprComponents:
+  sftp:
+    # Dev uses in-cluster SFTPGo (vizor-sftpgo); skip SSH host-key verification.
+    # External SFTP in prod/UAT should use knownHostsFile or hostPublicKey instead.
+    insecureIgnoreHostKey: true
