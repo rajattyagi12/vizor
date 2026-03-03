@@ -25,6 +25,10 @@ spec:
                   ingressClassName: {{ .Values.env.ingress.className | quote }}
                   ingressHost: {{ .Values.env.ingress.host | quote }}
                   projectRegistry: {{ .Values.env.image.projectRegistry | quote }}
+                  gatewayName: {{ .Values.gateway.name | default "" | quote }}
+                  gatewayNamespace: {{ .Values.gateway.namespace | default "" | quote }}
+                  listenerHttp: {{ (index .Values.gateway.listeners "http") | default "web" | quote }}
+                  listenerHttps: {{ (index .Values.gateway.listeners "https") | default "websecure" | quote }}
           - list:
               elements:
                 - order: 2
@@ -166,6 +170,14 @@ spec:
           parameters:
             - name: serviceAccount.name
               value: '{{ "{{ .derivedServiceAccountName }}" }}'
+            - name: gateway.name
+              value: '{{ "{{ .gatewayName }}" }}'
+            - name: gateway.namespace
+              value: '{{ "{{ .gatewayNamespace }}" }}'
+            - name: gateway.listeners.http
+              value: '{{ "{{ .listenerHttp }}" }}'
+            - name: gateway.listeners.https
+              value: '{{ "{{ .listenerHttps }}" }}'
     {{ "{{- end }}" }}
     {{ "{{- if eq .appName \"vizor-apps\" }}" }}
     spec:
@@ -186,6 +198,14 @@ spec:
               value: '{{ "{{ .ingressClassName }}" }}'
             - name: ingress.host
               value: '{{ "{{ .ingressHost }}" }}'
+            - name: gateway.name
+              value: '{{ "{{ .gatewayName }}" }}'
+            - name: gateway.namespace
+              value: '{{ "{{ .gatewayNamespace }}" }}'
+            - name: gateway.listeners.http
+              value: '{{ "{{ .listenerHttp }}" }}'
+            - name: gateway.listeners.https
+              value: '{{ "{{ .listenerHttps }}" }}'
             - name: serviceAccount.name
               value: '{{ "{{ .derivedServiceAccountName }}" }}'
     {{ "{{- end }}" }}

@@ -20,3 +20,11 @@ ingress:
   host: ""  # Default: mailhog-<Release.Namespace>.k8s.nbt.local; set to override (e.g. mailhog.k8s.nbt.local)
   className: ""  # e.g. traefik
   annotations: {}
+
+# Gateway API: when set, chart renders HTTPRoute instead of Ingress.
+gateway:
+  name: ""
+  namespace: ""
+  listeners:
+    http: "web"
+    https: "websecure"

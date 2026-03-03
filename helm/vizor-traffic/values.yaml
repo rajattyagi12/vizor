@@ -14,6 +14,14 @@ ingress:
   certName: ""
   certIssuer: ""
 
+# Gateway API: when set (e.g. from ArgoCD ApplicationSet), chart renders HTTPRoute instead of Ingress.
+gateway:
+  name: ""
+  namespace: ""
+  listeners:
+    http: "web"
+    https: "websecure"
+
 # Mailhog ingress is in vizor-mailhog chart (same app as Mailhog Deployment/Service).
 
 autoscaling:

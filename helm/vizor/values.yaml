@@ -44,6 +44,14 @@ ingress:
 
   certIssuer:
 
+# Gateway API: when set, chart renders HTTPRoute instead of Ingress for app and mailhog.
+gateway:
+  name: ""
+  namespace: ""
+  listeners:
+    http: "web"
+    https: "websecure"
+
 resources:
   limits:
     # -- CPU limit for the containers, leave alone mostly

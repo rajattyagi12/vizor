@@ -11,6 +11,15 @@ sftpgo:
 applicationSet:
   name: vizor-apps-uat
 
+# Gateway API: set by kubespray argocd_vizor or leave empty for Ingress fallback.
+gateway:
+  name: ""
+  namespace: ""
+  listeners:
+    http: "web"
+    https: "websecure"
+    grpc: ""
+
 env:
   name: uat
   repoURL: "#CHANGEME"
