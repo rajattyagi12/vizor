@@ -4,3 +4,10 @@ persistence:
   enabled: false
 local-path-provisioner:
   enabled: false
+
+daprComponents:
+  sftp:
+    # UAT uses external SFTP; validate server identity via public key.
+    # Set argocd_vizor_sftp_host_public_key in kubespray cluster vars:
+    #   ssh-keyscan -p 22 -t rsa win2k5.nbt.local 2>/dev/null | awk '{print $2, $3}'
+    hostPublicKeyKey: "sftpHostPublicKey"

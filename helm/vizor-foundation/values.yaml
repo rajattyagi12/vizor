@@ -33,6 +33,7 @@ daprComponents:
     passwordKey: sftpPassword
     secretName: ""
     insecureIgnoreHostKey: false
+    hostPublicKeyKey: ""   # Secret key holding SSH host public key (prod/UAT external SFTP)
 
 persistence:
   enabled: false
