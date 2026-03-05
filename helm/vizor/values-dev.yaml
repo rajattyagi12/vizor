@@ -132,9 +132,6 @@ sqlServer:
 local-path-provisioner:
   enabled: true           # Local storage provisioner for dev
 
-observability:
-  enabled: false          # Observability off by default in dev
-
 daprComponents:
   secrets:
     smtpusername: "AKIAVWE2WCVHKTCNHJEE"

@@ -2,5 +2,3 @@
 # Ingress host/cert come from root values (templatePatch). Enable observability if desired.
 mailhog:
   enabled: false
-observability:
-  enabled: false

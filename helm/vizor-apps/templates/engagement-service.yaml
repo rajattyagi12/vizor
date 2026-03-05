@@ -22,6 +22,7 @@ spec:
         dapr.io/enabled: "true"
         dapr.io/app-id: "engagement-service"
         dapr.io/app-port: "8080"
+        dapr.io/config: "tracing"
         dapr.io/log-as-json: "true"
         dapr.io/max-body-size: "4Mi"
         # Dapr sidecar resource requests/limits required for HPA CPU metrics

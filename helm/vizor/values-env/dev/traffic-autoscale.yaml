@@ -2,5 +2,3 @@
 # mailhog-ingress is rendered here when mailhog.enabled is true (mailhog Deployment/Service are in vizor-platform-support).
 mailhog:
   enabled: true
-observability:
-  enabled: false

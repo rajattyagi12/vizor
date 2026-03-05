@@ -15,9 +15,6 @@ sqlServer:
 local-path-provisioner:
   enabled: false
 
-observability:
-  enabled: false
-
 keycloak:
   startMode: "start"
   hostname: "#CHANGEME"

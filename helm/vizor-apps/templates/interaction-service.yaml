@@ -22,6 +22,7 @@ spec:
         dapr.io/enabled: "true"
         dapr.io/app-id: "interaction-service"
         dapr.io/app-port: "8080"
+        dapr.io/config: "tracing"
         dapr.io/log-as-json: "true"
         # Enable HTTP proxying so Dapr forwards requests directly to the app
         dapr.io/sidecar-listen-addresses: "0.0.0.0"

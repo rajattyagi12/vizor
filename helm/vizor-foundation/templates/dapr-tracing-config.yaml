@@ -1,0 +1,19 @@
+---
+# Dapr Configuration CR: instructs Dapr sidecars in THIS namespace to send OTLP traces to Jaeger.
+# Namespace-scoped: a pod in vizor-dev only resolves the CR named "tracing" if it exists in vizor-dev.
+# vizor-foundation is deployed per-environment (dev/uat/prod), so this CR is created in the right namespace automatically.
+#
+# The collector ExternalName service (collector.observability.svc.cluster.local:4317) is created
+# by the kubespray jaeger role and forwards to Jaeger's OTLP gRPC collector port.
+apiVersion: dapr.io/v1alpha1
+kind: Configuration
+metadata:
+  name: tracing
+  namespace: {{ .Release.Namespace }}
+spec:
+  tracing:
+    samplingRate: "1"     # 100% sampling — capture all spans
+    otel:
+      endpointAddress: "collector.observability.svc.cluster.local:4317"
+      protocol: grpc
+      isSecure: false

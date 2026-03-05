@@ -38,7 +38,7 @@ spec:
           image: caddy:latest
           env:
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: http://jaeger-inmemory-instance-collector.observability.svc.k8s.nbt:4317
+              value: {{ .Values.tracing.otlpEndpoint | default "http://collector.observability.svc.cluster.local:4317" | quote }}
             - name: OTEL_EXPORTER_OTLP_INSECURE
               value: "true"
           ports:
