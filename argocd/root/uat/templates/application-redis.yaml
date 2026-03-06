@@ -26,6 +26,12 @@ spec:
           value: standalone
         - name: persistence.enabled
           value: "false"
+        - name: metrics.enabled
+          value: "true"
+        - name: metrics.serviceMonitor.enabled
+          value: "false"
+        - name: metrics.extraArgs.check-keys
+          value: "*"
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.env.destinationNamespace | quote }}
