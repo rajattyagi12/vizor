@@ -33,3 +33,4 @@ env:
     className: traefik
     host: "#CHANGEME"
     publicHost: ""
+    publicScheme: ""

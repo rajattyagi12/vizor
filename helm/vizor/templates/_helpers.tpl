@@ -2,12 +2,17 @@
 {{/*
 Compute public-facing base URL from ingress values.
 Uses publicHost (external) when set, falls back to host (internal).
-Scheme is https when certName is non-empty, otherwise http.
+Scheme precedence: ingress.publicScheme (http/https) > certName-derived > http.
 */}}
 {{- define "vizor.publicUrl" -}}
 {{- $host := coalesce .Values.ingress.publicHost .Values.ingress.host -}}
+{{- $host = regexReplaceAll "^https?://" $host "" -}}
 {{- if $host -}}
+  {{- $configuredScheme := lower (default "" .Values.ingress.publicScheme) -}}
   {{- $scheme := ternary "https" "http" (not (empty .Values.ingress.certName)) -}}
+  {{- if or (eq $configuredScheme "http") (eq $configuredScheme "https") -}}
+    {{- $scheme = $configuredScheme -}}
+  {{- end -}}
   {{- printf "%s://%s" $scheme $host -}}
 {{- end -}}
 {{- end -}}

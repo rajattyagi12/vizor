@@ -30,3 +30,4 @@ env:
     className: traefik
     host: ""
     publicHost: ""
+    publicScheme: ""

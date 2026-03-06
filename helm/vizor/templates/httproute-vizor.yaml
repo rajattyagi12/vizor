@@ -16,13 +16,14 @@ spec:
     - name: {{ .Values.gateway.name }}
       namespace: {{ .Values.gateway.namespace }}
       sectionName: {{ .Values.gateway.listeners.https | default "websecure" }}
-  {{- if or .Values.ingress.host .Values.ingress.publicHost }}
+  {{- $publicHost := regexReplaceAll "^https?://" .Values.ingress.publicHost "" }}
+  {{- if or .Values.ingress.host $publicHost }}
   hostnames:
     {{- if .Values.ingress.host }}
     - "{{ .Values.ingress.host }}"
     {{- end }}
-    {{- if .Values.ingress.publicHost }}
-    - "{{ .Values.ingress.publicHost }}"
+    {{- if $publicHost }}
+    - "{{ $publicHost }}"
     {{- end }}
   {{- end }}
   rules:

@@ -25,6 +25,7 @@ spec:
                   ingressClassName: {{ .Values.env.ingress.className | quote }}
                   ingressHost: {{ .Values.env.ingress.host | quote }}
                   ingressPublicHost: {{ .Values.env.ingress.publicHost | default "" | quote }}
+                  ingressPublicScheme: {{ .Values.env.ingress.publicScheme | default "" | quote }}
                   projectRegistry: {{ .Values.env.image.projectRegistry | quote }}
                   gatewayName: {{ .Values.gateway.name | default "" | quote }}
                   gatewayNamespace: {{ .Values.gateway.namespace | default "" | quote }}
@@ -167,6 +168,8 @@ spec:
               value: '{{ "{{ .ingressHost }}" }}'
             - name: ingress.publicHost
               value: '{{ "{{ .ingressPublicHost }}" }}'
+            - name: ingress.publicScheme
+              value: '{{ "{{ .ingressPublicScheme }}" }}'
     {{ "{{- end }}" }}
     {{ "{{- if eq .appName \"vizor-platform-support\" }}" }}
     spec:

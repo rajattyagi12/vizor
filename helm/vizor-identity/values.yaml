@@ -34,7 +34,8 @@ keycloak:
 ingress:
   host: ""        # internal hostname; injected by ApplicationSet from argocd_vizor_ingress_host
   publicHost: ""  # optional external/public hostname; injected from argocd_vizor_public_host
-  certName: ""    # non-empty → https scheme in publicUrl helper
+  publicScheme: "" # optional explicit scheme (http/https); when empty publicUrl helper uses certName fallback
+  certName: ""     # non-empty → https scheme in publicUrl helper (fallback when publicScheme empty)
 
 keycloakRealmConfiguration:
   realmName: "vizor"
