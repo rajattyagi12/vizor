@@ -29,3 +29,4 @@ env:
   ingress:
     className: traefik
     host: ""
+    publicHost: ""

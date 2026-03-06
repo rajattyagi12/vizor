@@ -53,7 +53,6 @@ secretValues: |
     enabled: false
 
   keycloakRealmConfiguration:
-    serverUrl: https://vizorpreprod.roundtables.us
     clientPrivateSecret: ec6P80yhlvwpFFpQy+MXtSZebsmJVzvzyd31725W3zE=
     adminUser:
       password: "'@1V,Z4P;X98mySoB'"

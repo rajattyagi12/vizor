@@ -24,6 +24,7 @@ spec:
                   redisHost: {{ printf "%s:6379" (.Values.env.redisServiceName | default "vizor-redis-master") | quote }}
                   ingressClassName: {{ .Values.env.ingress.className | quote }}
                   ingressHost: {{ .Values.env.ingress.host | quote }}
+                  ingressPublicHost: {{ .Values.env.ingress.publicHost | default "" | quote }}
                   projectRegistry: {{ .Values.env.image.projectRegistry | quote }}
                   gatewayName: {{ .Values.gateway.name | default "" | quote }}
                   gatewayNamespace: {{ .Values.gateway.namespace | default "" | quote }}
@@ -162,6 +163,10 @@ spec:
               value: '{{ "{{ .derivedServiceAccountName }}" }}'
             - name: image.registry
               value: '{{ "{{ .projectRegistry }}" }}'
+            - name: ingress.host
+              value: '{{ "{{ .ingressHost }}" }}'
+            - name: ingress.publicHost
+              value: '{{ "{{ .ingressPublicHost }}" }}'
     {{ "{{- end }}" }}
     {{ "{{- if eq .appName \"vizor-platform-support\" }}" }}
     spec:
@@ -198,6 +203,8 @@ spec:
               value: '{{ "{{ .ingressClassName }}" }}'
             - name: ingress.host
               value: '{{ "{{ .ingressHost }}" }}'
+            - name: ingress.publicHost
+              value: '{{ "{{ .ingressPublicHost }}" }}'
             - name: gateway.name
               value: '{{ "{{ .gatewayName }}" }}'
             - name: gateway.namespace

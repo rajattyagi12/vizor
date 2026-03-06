@@ -14,16 +14,6 @@ keycloakRealmConfiguration:
     password: "YourStrongPassw0rd"
   realmJson:
     clients:
-      - clientId: vizor-client
-        name: Vizor Client
-        rootUrl: "{{ .Values.keycloakRealmConfiguration.serverUrl }}"
-        publicClient: true
-        directAccessGrantsEnabled: true
-        redirectUris:
-          - "{{ .Values.keycloakRealmConfiguration.serverUrl }}/*"
-        attributes:
-          post.logout.redirect.uris: "{{ .Values.keycloakRealmConfiguration.serverUrl }}/*"
-        enabled: true
       - clientId: vizor-client-private
         name: Vizor Client Private
         secret: "ADD-YOUR-SECRET"

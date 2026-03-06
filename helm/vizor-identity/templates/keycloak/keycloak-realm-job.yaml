@@ -149,34 +149,6 @@ spec:
                 }" \
                 http://keycloak:8080/auth/admin/realms/$REALM_NAME/clients/$CLIENT_UUID/default-client-scopes/$CLIENT_SCOPE_ID || echo "Scope may already be assigned"
 
-              echo "Checking if private client: $CLIENT_PRIVATE_ID already exists"
-              # Check if client already exists
-              EXISTING_CLIENT=$(curl -s \
-                -H "Authorization: Bearer $TOKEN" \
-                -H "Content-Type: application/json" \
-                "http://keycloak:8080/auth/admin/realms/$REALM_NAME/clients?clientId=$CLIENT_PRIVATE_ID" | jq '.[0]')
-
-              if [ "$EXISTING_CLIENT" != "null" ]; then
-                echo "Client $CLIENT_PRIVATE_ID already exists - doing nothing"
-              else
-                echo "Creating new client $CLIENT_PRIVATE_ID..."
-                curl -s -X POST \
-                  -H "Authorization: Bearer $TOKEN" \
-                  -H "Content-Type: application/json" \
-                  -d "{
-                    \"clientId\": \"$CLIENT_PRIVATE_ID\",
-                    \"name\": \"$CLIENT_PRIVATE_NAME\",
-                    \"secret\": \"$CLIENT_PRIVATE_SECRET\",
-                    \"publicClient\": false,
-                    \"standardFlowEnabled\": true,
-                    \"directAccessGrantsEnabled\": false,
-                    \"enabled\": true
-                  }" \
-                  "http://keycloak:8080/auth/admin/realms/$REALM_NAME/clients"
-
-                echo "Client $CLIENT_PRIVATE_ID created successfully"
-              fi
-
               # echo "Configuring SMTP settings for realm..."
               curl -s -X PUT \
                 -H "Authorization: Bearer $TOKEN" \
@@ -300,21 +272,6 @@ spec:
                   echo "execute-actions-email HTTP status: $SEND_STATUS"
                 fi
               fi
-
-              ## Update frontend URL for this realm
-              echo "Setting frontend URL for realm $REALM_NAME..."
-              curl -s -X PUT \
-                -H "Authorization: Bearer $TOKEN" \
-                -H "Content-Type: application/json" \
-                -d "{
-                  \"realm\": \"$REALM_NAME\",
-                  \"attributes\": {
-                    \"frontendUrl\": \"$FRONTEND_URL\"
-                  }
-                }" \
-                http://keycloak:8080/auth/admin/realms/$REALM_NAME || echo "Failed to set frontend URL"
-
-
 
               #REMOVE DEFAULT ROLES
               echo "Removing default roles from admin user..."
@@ -465,8 +422,6 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.global.secretName }}
                   key: KeycloakAdminEmail
-            - name: FRONTEND_URL
-              value: "{{ .Values.keycloakRealmConfiguration.serverUrl }}/auth"
             # SMTP: all from vizor-secrets Secret (single source: daprComponents.secrets in values-env/*/secrets.yaml)
             - name: SMTP_HOST
               valueFrom:
@@ -519,12 +474,3 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.global.secretName }}
                   key: KeycloakAdminUserPassword
-            - name: CLIENT_PRIVATE_ID
-              value: {{ .Values.keycloakRealmConfiguration.clientPrivateId | quote }}
-            - name: CLIENT_PRIVATE_NAME
-              value: {{ .Values.keycloakRealmConfiguration.clientPrivateId | quote }}
-            - name: CLIENT_PRIVATE_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.global.secretName }}
-                  key: VizorClientPrivateSecret

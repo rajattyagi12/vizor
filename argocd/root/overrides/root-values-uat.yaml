@@ -24,3 +24,4 @@ env:
   ingress:
     className: traefik
     host: vizor-uat.k8s.vizor.local
+    publicHost: ""

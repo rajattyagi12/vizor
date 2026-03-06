@@ -31,6 +31,11 @@ keycloak:
   proxyHeaders: "xforwarded"
   managementPort: 9000
 
+ingress:
+  host: ""        # internal hostname; injected by ApplicationSet from argocd_vizor_ingress_host
+  publicHost: ""  # optional external/public hostname; injected from argocd_vizor_public_host
+  certName: ""    # non-empty → https scheme in publicUrl helper
+
 keycloakRealmConfiguration:
   realmName: "vizor"
   clientId: "vizor-client"
@@ -39,7 +44,6 @@ keycloakRealmConfiguration:
   roleName: "Superuser"
   clientScope: "User-Client-ID"
   adminEmail: "#CHANGEME"
-  serverUrl: "http://127.0.0.1:8080"
   vizorEntityId: "urn:vizor:saml"
   keycloakApiBaseUrl: "http://vizor-keycloak-api-service:4567/"
   keycloakServiceUrl: "http://keycloak:8080/auth"
@@ -106,13 +110,8 @@ keycloakRealmConfiguration:
     clients:
       - clientId: vizor-client
         name: Vizor Client
-        rootUrl: "http://127.0.0.1:8080"
         publicClient: true
         directAccessGrantsEnabled: true
-        redirectUris:
-          - "http://127.0.0.1:8080/*"
-        attributes:
-          post.logout.redirect.uris: "http://127.0.0.1:8080/*"
         enabled: true
       - clientId: vizor-client-private
         name: Vizor Client Private

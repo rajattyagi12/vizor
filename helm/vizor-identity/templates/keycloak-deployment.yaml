@@ -9,10 +9,14 @@ data:
     {{- $cfg := .Values.keycloakRealmConfiguration }}
     {{- $realm := deepCopy $cfg.realmJson }}
     
-    {{- $client := index $realm.clients 0 }}  # Access the first client in the list
-    {{- $_ := set $client "rootUrl" $cfg.serverUrl }}
-    {{- $_ := set $client "redirectUris" (list (printf "%s/*" $cfg.serverUrl)) }}
-    {{- $_ := set $client "attributes" (dict "post.logout.redirect.uris" (printf "%s/*" $cfg.serverUrl)) }}
+    {{- $publicUrl := include "vizor-identity.publicUrl" . }}
+    {{- $client := index $realm.clients 0 }}
+    {{- $_ := set $client "rootUrl" $publicUrl }}
+    {{- $_ := set $client "redirectUris" (list (printf "%s/*" $publicUrl)) }}
+    {{- $_ := set $client "attributes" (dict "post.logout.redirect.uris" (printf "%s/*" $publicUrl)) }}
+    {{- $privateClient := index $realm.clients 1 }}
+    {{- $_ := set $privateClient "secret" $cfg.clientPrivateSecret }}
+    {{- $_ := set $realm "attributes" (dict "frontendUrl" (printf "%s/auth" $publicUrl)) }}
 
     {{ $realm | toJson | nindent 4 }}
 

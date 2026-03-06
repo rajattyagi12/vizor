@@ -24,3 +24,4 @@ env:
   ingress:
     className: traefik
     host: "#CHANGEME"
+    publicHost: ""

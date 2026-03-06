@@ -16,11 +16,23 @@ spec:
     - name: {{ .Values.gateway.name }}
       namespace: {{ .Values.gateway.namespace }}
       sectionName: {{ .Values.gateway.listeners.https | default "websecure" }}
-  {{- if .Values.ingress.host }}
+  {{- if or .Values.ingress.host .Values.ingress.publicHost }}
   hostnames:
+    {{- if .Values.ingress.host }}
     - "{{ .Values.ingress.host }}"
+    {{- end }}
+    {{- if .Values.ingress.publicHost }}
+    - "{{ .Values.ingress.publicHost }}"
+    {{- end }}
   {{- end }}
   rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /auth
+      backendRefs:
+        - name: keycloak
+          port: 8080
     - matches:
         - path:
             type: PathPrefix

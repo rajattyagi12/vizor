@@ -39,7 +39,7 @@ ingress:
   className: traefik
   # -- Ingress host DNS name
   host: # -- Set this to enable TLS, leave unset to run in insecure mode
-
+  publicHost: ""  # optional external/public hostname; when set, used as Keycloak frontendUrl base and added to HTTPRoute hostnames
   certName: # -- Cert manager issuer, leave unset to run in insecure mode
 
   certIssuer:
@@ -231,7 +231,6 @@ keycloakRealmConfiguration:
   clientScope: "User-Client-ID"
   #any smtp related email is the admin email
   adminEmail: "#CHANGEME"
-  serverUrl: "http://127.0.0.1:8080"
   vizorEntityId: "urn:vizor:saml"
   keycloakApiBaseUrl: "http://vizor-keycloak-api-service:4567/"
   keycloakServiceUrl: "http://keycloak:8080/auth"
@@ -306,13 +305,8 @@ keycloakRealmConfiguration:
     clients:
       - clientId: vizor-client
         name: Vizor Client
-        rootUrl: "{{ .Values.keycloakRealmConfiguration.serverUrl }}"
         publicClient: true
         directAccessGrantsEnabled: true
-        redirectUris:
-          - "{{ .Values.keycloakRealmConfiguration.serverUrl }}/*"
-        attributes:
-          post.logout.redirect.uris: "{{ .Values.keycloakRealmConfiguration.serverUrl }}/*"
         enabled: true
       - clientId: vizor-client-private
         name: Vizor Client Private
