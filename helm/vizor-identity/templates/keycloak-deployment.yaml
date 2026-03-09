@@ -8,7 +8,7 @@ data:
   vizor-realm.json: |
     {{- $cfg := .Values.keycloakRealmConfiguration }}
     {{- $realm := deepCopy $cfg.realmJson }}
-    
+
     {{- $publicUrl := include "vizor-identity.publicUrl" . }}
     {{- $client := index $realm.clients 0 }}
     {{- $_ := set $client "rootUrl" $publicUrl }}
@@ -38,6 +38,11 @@ spec:
     metadata:
       labels:
         app: keycloak
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "9000"
+      prometheus.io/path: "/auth/metrics"
+
     spec:
       serviceAccountName: {{ include "vizor-identity.serviceAccountName" . }}
       initContainers:
@@ -153,6 +158,11 @@ spec:
               value: "true"
             - name: KC_METRICS_ENABLED
               value: "true"
+            - name: KC_CACHE_METRICS_HISTOGRAMS_ENABLED
+              value: "true"
+            - name: KC_HTTP_METRICS_HISTOGRAMS_ENABLED
+              value: "true"
+
           ports:
             - name: http
               containerPort: 8080
