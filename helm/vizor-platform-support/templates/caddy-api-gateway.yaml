@@ -23,7 +23,14 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "2019"
         prometheus.io/path: "/metrics"
+        # Enable Dapr metrics
+        dapr.io/enable-metrics: "true"
+        dapr.io/metrics-port: "9090"
+
     spec:
+      metrics:
+        enabled: true
+        recordErrorCodes: true
       serviceAccountName: {{ include "vizor-platform-support.serviceAccountName" . }}
       {{- with .Values.scheduling.affinity }}
       affinity:
