@@ -13,6 +13,9 @@ data:
     }
 
     :80 {
+      tracing {
+        span api-proxy
+      }
       log {
         level DEBUG
         output stdout

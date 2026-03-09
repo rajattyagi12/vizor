@@ -23,6 +23,7 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "2019"
         prometheus.io/path: "/metrics"
+        dapr.io/config: "tracing"
         # Enable Dapr metrics
         dapr.io/enable-metrics: "true"
         dapr.io/metrics-port: "9090"
