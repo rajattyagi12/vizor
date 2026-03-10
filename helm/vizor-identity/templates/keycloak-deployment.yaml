@@ -38,10 +38,10 @@ spec:
     metadata:
       labels:
         app: keycloak
-    annotations:
-      prometheus.io/scrape: "true"
-      prometheus.io/port: "9000"
-      prometheus.io/path: "/auth/metrics"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9000"
+        prometheus.io/path: "/auth/metrics"
 
     spec:
       serviceAccountName: {{ include "vizor-identity.serviceAccountName" . }}
