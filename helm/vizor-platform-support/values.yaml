@@ -30,4 +30,4 @@ scheduling:
 # collector.observability.svc.cluster.local is the ExternalName service created by the kubespray jaeger role
 tracing:
   enabled: true
-  otlpEndpoint: "http://collector.observability.svc.cluster.local:4317"
+  otlpEndpoint: "http://collector.observability.svc.cluster.local:4318"
