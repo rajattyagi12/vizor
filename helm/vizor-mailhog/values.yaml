@@ -16,10 +16,8 @@ service:
 replicas: 1  # Single replica; no HA needed for dev/test SMTP capture
 
 ingress:
-  enabled: true
-  host: ""  # Default: mailhog-<Release.Namespace>.k8s.nbt.local; set to override (e.g. mailhog.k8s.nbt.local)
-  className: ""  # e.g. traefik
-  annotations: {}
+  host: ""      # Fully-qualified hostname; when empty, falls back to mailhog-<namespace>.<domain>
+  domain: ""    # Cluster ingress domain (e.g. k8s.nbt.local); injected by kubespray via argocd_vizor_ingress_domain
 
 # Gateway API: when set, chart renders HTTPRoute instead of Ingress.
 gateway:

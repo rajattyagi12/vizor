@@ -17,7 +17,7 @@ spec:
       namespace: {{ .Values.gateway.namespace }}
       sectionName: {{ .Values.gateway.listeners.https | default "websecure" }}
   hostnames:
-    - {{ .Values.ingress.host | default (printf "mailhog-%s.k8s.nbt.local" .Release.Namespace) | quote }}
+    - {{ .Values.ingress.host | default (printf "mailhog-%s.%s" .Release.Namespace (.Values.ingress.domain | default "cluster.local")) | quote }}
   rules:
     - matches:
         - path:
