@@ -41,7 +41,7 @@ keycloakRealmConfiguration:
   realmName: "vizor"
   clientId: "vizor-client"
   clientPrivateId: "vizor-client-private"
-  clientPrivateSecret: "#CHANGEME"
+  # clientPrivateSecret: sourced at render time from vizor-secrets K8s Secret (key: VizorClientPrivateSecret)
   roleName: "Superuser"
   clientScope: "User-Client-ID"
   adminEmail: "#CHANGEME"
@@ -116,7 +116,7 @@ keycloakRealmConfiguration:
         enabled: true
       - clientId: vizor-client-private
         name: Vizor Client Private
-        secret: "#CHANGEME"
+        # secret: injected by keycloak-deployment.yaml template via lookup from vizor-secrets (VizorClientPrivateSecret)
         publicClient: false
         standardFlowEnabled: true
         directAccessGrantsEnabled: false

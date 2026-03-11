@@ -15,7 +15,12 @@ data:
     {{- $_ := set $client "redirectUris" (list (printf "%s/*" $publicUrl)) }}
     {{- $_ := set $client "attributes" (dict "post.logout.redirect.uris" (printf "%s/*" $publicUrl)) }}
     {{- $privateClient := index $realm.clients 1 }}
-    {{- $_ := set $privateClient "secret" $cfg.clientPrivateSecret }}
+    {{- $secretObj := lookup "v1" "Secret" .Release.Namespace .Values.global.secretName }}
+    {{- $resolvedClientSecret := "" }}
+    {{- if $secretObj }}
+    {{- $resolvedClientSecret = index $secretObj.data "VizorClientPrivateSecret" | b64dec }}
+    {{- end }}
+    {{- $_ := set $privateClient "secret" $resolvedClientSecret }}
     {{- $_ := set $realm "attributes" (dict "frontendUrl" (printf "%s/auth" $publicUrl)) }}
 
     {{ $realm | toJson | nindent 4 }}
