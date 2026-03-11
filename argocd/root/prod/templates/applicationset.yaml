@@ -27,6 +27,7 @@ spec:
                   ingressPublicHost: {{ .Values.env.ingress.publicHost | default "" | quote }}
                   ingressPublicScheme: {{ .Values.env.ingress.publicScheme | default "" | quote }}
                   projectRegistry: {{ .Values.env.image.projectRegistry | quote }}
+                  userSyncEnabled: {{ .Values.env.userSyncEnabled | default "false" | quote }}
                   gatewayName: {{ .Values.gateway.name | default "" | quote }}
                   gatewayNamespace: {{ .Values.gateway.namespace | default "" | quote }}
                   listenerHttp: {{ (index .Values.gateway.listeners "http") | default "web" | quote }}
@@ -170,6 +171,8 @@ spec:
               value: '{{ "{{ .ingressPublicHost }}" }}'
             - name: ingress.publicScheme
               value: '{{ "{{ .ingressPublicScheme }}" }}'
+            - name: keycloakRealmConfiguration.userSyncJob.enabled
+              value: '{{ "{{ .userSyncEnabled }}" }}'
     {{ "{{- end }}" }}
     {{ "{{- if eq .appName \"vizor-platform-support\" }}" }}
     spec:
