@@ -24,6 +24,19 @@ spec:
       valueFiles:
         - values.yaml
         - ../vizor/values-env/uat/mailhog.yaml
+      parameters:
+        - name: enabled
+          value: {{ .Values.mailhog.enabled | default true | toString | quote }}
+        - name: ingress.className
+          value: {{ .Values.env.ingress.className | quote }}
+        - name: gateway.name
+          value: {{ .Values.gateway.name | default "" | quote }}
+        - name: gateway.namespace
+          value: {{ .Values.gateway.namespace | default "" | quote }}
+        - name: gateway.listeners.http
+          value: {{ index .Values.gateway.listeners "http" | default "web" | quote }}
+        - name: gateway.listeners.https
+          value: {{ index .Values.gateway.listeners "https" | default "websecure" | quote }}
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.env.destinationNamespace | quote }}
