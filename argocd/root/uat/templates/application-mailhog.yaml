@@ -27,8 +27,8 @@ spec:
       parameters:
         - name: enabled
           value: {{ .Values.mailhog.enabled | default true | toString | quote }}
-        - name: ingress.domain
-          value: {{ .Values.mailhog.ingressDomain | default "" | quote }}
+        - name: ingress.host
+          value: {{ printf "mailhog-%s" .Values.env.ingress.host | quote }}
         - name: gateway.name
           value: {{ .Values.gateway.name | default "" | quote }}
         - name: gateway.namespace
