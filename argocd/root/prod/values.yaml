@@ -29,6 +29,9 @@ env:
   image:
     projectRegistry: "#CHANGEME"
   # redisServiceName: optional; default vizor-redis-master. Dapr redisHost derived from Redis app.
+  clusterDomain: ""  # injected by kubespray argocd_vizor role from dns_domain (e.g. k8s.nbt)
+  otel:
+    enabled: "false"  # injected by kubespray; true when argocd_vizor_otel_enabled resolves to true
   ingress:
     className: traefik
     host: "#CHANGEME"

@@ -25,6 +25,8 @@ spec:
                   ingressPublicScheme: {{ .Values.env.ingress.publicScheme | default "" | quote }}
                   projectRegistry: {{ .Values.env.image.projectRegistry | quote }}
                   userSyncEnabled: {{ .Values.env.userSyncEnabled | default "false" | quote }}
+                  clusterDomain: {{ .Values.env.clusterDomain | default "cluster.local" | quote }}
+                  otelEnabled: {{ .Values.env.otel.enabled | default "false" | quote }}
                   gatewayName: {{ .Values.gateway.name | default "" | quote }}
                   gatewayNamespace: {{ .Values.gateway.namespace | default "" | quote }}
                   listenerHttp: {{ (index .Values.gateway.listeners "http") | default "web" | quote }}
@@ -170,6 +172,10 @@ spec:
               value: '{{ "{{ .ingressPublicScheme }}" }}'
             - name: keycloakRealmConfiguration.userSyncJob.enabled
               value: '{{ "{{ .userSyncEnabled }}" }}'
+            - name: clusterDomain
+              value: '{{ "{{ .clusterDomain }}" }}'
+            - name: otel.enabled
+              value: '{{ "{{ .otelEnabled }}" }}'
     {{ "{{- end }}" }}
     {{ "{{- if eq .appName \"vizor-platform-support\" }}" }}
     spec:

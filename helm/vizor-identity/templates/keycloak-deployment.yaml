@@ -167,6 +167,16 @@ spec:
               value: "true"
             - name: KC_HTTP_METRICS_HISTOGRAMS_ENABLED
               value: "true"
+            {{- if .Values.otel.enabled }}
+            - name: KC_TRACING_ENABLED
+              value: "true"
+            - name: KC_TRACING_ENDPOINT
+              value: {{ printf "http://collector.observability.svc.%s:4317" .Values.clusterDomain | quote }}
+            - name: KC_TRACING_SERVICE_NAME
+              value: {{ .Values.otel.serviceName | quote }}
+            - name: KC_TRACING_SAMPLER_RATIO
+              value: {{ .Values.otel.samplerRatio | quote }}
+            {{- end }}
 
           ports:
             - name: http

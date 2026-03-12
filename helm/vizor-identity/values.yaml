@@ -23,6 +23,13 @@ image:
   tag: latest
   pullSecrets: []
 
+clusterDomain: "cluster.local"  # overridden by ApplicationSet from kubespray dns_domain (e.g. k8s.nbt)
+
+otel:
+  enabled: false
+  serviceName: "keycloak"
+  samplerRatio: "1.0"
+
 keycloak:
   startMode: "start"
   hostname: ""
