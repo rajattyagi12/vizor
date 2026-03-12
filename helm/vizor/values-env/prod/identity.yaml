@@ -3,3 +3,7 @@
 keycloak:
   startMode: "start"
   # hostname: set via ingress or templatePatch from root values
+  eventMetrics:
+    enabled: true
+    userTags: "realm,clientId"
+    userEvents: "login,logout,refresh_token,code_to_token"

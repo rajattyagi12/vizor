@@ -37,6 +37,11 @@ keycloak:
   httpEnabled: true
   proxyHeaders: "xforwarded"
   managementPort: 9000
+  eventMetrics:
+    enabled: false
+    # Optional: comma-separated tags and events (keep small to avoid cardinality)
+    userTags: ""
+    userEvents: ""
 
 ingress:
   host: ""        # internal hostname; injected by ApplicationSet from argocd_vizor_ingress_host
