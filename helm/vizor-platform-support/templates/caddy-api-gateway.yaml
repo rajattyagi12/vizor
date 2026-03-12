@@ -49,6 +49,8 @@ spec:
               value: {{ .Values.tracing.otlpEndpoint | default "http://collector.observability.svc.cluster.local:4317" | quote }}
             - name: OTEL_EXPORTER_OTLP_INSECURE
               value: "true"
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: "service.name=api-proxy,service.namespace={{ .Release.Namespace }}"
           ports:
             - containerPort: 80
             - containerPort: 2019
