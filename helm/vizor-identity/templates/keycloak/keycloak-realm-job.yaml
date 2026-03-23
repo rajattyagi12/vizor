@@ -421,7 +421,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.global.secretName }}
-                  key: KeycloakAdminEmail
+                  key: smtp-mail-default-sender-email
             # SMTP: all from vizor-secrets Secret (single source: daprComponents.secrets in values-env/*/secrets.yaml)
             - name: SMTP_HOST
               valueFrom:
