@@ -54,6 +54,8 @@ spec:
               value: {{ .Values.runtime.enableSpamAssassin | toString | quote }}
             - name: MP_SMTP_AUTH_ACCEPT_ANY
               value: {{ .Values.runtime.smtpAuthAcceptAny | toString | quote }}
+            - name: MP_SMTP_AUTH_ALLOW_INSECURE
+              value: {{ .Values.runtime.smtpAuthAllowInsecure | toString | quote }}
           ports:
             - name: smtp
               containerPort: {{ .Values.service.smtpPort }}

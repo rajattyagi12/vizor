@@ -32,6 +32,7 @@ runtime:
   allowInternalHttpRequests: true
   enableSpamAssassin: true
   smtpAuthAcceptAny: true
+  smtpAuthAllowInsecure: true
 
 # Gateway API: when set, chart renders HTTPRoute instead of Ingress.
 gateway:
