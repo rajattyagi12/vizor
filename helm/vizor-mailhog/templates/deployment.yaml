@@ -31,8 +31,8 @@ spec:
             - sh
             - -c
             - >
-              printf '%s:%s\n' "$(cat /secret/{{ .Values.auth.usernameKey }})" "$(cat /secret/{{ .Values.auth.passwordKey }})" > /auth/{{ .Values.auth.fileName }} &&
-              chmod 0600 /auth/{{ .Values.auth.fileName }}
+              printf '%s:%s\n' "$(cat /secret/{{ .Values.auth.usernameKey }})" "$(cat /secret/{{ .Values.auth.passwordKey }})" > {{ .Values.auth.mountPath }}/{{ .Values.auth.fileName }} &&
+              chmod 0600 {{ .Values.auth.mountPath }}/{{ .Values.auth.fileName }}
           volumeMounts:
             - name: mailpit-auth-secret
               mountPath: /secret
