@@ -17,13 +17,50 @@ spec:
       labels:
         app: mailhog
     spec:
+      volumes:
+        - name: mailpit-auth
+          emptyDir: {}
+        - name: mailpit-auth-secret
+          secret:
+            secretName: {{ .Values.auth.secretName }}
+      initContainers:
+        - name: mailpit-auth-setup
+          image: busybox:1.36
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - >
+              printf '%s:%s\n' "$(cat /secret/{{ .Values.auth.usernameKey }})" "$(cat /secret/{{ .Values.auth.passwordKey }})" > /auth/{{ .Values.auth.fileName }} &&
+              chmod 0600 /auth/{{ .Values.auth.fileName }}
+          volumeMounts:
+            - name: mailpit-auth-secret
+              mountPath: /secret
+              readOnly: true
+            - name: mailpit-auth
+              mountPath: {{ .Values.auth.mountPath }}
       containers:
         - name: mailhog
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: MP_UI_AUTH_FILE
+              value: {{ .Values.auth.uiAuthFile | quote }}
+            - name: MP_ENABLE_CHAOS
+              value: {{ .Values.runtime.enableChaos | toString | quote }}
+            - name: MP_ALLOW_INTERNAL_HTTP_REQUESTS
+              value: {{ .Values.runtime.allowInternalHttpRequests | toString | quote }}
+            - name: MP_ENABLE_SPAMASSASSIN
+              value: {{ .Values.runtime.enableSpamAssassin | toString | quote }}
+            - name: MP_SMTP_AUTH_ACCEPT_ANY
+              value: {{ .Values.runtime.smtpAuthAcceptAny | toString | quote }}
           ports:
             - name: smtp
               containerPort: {{ .Values.service.smtpPort }}
             - name: web
               containerPort: {{ .Values.service.webPort }}
+          volumeMounts:
+            - name: mailpit-auth
+              mountPath: {{ .Values.auth.mountPath }}
+              readOnly: true
 {{- end }}
