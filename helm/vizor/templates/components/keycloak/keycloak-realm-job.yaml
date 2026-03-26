@@ -357,41 +357,127 @@ spec:
                 echo "Role $ROLE_NAME not found in realm!"
               fi
 
-              echo "Updating authentication flow to require OTP..."
+              echo "Creating custom browser flow and requiring OTP..."
 
-              # Get all executions under the Browser flow
-              echo "Getting browser flow executions..."
-              EXECUTIONS=$(curl -s \
+              CUSTOM_BROWSER="custom-browser"
+              echo "Duplicating built-in browser flow to $CUSTOM_BROWSER..."
+              COPY_RESP=$(curl -s -w "\n%{http_code}" -X POST \
                 -H "Authorization: Bearer $TOKEN" \
-                http://keycloak:8080/auth/admin/realms/$REALM_NAME/authentication/flows/browser/executions)
+                -H "Content-Type: application/json" \
+                -d '{"newName": "'"$CUSTOM_BROWSER"'"}' \
+                http://keycloak:8080/auth/admin/realms/$REALM_NAME/authentication/flows/browser/copy)
+              
+              HTTP_CODE=$(echo "$COPY_RESP" | tail -n1)
+              if [ "$HTTP_CODE" = "409" ]; then
+                echo "Flow $CUSTOM_BROWSER already exists. Proceeding with existing flow..."
+              fi
+
+              echo "Getting executions for $CUSTOM_BROWSER flow..."
+              NEW_EXECUTIONS=$(curl -s \
+                -H "Authorization: Bearer $TOKEN" \
+                http://keycloak:8080/auth/admin/realms/$REALM_NAME/authentication/flows/$CUSTOM_BROWSER/executions)
 
               # Check if we got valid JSON response
-              if ! echo "$EXECUTIONS" | jq -e . > /dev/null 2>&1; then
-                echo "ERROR: Invalid JSON response from browser flow API:"
-                echo "Response: $EXECUTIONS"
+              if ! echo "$NEW_EXECUTIONS" | jq -e . > /dev/null 2>&1; then
+                echo "ERROR: Invalid JSON response from newly copied flow API:"
+                echo "Response: $NEW_EXECUTIONS"
                 exit 1
               fi
 
-              # Debug: print all execution names
-              echo "Available executions in Browser flow:"
-              echo "$EXECUTIONS" | jq -r '.[].displayName'
+              # Find the Conditional 2FA step (it might be renamed if sub-flows take parent prefix, so check contains)
+              CONDITIONAL_2FA_ID=$(echo "$NEW_EXECUTIONS" | jq -r '.[] | select(.displayName | contains("Conditional 2FA")) | .id' | head -n 1)
 
-              # Find the OTP Form execution
-              OTP_ID=$(echo "$EXECUTIONS" | jq -r '.[] | select(.displayName=="OTP Form") | .id')
-
-              if [ -z "$OTP_ID" ] || [ "$OTP_ID" = "null" ]; then
-                echo "Failed to find OTP Form execution"
-                echo "Available display names:"
-                echo "$EXECUTIONS" | jq -r '.[].displayName // "unnamed"'
-                exit 1
+              if [ -n "$CONDITIONAL_2FA_ID" ] && [ "$CONDITIONAL_2FA_ID" != "null" ]; then
+                echo "Removing Conditional 2FA step (ID: $CONDITIONAL_2FA_ID)..."
+                curl -s -X DELETE \
+                  -H "Authorization: Bearer $TOKEN" \
+                  http://keycloak:8080/auth/admin/realms/$REALM_NAME/authentication/executions/$CONDITIONAL_2FA_ID
+                
+                echo "Fetching updated executions after deletion..."
+                NEW_EXECUTIONS=$(curl -s \
+                  -H "Authorization: Bearer $TOKEN" \
+                  http://keycloak:8080/auth/admin/realms/$REALM_NAME/authentication/flows/$CUSTOM_BROWSER/executions)
+              else
+                echo "Conditional 2FA step not found, may already be removed."
               fi
 
-              echo "Setting OTP Form requirement to REQUIRED..."
+              # Keycloak names the forms sub-flow as "<parent-alias> forms" when copying.
+              # Derive the alias directly to avoid jq string-interpolation escaping issues in YAML.
+              FORMS_FLOW_ALIAS="${CUSTOM_BROWSER} forms"
+              FORMS_FLOW_ALIAS_ENCODED=$(echo "$FORMS_FLOW_ALIAS" | sed 's/ /%20/g')
+
+              echo "Forms subflow alias: $FORMS_FLOW_ALIAS"
+
+              # Check if OTP Form already exists inside the forms subflow
+              NEW_OTP_ID=$(echo "$NEW_EXECUTIONS" | jq -r '.[] | select(.displayName=="OTP Form") | .id' | head -n 1)
+              OTP_JUST_ADDED=0
+
+              if [ -z "$NEW_OTP_ID" ] || [ "$NEW_OTP_ID" = "null" ]; then
+                echo "Adding OTP Form to subflow: $FORMS_FLOW_ALIAS..."
+                curl -s -X POST \
+                  -H "Authorization: Bearer $TOKEN" \
+                  -H "Content-Type: application/json" \
+                  -d '{"provider": "auth-otp-form"}' \
+                  "http://keycloak:8080/auth/admin/realms/$REALM_NAME/authentication/flows/$FORMS_FLOW_ALIAS_ENCODED/executions/execution" \
+                  || echo "OTP Form may already be added"
+
+                OTP_JUST_ADDED=1
+
+                echo "Fetching updated executions to get new OTP Form ID..."
+                NEW_EXECUTIONS=$(curl -s \
+                  -H "Authorization: Bearer $TOKEN" \
+                  "http://keycloak:8080/auth/admin/realms/$REALM_NAME/authentication/flows/$CUSTOM_BROWSER/executions")
+
+                NEW_OTP_ID=$(echo "$NEW_EXECUTIONS" | jq -r '.[] | select(.displayName=="OTP Form") | .id' | head -n 1)
+              else
+                echo "OTP Form already present, skipping addition."
+              fi
+
+              if [ -n "$NEW_OTP_ID" ] && [ "$NEW_OTP_ID" != "null" ]; then
+                echo "Setting OTP Form (ID: $NEW_OTP_ID) requirement to REQUIRED..."
+                curl -s -X PUT \
+                  -H "Authorization: Bearer $TOKEN" \
+                  -H "Content-Type: application/json" \
+                  -d '{"id":"'"$NEW_OTP_ID"'","requirement":"REQUIRED"}' \
+                  "http://keycloak:8080/auth/admin/realms/$REALM_NAME/authentication/flows/$CUSTOM_BROWSER/executions"
+
+                # Ensure OTP Form comes AFTER Username Password Form inside the sub-flow.
+                if [ "$OTP_JUST_ADDED" = "1" ]; then
+                  # Keycloak always inserts new executions at the TOP of the sub-flow.
+                  # We know the order is wrong — call lower-priority unconditionally.
+                  echo "OTP Form was just added (inserted at top) — calling lower-priority to place it after Username Password Form..."
+                  curl -s -X POST \
+                    -H "Authorization: Bearer $TOKEN" \
+                    "http://keycloak:8080/auth/admin/realms/$REALM_NAME/authentication/executions/$NEW_OTP_ID/lower-priority"
+                  echo "Order corrected: Username Password Form → OTP Form"
+                else
+                  # Re-run / idempotent path: check actual index before adjusting.
+                  OTP_INDEX=$(echo "$NEW_EXECUTIONS" | jq -r '.[] | select(.displayName=="OTP Form") | .index')
+                  PWD_INDEX=$(echo "$NEW_EXECUTIONS" | jq -r '.[] | select(.displayName=="Username Password Form") | .index')
+                  echo "Order check (re-run) — OTP Form index: $OTP_INDEX, Username Password Form index: $PWD_INDEX"
+                  if [ -n "$OTP_INDEX" ] && [ -n "$PWD_INDEX" ] && [ "$OTP_INDEX" -lt "$PWD_INDEX" ] 2>/dev/null; then
+                    echo "OTP Form is above Username Password Form — calling lower-priority to fix order..."
+                    curl -s -X POST \
+                      -H "Authorization: Bearer $TOKEN" \
+                      "http://keycloak:8080/auth/admin/realms/$REALM_NAME/authentication/executions/$NEW_OTP_ID/lower-priority"
+                    echo "Order corrected: Username Password Form → OTP Form"
+                  else
+                    echo "Order is already correct — no adjustment needed."
+                  fi
+                fi
+              else
+                echo "ERROR: Could not find OTP Form execution to set as REQUIRED"
+              fi
+
+              echo "Binding $CUSTOM_BROWSER as the default browser flow for the realm..."
               curl -s -X PUT \
                 -H "Authorization: Bearer $TOKEN" \
                 -H "Content-Type: application/json" \
-                -d '{"id":"'"$OTP_ID"'","requirement":"REQUIRED"}' \
-                http://keycloak:8080/auth/admin/realms/$REALM_NAME/authentication/flows/browser/executions
+                -d "{
+                  \"realm\": \"$REALM_NAME\",
+                  \"browserFlow\": \"$CUSTOM_BROWSER\"
+                }" \
+                http://keycloak:8080/auth/admin/realms/$REALM_NAME || echo "Failed to update realm browser flow"
 
               echo "Browser flow updated successfully."
 
