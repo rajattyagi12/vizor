@@ -210,6 +210,15 @@ serviceAccount:
   # -- Annotations to add to the ServiceAccount (e.g. for IRSA)
   annotations: {}
 
+saml:
+    jwtkey: "qwertyluopasdfghjklzxcvbnm123456"
+    refreshkey: "zxcvbnmlkjhgfdsa0987654321poiuytrewq"
+    relaycryptokey: "5AP7b+24XoOKe568t/knpdUVjd8q6rh/+qEiSmBO3HA="
+    issuer: "https://vizor.k8s.nbt.local/auth/realms/vizor"
+    audience: "vizor"
+powerBI:
+    baseurl: "https://powerbitest.roundtables.us"
+
 keycloakRealmConfiguration:
   realmName: "vizor"
   clientId: "vizor-client"
