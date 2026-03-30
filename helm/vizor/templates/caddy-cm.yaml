@@ -49,8 +49,70 @@ data:
           header_up Host {host}
           header_up X-Forwarded-For {remote}
           header_up X-Real-IP {remote}
+          header_up X-Forwarded-Proto https
+          header_up X-Forwarded-Scheme https
         }
         tracing {
+        }
+      }
+
+      handle /ReportServer* {
+        reverse_proxy core-service:8080 {
+          header_up Host {host}
+          header_up X-Forwarded-For {remote}
+          header_up X-Real-IP {remote}
+          header_up X-Forwarded-Proto https
+          header_up X-Forwarded-Scheme https
+        }
+      }
+
+      handle /api/reports/Reserved.ReportViewerWebControl.axd* {
+        reverse_proxy core-service:8080 {
+          header_up Host {host}
+          header_up X-Forwarded-For {remote}
+          header_up X-Real-IP {remote}
+          header_up X-Forwarded-Proto https
+          header_up X-Forwarded-Scheme https
+        }
+      }
+
+      handle /api/reports/ScriptResource.axd* {
+        reverse_proxy core-service:8080 {
+          header_up Host {host}
+          header_up X-Forwarded-For {remote}
+          header_up X-Real-IP {remote}
+          header_up X-Forwarded-Proto https
+          header_up X-Forwarded-Scheme https
+        }
+      }
+
+      handle /api/reports/WebResource.axd* {
+        reverse_proxy core-service:8080 {
+          header_up Host {host}
+          header_up X-Forwarded-For {remote}
+          header_up X-Real-IP {remote}
+          header_up X-Forwarded-Proto https
+          header_up X-Forwarded-Scheme https
+        }
+      }
+
+      handle /api/reports/Reserved.ReportServer* {
+        reverse_proxy core-service:8080 {
+          header_up Host {host}
+          header_up X-Forwarded-For {remote}
+          header_up X-Real-IP {remote}
+          header_up X-Forwarded-Proto https
+          header_up X-Forwarded-Scheme https
+        }
+      }
+
+      handle /api/reports/ReportViewer.aspx* {
+        reverse_proxy core-service:8080 {
+          header_up Host {host}
+          header_up X-Forwarded-For {remote}
+          header_up X-Real-IP {remote}
+          header_up X-Forwarded-Proto https
+          header_up X-Forwarded-Scheme https
         }
       }
 
