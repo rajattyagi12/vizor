@@ -39,10 +39,10 @@ auth:
 ingress:
   # -- Ingress class for ingress-rules
   className: traefik
-  # -- Ingress host DNS name
-  host: # -- Set this to enable TLS, leave unset to run in insecure mode
-  publicHost: ""  # optional external/public hostname; when set, used as Keycloak frontendUrl base and added to HTTPRoute hostnames
-  publicScheme: "" # optional explicit scheme (http/https) for public URL generation; empty keeps certName-derived behavior
+  host: vizor.local
+  publicHost: vizor.local
+  publicScheme: http Ingress host DNS name
+
   certName: # -- Cert manager issuer, leave unset to run in insecure mode
 
   certIssuer:
