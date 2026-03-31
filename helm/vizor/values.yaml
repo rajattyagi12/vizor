@@ -7,14 +7,15 @@ global:
   namespace: vizor # Your target namespace. All resources will be deployed here.
 
 image:
-  # -- Image registry, only change if you're using your own images
-  registry: harbor.nbt.local
+  # -- Use ECR registry
+  registry: 391166432590.dkr.ecr.us-east-1.amazonaws.com
   # -- Image repository
   repo: vizor
   # -- Image tag
   tag: latest
-  # -- Any pullsecrets that are required to pull the image
-  pullSecrets: []
+  # -- Pull secret to authenticate to ECR
+  pullSecrets:
+    - ecr-secret
 
 auth:
   # -- Set this to enable authentication, leave unset to run in demo mode
