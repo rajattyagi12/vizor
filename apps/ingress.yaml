@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ingress
+  namespace: argocd
+
+spec:
+  project: default
+
+  sources:
+    # Helm chart
+    - repoURL: https://kubernetes.github.io/ingress-nginx
+      chart: ingress-nginx
+      targetRevision: "*"
+      helm:
+        valueFiles:
+          - $values/config/ingress-values.yaml
+
+    # Your repo for values
+    - repoURL: https://github.com/rajattyagi12/vizor.git
+      targetRevision: codex/app-of-apps-inplace-convert
+      ref: values
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: vizor
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
