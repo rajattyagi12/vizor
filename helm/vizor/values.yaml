@@ -25,7 +25,7 @@ image:
   repo: vizor
   tag: latest
   pullSecrets:
-    - ecr-secret
+    - name: ecr-secret
   
 # ✅ ADD THIS BLOCK
 ecr:
