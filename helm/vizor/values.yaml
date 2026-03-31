@@ -2,19 +2,15 @@
 # Default values for vizor Helm chart
 #
 
-# -- Global settings for the Helm chart
 global:
-  namespace: vizor
-  image:
-    # ECR registry
-    registry: 391166432590.dkr.ecr.us-east-1.amazonaws.com
-    # Base repository for all Vizor images
-    repo: vizor
-    # Default tag for all images
-    tag: latest
-    # Pull secret to authenticate to ECR
-    pullSecrets:
-      - ecr-secret
+  namespace: vizor   # keep only this
+
+image:
+  registry: 391166432590.dkr.ecr.us-east-1.amazonaws.com
+  repo: vizor
+  tag: latest
+  pullSecrets:
+    - ecr-secret
 
 auth:
   # -- Set this to enable authentication, leave unset to run in demo mode
