@@ -232,7 +232,18 @@ keycloakRealmConfiguration:
   clientPrivateId: "vizor-client-private"
   clientPrivateSecret: "#CHANGEME"  # Replace with actual secret, also change in the client config below
   roleName: "Superuser"
-  clientScope: "User-Client-ID"
+  clientScope: "User-Client-ID" 
+  # ✅ ADD THIS BLOCK HERE
+  smtp:
+    host: "dummy"
+    port: 25
+    from: "dummy@local"
+    auth:
+      username: "dummy"
+      password: "dummy"
+    starttls: false
+
+  
   #any smtp related email is the admin email
   adminEmail: "#CHANGEME"
   vizorEntityId: "urn:vizor:saml"
