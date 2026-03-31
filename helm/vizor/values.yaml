@@ -1,9 +1,5 @@
-#
-# Default values for vizor Helm chart
-#
-
 global:
-  namespace: vizor   # keep only this
+  namespace: vizor
 
 image:
   registry: 391166432590.dkr.ecr.us-east-1.amazonaws.com
@@ -13,73 +9,43 @@ image:
     - ecr-secret
 
 auth:
-  # -- Set this to enable authentication, leave unset to run in demo mode
-  clientId:
+  clientId: ""
 
 ingress:
-  # -- Ingress class for ingress-rules
   className: traefik
-  # -- Ingress host DNS name
-  host: # -- Set this to enable TLS, leave unset to run in insecure mode
-
-  certName: # -- Cert manager issuer, leave unset to run in insecure mode
-
-  certIssuer:
+  host: ""
+  certName: ""
+  certIssuer: ""
 
 resources:
   limits:
-    # -- CPU limit for the containers, leave alone mostly
     cpu: 256m
-    # -- Memory limit for the containers, leave alone mostly
     memory: 512Mi
   requests:
-    # -- CPU limit for the containers, leave alone mostly
     cpu: 64m
-    # -- Memory limit for the containers, leave alone mostly
     memory: 128Mi
 
 scheduling:
-  # -- Optional pod affinity/anti-affinity for stateless workloads
   affinity: {}
-  # -- Optional topology spread constraints for stateless workloads
   topologySpreadConstraints: []
 
 coreService:
-  # -- Dapr store core annotations
-  annotations: # -- Dapr store core replica count
-
+  annotations: {}
   replicas: 2
 
 engagementService:
-  # -- Dapr store engagement annotations
-  annotations: # -- Dapr store engagement replica count
-
+  annotations: {}
   replicas: 2
 
 interactionService:
-  # -- Dapr store interaction annotations
-  annotations: # -- Dapr store interaction replica count
-  # Multiple replicas supported with ClientIP session affinity configured in service
-  # Session affinity ensures all SignalR requests from same client hit the same pod
+  annotations: {}
   replicas: 2
-  # -- Redis connection string for SignalR backplane
-  # This is used by SignalR to share connection state across multiple pods
-  # Format: "host:port" (e.g., "vizor-redis-master:6379")
-  # If not set, defaults to "vizor-redis-master:6379" in Program.cs
   redisConnectionString: "vizor-redis-master:6379"
 
 useMigrationSql: false
 
-# users:
-#   # -- Dapr store users annotations
-#   annotations:
-#   # -- Dapr store users replica count
-#   replicas: 1
-
 frontend:
-  # -- Dapr store frontend host annotations
-  annotations: # -- Dapr store frontend host replica count
-
+  annotations: {}
   replicas: 1
 
 apiProxy:
@@ -114,17 +80,12 @@ autoscaling:
     targetCPUUtilizationPercentage: 70
 
 daprComponents:
-  # -- Enable to deploy the Dapr components
   deploy: true
   state:
-    # -- Dapr state store component name
     name: statestore
-    # -- Hostname of redis, fullnameOverride should be used when deploying redis helm chart
     redisHost: vizor-redis-master:6379
   pubsub:
-    # -- Dapr pubsub component name
     name: pubsub
-    # -- Hostname of redis, fullnameOverride should be used when deploying redis helm chart
     redisHost: vizor-redis-master:6379
 
   secrets:
@@ -139,16 +100,16 @@ daprComponents:
     SsrsPassword: "#CHANGEME"
     SsrsBaseUrl: "#CHANGEME"
     SsrsTimeoutSeconds: "300"
+
   secretStore:
     name: vizor-secretstore
     componentType: secretstores.kubernetes
     secretName: vizor-secrets
 
   sftp:
-    address: "#CHANGEME" # Your SFTPGo service address
-    username: "#CHANGEME" # SFTPGo user
-    password: "#CHANGEME" # The key in the secret that contains the password
-
+    address: "#CHANGEME"
+    username: "#CHANGEME"
+    password: "#CHANGEME"
 
 sqlServer:
   enabled: true
@@ -162,184 +123,59 @@ sqlServer:
     name: sql-server-service
     port: 1433
 
-
-# -- Persistent Volume and Claim configuration for SFTPGo and backups
 persistence:
-  enabled: false # Enable persistence for SFTPGo and backups
-  size: 5Gi # Size of the persistent volume
-  storageClass: local-path # Use the StorageClass provided by the subchart
+  enabled: false
+  size: 5Gi
+  storageClass: local-path
 
-# -- Backup CronJob Configuration
 backupCronJob:
   enabled: false
-  schedule: "0 2 * * *" # Daily at 2 AM UTC
-  image: busybox:latest # For `cp -a`, consider custom image for `rsync`
+  schedule: "0 2 * * *"
+  image: busybox:latest
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 1
 
-# --- Configuration for the local-path-provisioner subchart ---
 local-path-provisioner:
-  # This key must match the `name` in Chart.yaml dependencies
-  enabled: true # Ensure the subchart is enabled
+  enabled: true
   storageClass:
-    create: true # Ensure it creates the StorageClass
-    defaultClass: true # Make it the default StorageClass (optional, but convenient)
-    name: local-path # Ensure the StorageClass name is 'local-path'
-    reclaimPolicy: Retain # <--- IMPORTANT: Set reclaim policy to Retain
+    create: true
+    defaultClass: true
+    name: local-path
+    reclaimPolicy: Retain
     volumeBindingMode: WaitForFirstConsumer
-  # You can customize other local-path-provisioner values here if needed
-  # For example, to change the base path on the node (advanced):
   nodePathMap:
     - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
       paths:
         - /opt/local-path-provisioner
 
-# -- SFTPGo Configuration (dev only; full config in values-dev.yaml)
 sftpgo:
   enabled: false
 
 serviceAccount:
-  # -- Create a dedicated ServiceAccount for Vizor workloads
   create: true
-  # -- Name override; if empty the chart fullname is used
   name: ""
-  # -- Annotations to add to the ServiceAccount (e.g. for IRSA)
   annotations: {}
 
 saml:
-    jwtkey: "qwertyluopasdfghjklzxcvbnm123456"
-    refreshkey: "zxcvbnmlkjhgfdsa0987654321poiuytrewq"
-    relaycryptokey: "5AP7b+24XoOKe568t/knpdUVjd8q6rh/+qEiSmBO3HA="
-    issuer: "https://vizor.k8s.nbt.local/auth/realms/vizor"
-    audience: "vizor"
+  jwtkey: "qwertyluopasdfghjklzxcvbnm123456"
+  refreshkey: "zxcvbnmlkjhgfdsa0987654321poiuytrewq"
+  relaycryptokey: "5AP7b+24XoOKe568t/knpdUVjd8q6rh/+qEiSmBO3HA="
+  issuer: "https://vizor.k8s.nbt.local/auth/realms/vizor"
+  audience: "vizor"
+
 powerBI:
-    baseurl: "https://powerbitest.roundtables.us"
-
-keycloakRealmConfiguration:
-  realmName: "vizor"
-  clientId: "vizor-client"
-  clientPrivateId: "vizor-client-private"
-  clientPrivateSecret: "#CHANGEME"  # Replace with actual secret, also change in the client config below
-  roleName: "Superuser"
-  clientScope: "User-Client-ID"
-  #any smtp related email is the admin email
-  adminEmail: "#CHANGEME"
-  serverUrl: "http://127.0.0.1:8080"
-  vizorEntityId: "urn:vizor:saml"
-  keycloakApiBaseUrl: "http://vizor-keycloak-api-service:4567/"
-  keycloakServiceUrl: "http://keycloak:8080/auth"
-  smtp:
-    host: "#CHANGEME"
-    port: "1025"
-    starttls: "false"
-    auth: "false"
-    mailDisplayName: "Vizor Auth"
-    smtpusername: "#CHANGEME"
-    smtppassword: "#CHANGEME"
-
-  keycloakEnv:
-    AUTH_DATABASE_NAME: "vizor_auth"
-    KEYCLOAK_ADMIN: "admin"
-    KEYCLOAK_ADMIN_PASSWORD: "#CHANGEME"
-    KC_DB: "mssql"
-    KC_DB_USERNAME: "sa"
-    KC_DB_PASSWORD: "#CHANGEME"
-    KC_HTTP_RELATIVE_PATH: "/auth"
-  resources:
-    requested_memory: "512Mi"
-    requested_cpu: "512m"
-  #FirstUser
-  adminUser:
-    email: "#CHANGEME"
-    firstName: "Admin"
-    lastName: "User"
-    attributes_clientID: "1"
-    password: "#CHANGEME"
-
-  userSyncJob:
-    enabled: false
-
-  userSyncDatabase:
-    server: "172.16.16.76"
-    user: "sa"
-    password: "#CHANGEME"
-    name: "BenchmarkV2"
-
-
-  realmJson:
-    realm: vizor
-    enabled: true
-    ssoSessionMaxLifespan: 36000
-    ssoSessionIdleTimeout: 7200
-    accessTokenLifespan: 3600
-    editUsernameAllowed: true
-    registrationEmailAsUsername: true
-    loginWithEmailAllowed: true
-    verifyEmail: true
-    loginTheme: VizorTheme
-    emailTheme: VizorTheme
-    resetPasswordAllowed: true
-    passwordPolicy: "length(8) and digits(1) and upperCase(1) and lowerCase(1) and specialChars(1) and passwordHistory(3)"
-    bruteForceProtected: true
-    permanentLockout: true
-    failureFactor: 5
-    rememberMe: false
-    clientSessionIdleTimeout: 3600
-    clientSessionMaxLifespan: 7200
-
-    roles:
-      realm:
-        - name: Superuser
-          description: Superuser role
-        - name: Director
-          description: Director role
-        - name: Associate
-          description: Associate role
-        - name: Events Admin
-          description: Events Admin role
-        - name: Viewer
-          description: Viewer role
-        - name: Client
-          description: Client role
-        - name: Configuration Manager
-          description: Configuration Manager role
-
-    clients:
-      - clientId: vizor-client
-        name: Vizor Client
-        rootUrl: "{{ .Values.keycloakRealmConfiguration.serverUrl }}"
-        publicClient: true
-        directAccessGrantsEnabled: true
-        redirectUris:
-          - "{{ .Values.keycloakRealmConfiguration.serverUrl }}/*"
-        attributes:
-          post.logout.redirect.uris: "{{ .Values.keycloakRealmConfiguration.serverUrl }}/*"
-        enabled: true
-      - clientId: vizor-client-private
-        name: Vizor Client Private
-        secret: "#CHANGEME"  # Replace with actual secret
-        publicClient: false
-        standardFlowEnabled: true
-        directAccessGrantsEnabled: false
-        enabled: true
+  baseurl: "https://powerbitest.roundtables.us"
 
 observability:
   enabled: false
 
-# -- MailHog fake SMTP server (dev/test only)
 mailhog:
   enabled: false
 
 keycloak:
-  # -- Keycloak start mode: "start" (prod) or "start-dev" (dev)
   startMode: "start"
-  # -- Keycloak hostname passed to --hostname flag (required for production mode)
   hostname: ""
-  # -- Set to false to allow requests via any hostname (useful behind a reverse proxy)
   hostnameStrict: false
-  # -- Enable HTTP listener when TLS is terminated at the ingress
   httpEnabled: true
-  # -- Proxy headers mode (xforwarded or forwarded)
   proxyHeaders: "xforwarded"
-  # -- Management port for health/metrics endpoints
   managementPort: 9000
