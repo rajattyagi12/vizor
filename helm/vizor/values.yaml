@@ -4,18 +4,17 @@
 
 # -- Global settings for the Helm chart
 global:
-  namespace: vizor # Your target namespace. All resources will be deployed here.
-
-image:
-  # -- Use ECR registry
-  registry: 391166432590.dkr.ecr.us-east-1.amazonaws.com
-  # -- Image repository
-  repo: vizor
-  # -- Image tag
-  tag: latest
-  # -- Pull secret to authenticate to ECR
-  pullSecrets:
-    - ecr-secret
+  namespace: vizor
+  image:
+    # ECR registry
+    registry: 391166432590.dkr.ecr.us-east-1.amazonaws.com
+    # Base repository for all Vizor images
+    repo: vizor
+    # Default tag for all images
+    tag: latest
+    # Pull secret to authenticate to ECR
+    pullSecrets:
+      - ecr-secret
 
 auth:
   # -- Set this to enable authentication, leave unset to run in demo mode
