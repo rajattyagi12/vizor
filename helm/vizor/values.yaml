@@ -23,7 +23,6 @@ components:
 image:
   registry: 391166432590.dkr.ecr.us-east-1.amazonaws.com
   repo: vizor
-  tag: latest
   pullSecrets:
     - name: ecr-secret
     
