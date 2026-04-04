@@ -22,7 +22,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: migrations
-          image: {{ .Values.image.registry }}/{{ .Values.image.repo }}/ef-core-migration:{{ .Values.image.tag }}
+          image: "{{ .Values.image.registry }}/vizor/ef-core-migration:{{ .Values.image.tag }}"
           imagePullPolicy: Always
           env:
             - name: {{ if .Values.useMigrationSql }}MSSQL_CONNECTION_STRING{{ else }}ConnectionStrings__DefaultConnection{{ end }}
