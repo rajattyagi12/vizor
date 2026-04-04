@@ -13,10 +13,11 @@ serviceAccount:
   annotations: {}
 
 image:
-  registry: harbor.nbt.local
+  registry: 391166432590.dkr.ecr.us-east-1.amazonaws.com
   repo: vizor
-  tag: latest
-  pullSecrets: []
+  tag: develop-0.0.1.404
+  pullSecrets:
+    - name: ecr-secret
 
 # SQL Server SA_PASSWORD is read from Secret (global.secretName, key SA_PASSWORD).
 # Deploy vizor-secrets before vizor-data-init so the secret exists.
