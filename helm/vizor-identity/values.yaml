@@ -20,7 +20,7 @@ sqlServer:
 image:
   registry: 391166432590.dkr.ecr.us-east-1.amazonaws.com
   repo: vizor
-  tag: develop-0.0.1.404
+  tag: develop-0.0.1.409
   pullSecrets:
     - name: ecr-secret
 
