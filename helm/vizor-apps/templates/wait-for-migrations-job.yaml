@@ -16,7 +16,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: wait
-          image: bitnami/kubectl:develop-0.0.1.408
+          image: bitnami/kubectl:latest
           command:
             - /bin/sh
             - -c
