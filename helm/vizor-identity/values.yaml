@@ -18,10 +18,11 @@ sqlServer:
     port: 1433
 
 image:
-  registry: harbor.nbt.local
+  registry: 391166432590.dkr.ecr.us-east-1.amazonaws.com
   repo: vizor
-  tag: latest
-  pullSecrets: []
+  tag: develop-0.0.1.404
+  pullSecrets:
+    - name: ecr-secret
 
 clusterDomain: "cluster.local"  # overridden by ApplicationSet from kubespray dns_domain (e.g. k8s.nbt)
 
