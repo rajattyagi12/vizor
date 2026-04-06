@@ -1,34 +1,30 @@
-```yaml
+# Independent values for vizor-foundation chart.
+# No component toggles; this chart deploys only foundation resources.
+
 global:
-  namespace: vizor-uat   # ✅ match your actual deployment namespace
+  namespace: vizor
+  # Naming contract: same names across all vizor-* charts for cross-references.
   secretName: vizor-secrets
-  serviceAccountName: vizor-runtime
-  # ✅ Use correct Redis from dapr-system (FQDN)
-  redisHost: dapr-redis-master.dapr-system.svc.cluster.local:6379
+  serviceAccountName: vizor-runtime  # Override via Argo param serviceAccount.name
+  redisHost: vizor-redis-master:6379
 
 serviceAccount:
   create: true
-  name: ""  # uses global.serviceAccountName if empty
+  name: ""  # If empty, use global.serviceAccountName
   annotations: {}
 
 daprComponents:
   deploy: true
-
   state:
     name: statestore
-    # ✅ fixed Redis host
-    redisHost: dapr-redis-master.dapr-system.svc.cluster.local:6379
-
+    redisHost: vizor-redis-master:6379
   pubsub:
     name: pubsub
-    # ✅ fixed Redis host
-    redisHost: dapr-redis-master.dapr-system.svc.cluster.local:6379
-
+    redisHost: vizor-redis-master:6379
   secretStore:
     name: vizor-secretstore
     componentType: secretstores.kubernetes
     secretName: vizor-secrets
-
   sftp:
     name: sftpgo-binding
     rootPath: "."
@@ -37,7 +33,7 @@ daprComponents:
     passwordKey: sftpPassword
     secretName: ""
     insecureIgnoreHostKey: false
-    hostPublicKeyKey: ""
+    hostPublicKeyKey: ""   # Secret key holding SSH host public key (prod/UAT external SFTP)
 
 persistence:
   enabled: false
@@ -59,4 +55,4 @@ local-path-provisioner:
     - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
       paths:
         - /opt/local-path-provisioner
-```
+
