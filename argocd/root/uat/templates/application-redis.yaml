@@ -13,9 +13,9 @@ metadata:
 spec:
   project: {{ .Values.project | quote }}
   source:
-    repoURL: oci://registry-1.docker.io/cloudpirates/redis
+    repoURL: https://charts.bitnami.com/bitnami
     chart: redis
-    targetRevision: "0.24.0"
+    targetRevision: "23.2.12"
     helm:
       parameters:
         - name: fullnameOverride
