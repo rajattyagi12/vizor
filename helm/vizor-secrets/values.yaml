@@ -12,7 +12,7 @@ secretName: vizor-secrets
 sqlServer:
   username: "sa"
   database: "vizor"
-  ddbPassword: "YourStrongPassword123"
+  dbPassword: "YourStrongPassword123"
   service:
     name: sqlserver   # ✅ FIXED
     port: 1433
