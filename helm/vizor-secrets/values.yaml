@@ -12,9 +12,9 @@ secretName: vizor-secrets
 sqlServer:
   username: "sa"
   database: "vizor"
-  dbPassword: "#CHANGEME"
+  ddbPassword: "YourStrongPassword123"
   service:
-    name: sql-server-service
+    name: sqlserver   # ✅ FIXED
     port: 1433
 
 keycloakRealmConfiguration:
