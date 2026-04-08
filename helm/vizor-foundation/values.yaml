@@ -16,7 +16,7 @@ serviceAccount:
 daprComponents:
   deploy: true
   sftp:
-    insecureIgnoreHostKey: true
+    insecureSkipHostKeyValidation: true
   
   state:
     name: statestore
