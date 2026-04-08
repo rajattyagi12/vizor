@@ -8,7 +8,7 @@ spec:
   version: v1
   metadata:
   - name: redisHost
-    value: {{ .Values.daprComponents.pubsub.redisHost }}
+    value: "vizor-redis-master-master.{{ .Release.Namespace }}.svc.cluster.local:6379"
   - name: redisPassword
     value: ""
 {{ end }}
