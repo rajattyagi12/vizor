@@ -46,7 +46,7 @@ interactionService:
   replicas: 2
   annotations: {}
   # When using root app-of-apps, match the Redis app (env.redisServiceName:6379, default vizor-redis-master)
-  redisConnectionString: "vizor-redis-master:6379"
+  redisConnectionString: "vizor-redis-master-master:6379 "
 
 frontend:
   replicas: 1
