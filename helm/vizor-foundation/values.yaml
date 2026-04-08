@@ -16,8 +16,8 @@ serviceAccount:
 daprComponents:
   deploy: true
   sftp:
-    insecureSkipHostKeyValidation: true host
-    PublicKeyKey: ""   # important
+    enabled: false
+    
     
   
   state:
