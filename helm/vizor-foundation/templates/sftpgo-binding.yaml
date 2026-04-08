@@ -31,8 +31,8 @@ spec:
       value: "10"
     - name: keepAliveInterval
       value: "30s"
-    {{- if .Values.daprComponents.sftp.insecureIgnoreHostKey }}
-    - name: insecureIgnoreHostKey
+    {{- if .Values.daprComponents.sftp.insecureSkipHostKeyValidation }}
+    - name: insecureSkipHostKeyValidation
       value: "true"
     {{- else if .Values.daprComponents.sftp.hostPublicKeyKey }}
     - name: hostPublicKey
