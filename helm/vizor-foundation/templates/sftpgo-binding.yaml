@@ -1,5 +1,4 @@
-
-{{- if .Values.daprComponents.deploy }}
+{{- if and .Values.daprComponents.deploy .Values.daprComponents.sftp.enabled }}
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
