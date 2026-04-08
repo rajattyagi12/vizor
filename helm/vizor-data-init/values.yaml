@@ -15,7 +15,7 @@ serviceAccount:
 image:
   registry: 391166432590.dkr.ecr.us-east-1.amazonaws.com
   repo: vizor
-  tag: develop-0.0.1.409
+  tag: latest
   pullSecrets:
     - name: ecr-secret
 
