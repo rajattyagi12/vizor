@@ -25,8 +25,13 @@ spec:
       value: "10"
     - name: keepAliveInterval
       value: "30s"
-# Added insecureIgnoreHostKey to fix the "no host validation method" error
+{{- if .Values.daprComponents.sftp.insecureIgnoreHostKey }}
     - name: insecureIgnoreHostKey
       value: "true"
-{{- end }}
+    {{- else if .Values.daprComponents.sftp.hostPublicKeyKey }}
+    - name: hostPublicKey
+      secretKeyRef:
+        name: {{ .Values.daprComponents.sftp.secretName | default .Values.daprComponents.secretStore.secretName | default .Values.global.secretName }}
+        key: {{ .Values.daprComponents.sftp.hostPublicKeyKey | quote }}
+    {{- end }}
 {{- end }}
