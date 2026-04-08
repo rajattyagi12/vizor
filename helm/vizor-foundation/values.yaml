@@ -15,6 +15,9 @@ serviceAccount:
 
 daprComponents:
   deploy: true
+  sftp:
+    insecureIgnoreHostKey: true
+  
   state:
     name: statestore
     redisHost: vizor-redis-master:6379
