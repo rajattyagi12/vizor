@@ -1,1 +1,44 @@
 
+{{- if .Values.daprComponents.deploy }}
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: {{ .Values.daprComponents.sftp.name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  type: bindings.sftp
+  version: v1
+  metadata:
+    - name: rootPath
+      value: {{ .Values.daprComponents.sftp.rootPath | quote }}
+    - name: address
+      secretKeyRef:
+        name: {{ .Values.daprComponents.sftp.secretName | default .Values.daprComponents.secretStore.secretName | default .Values.global.secretName }}
+        key: {{ .Values.daprComponents.sftp.addressKey | quote }}
+    - name: username
+      secretKeyRef:
+        name: {{ .Values.daprComponents.sftp.secretName | default .Values.daprComponents.secretStore.secretName | default .Values.global.secretName }}
+        key: {{ .Values.daprComponents.sftp.usernameKey | quote }}
+    - name: password
+      secretKeyRef:
+        name: {{ .Values.daprComponents.sftp.secretName | default .Values.daprComponents.secretStore.secretName | default .Values.global.secretName }}
+        key: {{ .Values.daprComponents.sftp.passwordKey | quote }}
+    - name: startupDelaySeconds
+      value: "30"
+    - name: timeout
+      value: "60s"
+    - name: maxConnections
+      value: "10"
+    - name: keepAliveInterval
+      value: "30s"
+    {{- if .Values.daprComponents.sftp.insecureSkipHostKeyValidation }}
+    - name: insecureSkipHostKeyValidation
+      value: "true"
+    {{- else if .Values.daprComponents.sftp.hostPublicKeyKey }}
+    - name: hostPublicKey
+      secretKeyRef:
+        name: {{ .Values.daprComponents.sftp.secretName | default .Values.daprComponents.secretStore.secretName | default .Values.global.secretName }}
+        key: {{ .Values.daprComponents.sftp.hostPublicKeyKey | quote }}
+    {{- end }}
+{{- end }}
