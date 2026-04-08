@@ -6,7 +6,8 @@ global:
   # Naming contract: same names across all vizor-* charts for cross-references.
   secretName: vizor-secrets
   serviceAccountName: vizor-runtime  # Override via Argo param serviceAccount.name
-  redisHost: vizor-redis-master:6379
+  redisHost: global:
+  redisHost: vizor-redis-master-master:6379
 
 serviceAccount:
   create: true
