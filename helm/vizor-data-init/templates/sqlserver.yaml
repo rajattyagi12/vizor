@@ -30,13 +30,13 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.global.secretName }}
                   key: SA_PASSWORD
-          resources:
+          resources:          
             requests:
-              memory: "1Gi"
-              cpu: "2"
+               cpu: "500m"
+               memory: "512Mi"
             limits:
-              memory: "2Gi"
-              cpu: "2"
+              cpu: "1"
+              memory: "1Gi"
 ---
 apiVersion: v1
 kind: Service
