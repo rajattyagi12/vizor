@@ -7,7 +7,7 @@ global:
   secretName: vizor-secrets
   serviceAccountName: vizor-runtime  # Override via Argo param serviceAccount.name
   redisHost: global:
-  redisHost: vizor-redis-master-master:6379
+  redisHost: vizor-redis-master:6379
 
 serviceAccount:
   create: true
