@@ -19,7 +19,7 @@ spec:
     helm:
       parameters:
         - name: fullnameOverride
-          value: {{ .Values.env.redisServiceName | default "vizor-redis" | quote }}
+          value: {{ .Values.env.redisServiceName | default "vizor-redis-master" | quote }}
         - name: auth.enabled
           value: "false"
         - name: architecture
