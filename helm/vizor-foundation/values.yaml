@@ -6,7 +6,7 @@ global:
   # Naming contract: same names across all vizor-* charts for cross-references.
   secretName: vizor-secrets
   serviceAccountName: vizor-runtime  # Override via Argo param serviceAccount.name
-  redisHost: "vizor-redis-master:6379"
+  redisHost: "vizor-redis-master-master:6379"
 
 serviceAccount:
   create: true
@@ -20,10 +20,10 @@ daprComponents:
 
   state:
     name: statestore
-    redisHost: "vizor-redis-master:6379"
+    redisHost: "vizor-redis-master-master:6379"
   pubsub:
     name: pubsub
-    redisHost: "vizor-redis-master:6379"
+    redisHost: "vizor-redis-master-master:6379"
   secretStore:
     name: vizor-secretstore
     componentType: secretstores.kubernetes
