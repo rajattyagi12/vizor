@@ -1,1 +1,61 @@
+# Independent values for vizor-foundation chart.
+# No component toggles; this chart deploys only foundation resources.
+
+global:
+  namespace: vizor
+  # Naming contract: same names across all vizor-* charts for cross-references.
+  secretName: vizor-secrets
+  serviceAccountName: vizor-runtime  # Override via Argo param serviceAccount.name
+  redisHost: "vizor-redis-master-master:6379"
+
+serviceAccount:
+  create: true
+  name: ""  # If empty, use global.serviceAccountName
+  annotations: {}
+
+daprComponents:
+  deploy: true
+  sftp:
+    enabled: false
+
+  state:
+    name: statestore
+    redisHost: "vizor-redis-master-master:6379"
+  pubsub:
+    name: pubsub
+    redisHost: "vizor-redis-master-master:6379"
+  secretStore:
+    name: vizor-secretstore
+    componentType: secretstores.kubernetes
+    secretName: vizor-secrets
+  sftp:
+    name: sftpgo-binding
+    rootPath: "."
+    addressKey: sftpAddress
+    usernameKey: sftpUsername
+    passwordKey: sftpPassword
+    secretName: ""
+    insecureIgnoreHostKey: false
+    hostPublicKeyKey: ""   # Secret key holding SSH host public key (prod/UAT external SFTP)
+
+persistence:
+  enabled: false
+  size: 5Gi
+  storageClass: local-path
+  sftpPvcName: vizor-sftpgo-data
+  sftpgoDbPvcName: vizor-sftpgo-db
+  backupPvcName: vizor-backup-data
+
+local-path-provisioner:
+  enabled: true
+  storageClass:
+    create: true
+    defaultClass: true
+    name: local-path
+    reclaimPolicy: Retain
+    volumeBindingMode: WaitForFirstConsumer
+  nodePathMap:
+    - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
+      paths:
+        - /opt/local-path-provisioner
 
